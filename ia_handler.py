@@ -1,7 +1,15 @@
 # ia_handler.py - Cerveau IA OPTIMISÉ ULTRA-RAPIDE 🧠⚡
 
 from groq import Groq
-from config import GROQ_API_KEY, GEMINI_API_KEY, MISTRAL_API_KEY
+import os
+
+# Essayer d'importer config.py (local), sinon utiliser les variables d'environnement (Render)
+try:
+    from config import GROQ_API_KEY, GEMINI_API_KEY, MISTRAL_API_KEY
+except ImportError:
+    GROQ_API_KEY = os.getenv("GROQ_API_KEY", "")
+    GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
+    MISTRAL_API_KEY = os.getenv("MISTRAL_API_KEY", "")
 
 # ═══════════════════════════════════════════
 # 🤖 CONFIGURATION DES IA

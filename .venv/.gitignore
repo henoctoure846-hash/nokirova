@@ -1,0 +1,26 @@
+# Environnement virtuel
+.venv/
+venv/
+__pycache__/
+*.pyc
+*.pyo
+
+# Fichiers de config sensibles
+config.py
+
+# Sorties générées
+outputs/
+uploads/
+
+# Base de données locale
+*.db
+
+# PyCharm
+.idea/
+
+# Système
+.DS_Store
+Thumbs.db
+
+# Polices (trop lourdes)
+fonts/

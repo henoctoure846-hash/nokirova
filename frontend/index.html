@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#7ED321">
+    <title>🌸 NOKIROVA - Ton Prof Intelligent</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- 📱 HEADER MOBILE -->
+    <header class="header">
+        <div class="logo">
+            <span class="logo-emoji">🌸</span>
+            <h1>NOKIROVA</h1>
+        </div>
+        <button class="btn-menu" onclick="toggleMenu()">☰</button>
+    </header>
+
+    <!-- 📋 MENU LATÉRAL -->
+    <nav class="sidebar" id="sidebar">
+        <div class="logo-halo">
+            <h2>🌸 NOKIROVA</h2>
+            <p>✨ Ton Prof Intelligent ✨</p>
+        </div>
+
+        <button class="menu-btn active" onclick="afficherPage('accueil')">🏠 Accueil</button>
+        <button class="menu-btn" onclick="afficherPage('profil')">🏆 Mon Profil</button>
+        <button class="menu-btn" onclick="afficherPage('import')">📥 Importer un cours</button>
+        <button class="menu-btn" onclick="afficherPage('ocr')">📸 Scanner image</button>
+        <button class="menu-btn" onclick="afficherPage('resume')">📝 Résumé</button>
+        <button class="menu-btn" onclick="afficherPage('explication')">💡 Explication</button>
+        <button class="menu-btn" onclick="afficherPage('qcm')">🎯 QCM</button>
+        <button class="menu-btn" onclick="afficherPage('questions')">❓ Questions</button>
+        <button class="menu-btn" onclick="afficherPage('examen')">📚 Examens</button>
+        <button class="menu-btn" onclick="afficherPage('audio')">🎧 Audio</button>
+        <button class="menu-btn" onclick="afficherPage('chat')">💬 Question libre</button>
+
+        <div class="cours-actuel">
+            <p class="label">📚 COURS ACTUEL</p>
+            <p class="nom" id="nomCoursSidebar">Aucun cours chargé</p>
+        </div>
+    </nav>
+
+    <!-- 🖼️ ZONE PRINCIPALE -->
+    <main class="main-content">
+
+        <!-- 🏠 ACCUEIL -->
+        <section class="page" id="page-accueil">
+            <div class="hero">
+                <h1>🌸 Bienvenue dans NOKIROVA !</h1>
+                <p>✨ Ton professeur intelligent personnel ✨</p>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card stat-jaune">
+                    <div class="stat-icon">⭐</div>
+                    <div class="stat-info">
+                        <p class="stat-titre" id="statNiveau">Niveau 1</p>
+                        <p class="stat-valeur" id="statXp">0 XP</p>
+                    </div>
+                </div>
+                <div class="stat-card stat-orange">
+                    <div class="stat-icon">🔥</div>
+                    <div class="stat-info">
+                        <p class="stat-titre" id="statStreak">0 jour</p>
+                        <p class="stat-valeur">Streak</p>
+                    </div>
+                </div>
+                <div class="stat-card stat-vert">
+                    <div class="stat-icon">📚</div>
+                    <div class="stat-info">
+                        <p class="stat-titre" id="statCours">0</p>
+                        <p class="stat-valeur">Cours</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="cartes-grille">
+                <div class="carte carte-bleu" onclick="afficherPage('import')">
+                    <div class="carte-emoji">📥</div>
+                    <h3>Importer</h3>
+                    <p>PDF, Word, PPT</p>
+                </div>
+                <div class="carte carte-vert" onclick="afficherPage('ocr')">
+                    <div class="carte-emoji">📸</div>
+                    <h3>Scanner</h3>
+                    <p>Photo de cours</p>
+                </div>
+                <div class="carte carte-rose" onclick="afficherPage('qcm')">
+                    <div class="carte-emoji">🎯</div>
+                    <h3>QCM</h3>
+                    <p>Tests rapides</p>
+                </div>
+                <div class="carte carte-orange" onclick="afficherPage('examen')">
+                    <div class="carte-emoji">📚</div>
+                    <h3>Examens</h3>
+                    <p>4 niveaux</p>
+                </div>
+            </div>
+
+            <div class="objectif">
+                <p class="objectif-titre">🎯 OBJECTIF DU JOUR</p>
+                <p>💪 Importe un cours et fais au moins 5 QCM !<br>Tu vas y arriver ! 🌟</p>
+            </div>
+
+            <button class="btn-cta" onclick="afficherPage('import')">
+                🚀 COMMENCER MAINTENANT
+            </button>
+        </section>
+
+        <!-- 🏆 PROFIL -->
+        <section class="page hidden" id="page-profil">
+            <div class="titre-page violet">🏆 Mon Profil</div>
+
+            <div class="carte-niveau">
+                <h2 id="profilTitre">🌱 Apprenti</h2>
+                <p class="grand">⭐ Niveau <span id="profilNiveau">1</span></p>
+                <p>✨ <span id="profilXp">0</span> XP</p>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+                <p class="petit" id="progressTexte">0/100 XP vers niveau 2</p>
+            </div>
+
+            <div class="carte-streak">
+                <p>🔥 STREAK : <span id="profilStreak">0</span> jour(s) consécutif(s) !</p>
+            </div>
+
+            <div class="carte-stats">
+                <h3>📊 TES STATISTIQUES</h3>
+                <p>📚 Cours importés : <span id="profilCours">0</span></p>
+                <p>💬 Questions posées : <span id="profilQuestions">0</span></p>
+                <p>🎧 Audios créés : <span id="profilAudios">0</span></p>
+                <p>🎯 QCM réussis : <span id="profilQcm">0</span></p>
+            </div>
+
+            <div class="carte-badges">
+                <h3>🏆 BADGES DÉBLOQUÉS</h3>
+                <div id="badgesContainer">
+                    <p class="petit">Continue à utiliser NOKIROVA pour débloquer des badges !</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 📥 IMPORT -->
+        <section class="page hidden" id="page-import">
+            <div class="titre-page bleu">📥 Importer un cours</div>
+
+            <div class="info-card bleu">
+                📄 Formats acceptés : PDF • Word • PowerPoint • TXT<br>
+                🔍 NOKIROVA détecte automatiquement la matière !
+            </div>
+
+            <input type="file" id="fichierInput" accept=".pdf,.docx,.pptx,.txt" hidden>
+            <button class="btn-action bleu" onclick="document.getElementById('fichierInput').click()">
+                📁 Choisir un fichier
+            </button>
+
+            <div class="zone-resultat" id="zoneImport">
+                📄 L'aperçu du cours apparaîtra ici après import...
+            </div>
+        </section>
+
+        <!-- 📸 OCR -->
+        <section class="page hidden" id="page-ocr">
+            <div class="titre-page vert">📸 Scanner une image</div>
+
+            <div class="info-card vert">
+                📸 Prends en photo un cours, un exercice...<br>
+                NOKIROVA va LIRE et EXPLIQUER ! 🤖✨
+            </div>
+
+            <input type="file" id="imageInput" accept="image/*" hidden>
+            <button class="btn-action vert" onclick="document.getElementById('imageInput').click()">
+                📁 Choisir une image
+            </button>
+
+            <div class="zone-resultat" id="zoneOcr">
+                📸 Sélectionne une image ci-dessus...
+            </div>
+        </section>
+
+        <!-- 📝 RÉSUMÉ -->
+        <section class="page hidden" id="page-resume">
+            <div class="titre-page bleu">📝 Résumé du cours</div>
+            <button class="btn-action bleu" onclick="genererResume()">
+                📝 Générer le résumé
+            </button>
+            <div class="zone-resultat" id="zoneResume">
+                👆 Importe un cours puis clique sur le bouton !
+            </div>
+            <button class="btn-pdf" onclick="exporterPDF('resume', 'zoneResume')">
+                💾 Exporter en PDF
+            </button>
+        </section>
+
+        <!-- 💡 EXPLICATION -->
+        <section class="page hidden" id="page-explication">
+            <div class="titre-page orange">💡 Explication simplifiée</div>
+            <button class="btn-action orange" onclick="genererExplication()">
+                💡 Expliquer simplement
+            </button>
+            <div class="zone-resultat" id="zoneExplication">
+                👆 Importe un cours puis clique sur le bouton !
+            </div>
+            <button class="btn-pdf" onclick="exporterPDF('explication', 'zoneExplication')">
+                💾 Exporter en PDF
+            </button>
+        </section>
+
+        <!-- 🎯 QCM -->
+        <section class="page hidden" id="page-qcm">
+            <div class="titre-page violet">🎯 Générer des QCM</div>
+
+            <div class="slider-container">
+                <label>🎚️ Nombre de QCM : <span id="qcmValue">5</span></label>
+                <input type="range" id="qcmSlider" min="1" max="20" value="5" oninput="document.getElementById('qcmValue').textContent = this.value">
+            </div>
+
+            <button class="btn-action violet" onclick="genererQCM()">
+                🎯 Générer les QCM
+            </button>
+            <div class="zone-resultat" id="zoneQcm">
+                👆 Importe un cours puis clique sur le bouton !
+            </div>
+            <button class="btn-pdf" onclick="exporterPDF('qcm', 'zoneQcm')">
+                💾 Exporter en PDF
+            </button>
+        </section>
+
+        <!-- ❓ QUESTIONS -->
+        <section class="page hidden" id="page-questions">
+            <div class="titre-page violet">❓ Questions de cours</div>
+
+            <div class="slider-container">
+                <label>🎚️ Nombre : <span id="questValue">5</span></label>
+                <input type="range" id="questSlider" min="1" max="15" value="5" oninput="document.getElementById('questValue').textContent = this.value">
+            </div>
+
+            <button class="btn-action violet" onclick="genererQuestions()">
+                ❓ Générer
+            </button>
+            <div class="zone-resultat" id="zoneQuestions">
+                👆 Importe un cours puis clique sur le bouton !
+            </div>
+            <button class="btn-pdf" onclick="exporterPDF('questions', 'zoneQuestions')">
+                💾 Exporter en PDF
+            </button>
+        </section>
+
+        <!-- 📚 EXAMEN -->
+        <section class="page hidden" id="page-examen">
+            <div class="titre-page orange">📚 Exercices type Examen</div>
+
+            <div class="select-container">
+                <label>🎓 Niveau :</label>
+                <select id="niveauSelect">
+                    <option value="debutant">🟢 Débutant</option>
+                    <option value="intermediaire" selected>🟡 Intermédiaire</option>
+                    <option value="difficile">🟠 Difficile</option>
+                    <option value="ultra_difficile">🔴 Ultra difficile</option>
+                </select>
+
+                <label>📊 Nombre :</label>
+                <select id="nbExSelect">
+                    <option>1</option>
+                    <option>2</option>
+                    <option selected>3</option>
+                    <option>5</option>
+                    <option>10</option>
+                </select>
+            </div>
+
+            <button class="btn-action orange" onclick="genererExamen()">
+                📚 Générer les exercices
+            </button>
+            <div class="zone-resultat" id="zoneExamen">
+                👆 Importe un cours puis clique sur le bouton !
+            </div>
+            <button class="btn-pdf" onclick="exporterPDF('examen', 'zoneExamen')">
+                💾 Exporter en PDF
+            </button>
+        </section>
+
+        <!-- 🎧 AUDIO -->
+        <section class="page hidden" id="page-audio">
+            <div class="titre-page violet">🎧 Créer un audio</div>
+
+            <label>✍️ Tape ton texte :</label>
+            <textarea id="texteAudio" placeholder="Écris ce que NOKIROVA doit dire..." rows="6"></textarea>
+
+            <div class="select-container">
+                <label>🎙️ Voix :</label>
+                <select id="voixSelect">
+                    <option value="jeune_femme">Jeune femme</option>
+                    <option value="femme">Femme</option>
+                    <option value="jeune_homme">Jeune homme</option>
+                    <option value="homme">Homme</option>
+                </select>
+            </div>
+
+            <div class="btn-row">
+                <button class="btn-action bleu" onclick="remplirAvecCours()">
+                    📄 Utiliser le cours
+                </button>
+                <button class="btn-action violet" onclick="creerAudio()">
+                    🎧 Créer l'audio
+                </button>
+            </div>
+
+            <div class="zone-resultat" id="zoneAudio"></div>
+        </section>
+
+        <!-- 💬 CHAT -->
+        <section class="page hidden" id="page-chat">
+            <div class="titre-page violet">💬 Question libre à NOKIROVA</div>
+
+            <input type="text" id="questionChat" placeholder="Pose-moi N'IMPORTE QUELLE question..." onkeypress="if(event.key==='Enter') envoyerQuestion()">
+
+            <button class="btn-action violet" onclick="envoyerQuestion()">
+                🚀 Envoyer
+            </button>
+
+            <div class="zone-resultat" id="zoneChat">
+                💡 Pose ta question ci-dessus puis appuie sur Entrée !
+            </div>
+            <button class="btn-pdf" onclick="exporterPDF('reponse', 'zoneChat')">
+                💾 Exporter en PDF
+            </button>
+        </section>
+    </main>
+
+    <!-- 🔔 NOTIFICATIONS -->
+    <div id="notifContainer"></div>
+
+    <script src="app.js"></script>
+</body>
+</html>

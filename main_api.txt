@@ -1,0 +1,351 @@
+# api/main_api.py - Backend API NOKIROVA 🌐⚡
+
+import sys
+import os
+
+# Ajouter le dossier parent au path pour importer nos modules
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+from fastapi import FastAPI, UploadFile, File, Form, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse, JSONResponse
+from fastapi.staticfiles import StaticFiles
+from pydantic import BaseModel
+import shutil
+from datetime import datetime
+import uuid
+
+# Importer nos modules NOKIROVA
+from ia_handler import demander_ia, expliquer_simplement, creer_resume
+from document_parser import lire_document
+from audio_generator import generer_audio
+from exercice_generator import generer_qcm, generer_questions_cours, generer_exercices_examen
+from ocr_handler import lire_image_et_expliquer
+from export_pdf import exporter_en_pdf
+import database as db
+
+# Initialiser
+db.init_db()
+db.maj_streak()
+
+# ═══════════════════════════════════════════
+# 🚀 CRÉATION DE L'API
+# ═══════════════════════════════════════════
+app = FastAPI(
+    title="NOKIROVA API",
+    description="🌸 Ton Prof Intelligent Personnel - API Backend",
+    version="1.0.0"
+)
+
+# CORS : permettre l'accès depuis n'importe quel frontend
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# Dossiers
+UPLOAD_FOLDER = "uploads"
+OUTPUT_FOLDER = "outputs"
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+os.makedirs(OUTPUT_FOLDER, exist_ok=True)
+
+# Stockage en mémoire (le cours actuellement chargé)
+# En production on utilisera la BDD, mais pour commencer c'est OK
+sessions = {}
+
+
+# ═══════════════════════════════════════════
+# 📋 MODÈLES DE DONNÉES
+# ═══════════════════════════════════════════
+class QuestionLibre(BaseModel):
+    question: str
+
+
+class GenerationRequest(BaseModel):
+    session_id: str
+    nombre: int = 5
+
+
+class ExamenRequest(BaseModel):
+    session_id: str
+    nombre: int = 3
+    niveau: str = "intermediaire"
+
+
+class AudioRequest(BaseModel):
+    texte: str
+    voix: str = "jeune_femme"
+
+
+# ═══════════════════════════════════════════
+# 🏠 ROUTE PRINCIPALE (test)
+# ═══════════════════════════════════════════
+@app.get("/")
+async def accueil():
+    return {
+        "message": "🌸 Bienvenue dans l'API NOKIROVA !",
+        "version": "1.0.0",
+        "status": "✅ Opérationnel",
+        "endpoints": {
+            "📥 Importer un cours": "POST /api/import",
+            "📝 Résumé": "POST /api/resume/{session_id}",
+            "💡 Explication": "POST /api/explication/{session_id}",
+            "🎯 QCM": "POST /api/qcm",
+            "❓ Questions": "POST /api/questions",
+            "📚 Examen": "POST /api/examen",
+            "💬 Chat libre": "POST /api/chat",
+            "🎧 Audio": "POST /api/audio",
+            "📸 OCR": "POST /api/ocr",
+            "🏆 Profil": "GET /api/profil",
+            "📄 PDF": "POST /api/pdf"
+        }
+    }
+
+
+# ═══════════════════════════════════════════
+# 📥 IMPORTER UN COURS
+# ═══════════════════════════════════════════
+@app.post("/api/import")
+async def importer_cours(fichier: UploadFile = File(...)):
+    """Importe un cours (PDF, Word, PPT, TXT)"""
+    try:
+        # Sauvegarder le fichier
+        session_id = str(uuid.uuid4())
+        chemin = os.path.join(UPLOAD_FOLDER, f"{session_id}_{fichier.filename}")
+        
+        with open(chemin, "wb") as f:
+            shutil.copyfileobj(fichier.file, f)
+        
+        # Lire le contenu
+        contenu = lire_document(chemin)
+        
+        if not contenu or contenu.startswith("❌"):
+            raise HTTPException(status_code=400, detail="Impossible de lire le fichier")
+        
+        # Sauvegarder dans la BDD + détection matière
+        matiere = db.sauvegarder_cours(fichier.filename, contenu)
+        
+        # Stocker la session
+        sessions[session_id] = {
+            "contenu": contenu,
+            "nom": fichier.filename,
+            "matiere": matiere
+        }
+        
+        return {
+            "success": True,
+            "session_id": session_id,
+            "nom": fichier.filename,
+            "matiere": matiere,
+            "taille": len(contenu),
+            "apercu": contenu[:500] + "..." if len(contenu) > 500 else contenu,
+            "message": f"✅ Cours '{fichier.filename}' chargé ! Matière : {matiere}"
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Erreur : {str(e)}")
+
+
+# ═══════════════════════════════════════════
+# 📝 RÉSUMÉ
+# ═══════════════════════════════════════════
+@app.post("/api/resume/{session_id}")
+async def creer_resume_endpoint(session_id: str):
+    """Crée un résumé du cours"""
+    if session_id not in sessions:
+        raise HTTPException(status_code=404, detail="Session introuvable. Importe d'abord un cours.")
+    
+    contenu = sessions[session_id]["contenu"]
+    resume = creer_resume(contenu[:5000])
+    db.ajouter_xp(5)
+    
+    return {
+        "success": True,
+        "resume": resume,
+        "matiere": sessions[session_id]["matiere"]
+    }
+
+
+# ═══════════════════════════════════════════
+# 💡 EXPLICATION SIMPLIFIÉE
+# ═══════════════════════════════════════════
+@app.post("/api/explication/{session_id}")
+async def expliquer_endpoint(session_id: str):
+    """Explique simplement le cours"""
+    if session_id not in sessions:
+        raise HTTPException(status_code=404, detail="Session introuvable")
+    
+    contenu = sessions[session_id]["contenu"]
+    explication = expliquer_simplement(contenu[:5000])
+    db.ajouter_xp(5)
+    
+    return {
+        "success": True,
+        "explication": explication
+    }
+
+
+# ═══════════════════════════════════════════
+# 🎯 QCM
+# ═══════════════════════════════════════════
+@app.post("/api/qcm")
+async def generer_qcm_endpoint(req: GenerationRequest):
+    """Génère des QCM"""
+    if req.session_id not in sessions:
+        raise HTTPException(status_code=404, detail="Session introuvable")
+    
+    contenu = sessions[req.session_id]["contenu"]
+    qcm = generer_qcm(contenu[:5000], req.nombre)
+    db.ajouter_xp(req.nombre * 2)
+    
+    return {"success": True, "qcm": qcm}
+
+
+# ═══════════════════════════════════════════
+# ❓ QUESTIONS DE COURS
+# ═══════════════════════════════════════════
+@app.post("/api/questions")
+async def generer_questions_endpoint(req: GenerationRequest):
+    """Génère des questions de cours"""
+    if req.session_id not in sessions:
+        raise HTTPException(status_code=404, detail="Session introuvable")
+    
+    contenu = sessions[req.session_id]["contenu"]
+    questions = generer_questions_cours(contenu[:5000], req.nombre)
+    db.ajouter_xp(req.nombre * 2)
+    
+    return {"success": True, "questions": questions}
+
+
+# ═══════════════════════════════════════════
+# 📚 EXERCICES EXAMEN
+# ═══════════════════════════════════════════
+@app.post("/api/examen")
+async def generer_examen_endpoint(req: ExamenRequest):
+    """Génère des exercices type examen"""
+    if req.session_id not in sessions:
+        raise HTTPException(status_code=404, detail="Session introuvable")
+    
+    contenu = sessions[req.session_id]["contenu"]
+    exos = generer_exercices_examen(contenu[:5000], req.niveau, req.nombre)
+    db.ajouter_xp(req.nombre * 5)
+    
+    return {"success": True, "exercices": exos}
+
+
+# ═══════════════════════════════════════════
+# 💬 CHAT LIBRE
+# ═══════════════════════════════════════════
+@app.post("/api/chat")
+async def chat_endpoint(req: QuestionLibre):
+    """Pose une question libre à l'IA"""
+    reponse = demander_ia(req.question)
+    db.incrementer_stat("questions_posees")
+    db.ajouter_xp(5)
+    db.sauvegarder_historique("chat", req.question, reponse)
+    
+    return {"success": True, "reponse": reponse}
+
+
+# ═══════════════════════════════════════════
+# 🎧 AUDIO
+# ═══════════════════════════════════════════
+@app.post("/api/audio")
+async def creer_audio_endpoint(req: AudioRequest):
+    """Crée un audio à partir d'un texte"""
+    nom_fichier = f"audio_{uuid.uuid4().hex[:8]}.mp3"
+    chemin = generer_audio(req.texte, nom_fichier, req.voix)
+    
+    if not chemin:
+        raise HTTPException(status_code=500, detail="Erreur création audio")
+    
+    db.incrementer_stat("audios_crees")
+    db.ajouter_xp(8)
+    
+    return {
+        "success": True,
+        "fichier": nom_fichier,
+        "url": f"/api/download/{nom_fichier}"
+    }
+
+
+# ═══════════════════════════════════════════
+# 📸 OCR
+# ═══════════════════════════════════════════
+@app.post("/api/ocr")
+async def ocr_endpoint(image: UploadFile = File(...)):
+    """Scanne une image et l'explique"""
+    try:
+        chemin = os.path.join(UPLOAD_FOLDER, f"img_{uuid.uuid4().hex[:8]}_{image.filename}")
+        with open(chemin, "wb") as f:
+            shutil.copyfileobj(image.file, f)
+        
+        resultat = lire_image_et_expliquer(chemin)
+        db.ajouter_xp(15)
+        
+        return {"success": True, "resultat": resultat}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Erreur OCR : {str(e)}")
+
+
+# ═══════════════════════════════════════════
+# 🏆 PROFIL UTILISATEUR
+# ═══════════════════════════════════════════
+@app.get("/api/profil")
+async def profil_endpoint():
+    """Récupère les stats de l'utilisateur"""
+    stats = db.get_stats()
+    badges = db.lister_badges()
+    titre = db.get_niveau_titre(stats["niveau"])
+    
+    return {
+        "success": True,
+        "stats": stats,
+        "titre": titre,
+        "badges": [{"nom": b[0], "description": b[1], "emoji": b[2]} for b in badges]
+    }
+
+
+# ═══════════════════════════════════════════
+# 📄 EXPORT PDF
+# ═══════════════════════════════════════════
+@app.post("/api/pdf")
+async def exporter_pdf_endpoint(contenu: str = Form(...), titre: str = Form("Document"), nom: str = Form("document")):
+    """Exporte un contenu en PDF"""
+    from datetime import datetime
+    date_simple = datetime.now().strftime('%d-%m-%Y')
+    nom_fichier = f"NOKIROVA_{nom}_{date_simple}.pdf"
+    
+    resultat = exporter_en_pdf(contenu, titre, nom_fichier)
+    
+    return {"success": True, "resultat": resultat}
+
+
+# ═══════════════════════════════════════════
+# 📥 TÉLÉCHARGEMENT DE FICHIERS
+# ═══════════════════════════════════════════
+@app.get("/api/download/{nom_fichier}")
+async def telecharger(nom_fichier: str):
+    """Télécharge un fichier généré (audio, PDF...)"""
+    chemin = os.path.join(OUTPUT_FOLDER, nom_fichier)
+    if not os.path.exists(chemin):
+        raise HTTPException(status_code=404, detail="Fichier introuvable")
+    return FileResponse(chemin)
+
+
+# ═══════════════════════════════════════════
+# 🚀 LANCEMENT
+# ═══════════════════════════════════════════
+if __name__ == "__main__":
+    import uvicorn
+    print("\n" + "="*60)
+    print("🌸 NOKIROVA API DÉMARRE...")
+    print("="*60)
+    print("📡 URL locale     : http://localhost:8000")
+    print("📚 Documentation  : http://localhost:8000/docs")
+    print("🎯 Test           : http://localhost:8000/")
+    print("="*60 + "\n")
+    
+    uvicorn.run(app, host="0.0.0.0", port=8000)

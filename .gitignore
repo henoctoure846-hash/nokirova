@@ -1,0 +1,25 @@
+# Environnement virtuel
+.venv/
+venv/
+__pycache__/
+*.pyc
+
+# Config sensible
+config.py
+
+# Sorties
+outputs/
+uploads/
+
+# DB locale
+*.db
+
+# PyCharm
+.idea/
+
+# Polices lourdes
+fonts/
+
+# Système
+.DS_Store
+Thumbs.db

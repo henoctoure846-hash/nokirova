@@ -5,7 +5,7 @@ package.domain = org.nokirova
 
 source.dir = .
 source.include_exts = py,png,jpg,kv,atlas,ttf
-source.include_patterns = fonts/*
+source.include_patterns = fonts/*,assets/*
 source.main = mobile_app.py
 
 version = 1.0
@@ -14,6 +14,10 @@ requirements = python3,kivy==2.3.0,kivymd==1.1.1,pillow,requests,certifi,charset
 
 orientation = portrait
 fullscreen = 0
+
+# 🎨 ICÔNE & SPLASH SCREEN
+icon.filename = %(source.dir)s/assets/icon.png
+presplash.filename = %(source.dir)s/assets/icon.png
 
 android.permissions = INTERNET,ACCESS_NETWORK_STATE
 android.api = 33

@@ -1,8 +1,10 @@
 // 🌸 NOKIROVA - Logique
 JavaScript
 
-const
-API_URL = 'http://localhost:8000';
+// 🌐 URL automatique : local en dev, Render en prod
+const API_URL = window.location.hostname === 'localhost'
+    ? 'http://localhost:8000'
+    : 'https://nokirova-1.onrender.com';
 let
 sessionId = null;
 let

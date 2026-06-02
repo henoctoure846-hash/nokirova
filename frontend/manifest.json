@@ -1,0 +1,26 @@
+{
+  "name": "NOKIROVA - Ton Prof Intelligent",
+  "short_name": "NOKIROVA",
+  "description": "🌸 Ton professeur intelligent personnel propulsé par l'IA",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#FAFAFA",
+  "theme_color": "#7ED321",
+  "orientation": "portrait",
+  "lang": "fr",
+  "categories": ["education", "productivity"],
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

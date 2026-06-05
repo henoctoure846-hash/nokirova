@@ -1,0 +1,215 @@
+{% extends "base.html" %}
+{% block title %}Partage - NOKIROVA{% endblock %}
+{% block contenu %}
+<div class="page-container">
+
+  <div class="page-header" style="background: linear-gradient(135deg, #FFC9DE, #FFE5EF); border-left: 5px solid #FF6B9D;">
+    <div class="page-header-icon" style="background: linear-gradient(135deg, #FF6B9D, #C2185B);">🤝</div>
+    <div>
+      <h1 class="page-title" style="color: #C2185B;">Partage de cours</h1>
+      <p class="page-subtitle" style="color: #E91E8C;">Exporte et importe des cours avec tes amis 🌸</p>
+    </div>
+  </div>
+
+  <!-- 2 CARTES PRINCIPALES -->
+  <div class="cartes-partage">
+
+    <!-- EXPORT -->
+    <div class="carte-action">
+      <div class="icone-action" style="background:linear-gradient(135deg, #FF6B9D, #C2185B);">📤</div>
+      <h2 style="color:#C2185B;">Exporter un cours</h2>
+      <p>Crée un fichier <code>.nokirova</code> à envoyer à tes amis</p>
+
+      <select id="select-cours" class="select-rose"></select>
+      <input type="text" id="createur" placeholder="👤 Ton pseudo (ex: Hénoc)" class="input-rose"/>
+      <button onclick="exporter()" class="btn-rose">📤 Exporter</button>
+    </div>
+
+    <!-- IMPORT -->
+    <div class="carte-action">
+      <div class="icone-action" style="background:linear-gradient(135deg, #7B61FF, #5B21B6);">📥</div>
+      <h2 style="color:#5B21B6;">Importer un cours</h2>
+      <p>Reçois un fichier <code>.nokirova</code> et importe-le !</p>
+
+      <div class="zone-drop" onclick="document.getElementById('file-nok').click()">
+        <input type="file" id="file-nok" accept=".nokirova" style="display:none;" onchange="fichierChoisi(event)"/>
+        <span style="font-size:3rem;">📥</span>
+        <p style="color:#5B21B6; font-weight:700; margin-top:0.5rem;">Cliquer pour choisir un .nokirova</p>
+        <p id="nom-fic" style="color:#9CA3AF; font-size:0.85rem; margin-top:0.3rem;"></p>
+      </div>
+
+      <button onclick="importer()" id="btn-importer" class="btn-violet" disabled>📥 Importer</button>
+    </div>
+
+  </div>
+
+  <!-- ZONE APERÇU IMPORT -->
+  <div id="apercu-import" class="apercu-card" style="display:none;">
+    <h3 style="color:#5B21B6;">📥 Aperçu du fichier reçu</h3>
+    <div id="apercu-contenu"></div>
+    <button onclick="confirmerImport()" class="btn-rose" style="margin-top:1rem;">✅ Confirmer l'import</button>
+  </div>
+
+  <!-- LOADING -->
+  <div id="loading" class="loading-card" style="display:none;">
+    <div class="spinner"></div>
+    <p style="font-weight:700;">⏳ Traitement en cours...</p>
+  </div>
+</div>
+
+<style>
+  .page-container { padding:2rem; max-width:1100px; margin:0 auto;}
+  .page-header { display:flex; align-items:center; gap:1.2rem; border-radius:20px; padding:1.5rem 2rem; margin-bottom:1.5rem; box-shadow:0 4px 20px rgba(0,0,0,0.05);}
+  .page-header-icon { width:60px; height:60px; border-radius:16px; display:flex; align-items:center; justify-content:center; font-size:1.8rem; color:white;}
+  .page-title { font-size:1.6rem; font-weight:800; margin:0;}
+  .page-subtitle { margin:0.2rem 0 0; font-size:0.95rem;}
+
+  .cartes-partage { display:grid; grid-template-columns:1fr 1fr; gap:1.5rem; margin-bottom:1.5rem;}
+  .carte-action { background:white; border-radius:20px; padding:2rem; box-shadow:0 4px 20px rgba(0,0,0,0.06); text-align:center; border-top:5px solid #FF6B9D;}
+  .icone-action { width:70px; height:70px; border-radius:20px; display:flex; align-items:center; justify-content:center; font-size:2.2rem; color:white; margin:0 auto 1rem;}
+  .carte-action h2 { font-size:1.2rem; margin-bottom:0.5rem;}
+  .carte-action p { color:#6B7280; font-size:0.9rem; margin-bottom:1rem;}
+  .carte-action code { background:#FFE5EF; color:#C2185B; padding:0.15rem 0.4rem; border-radius:4px; font-size:0.85rem;}
+
+  .select-rose, .input-rose { width:100%; padding:0.7rem 1rem; border:2px solid #FFC9DE; border-radius:12px; font-size:0.9rem; margin-bottom:0.7rem; outline:none; background:#FFF7FB;}
+  .select-rose:focus, .input-rose:focus { border-color:#FF6B9D;}
+
+  .btn-rose { width:100%; padding:0.8rem; background:linear-gradient(135deg, #FF6B9D, #C2185B); color:white; border:none; border-radius:12px; font-weight:700; cursor:pointer; box-shadow:0 4px 15px rgba(255,107,157,0.4);}
+  .btn-rose:hover { transform:translateY(-2px);}
+  .btn-rose:disabled { background:#D1D5DB; cursor:not-allowed;}
+
+  .btn-violet { width:100%; padding:0.8rem; background:linear-gradient(135deg, #7B61FF, #5B21B6); color:white; border:none; border-radius:12px; font-weight:700; cursor:pointer; box-shadow:0 4px 15px rgba(123,97,255,0.4); margin-top:0.7rem;}
+  .btn-violet:hover { transform:translateY(-2px);}
+  .btn-violet:disabled { background:#D1D5DB; cursor:not-allowed;}
+
+  .zone-drop { background:#FAF5FF; border:3px dashed #7B61FF; border-radius:14px; padding:1.5rem; cursor:pointer; transition:0.2s;}
+  .zone-drop:hover { background:#EDE9FE;}
+
+  .apercu-card { background:white; border-radius:20px; padding:2rem; box-shadow:0 4px 25px rgba(123,97,255,0.15); border-top:4px solid #7B61FF; margin-bottom:1.5rem;}
+  .apercu-card h3 { font-size:1.2rem; margin-bottom:1rem;}
+  .apercu-item { padding:0.6rem 1rem; background:#FAF5FF; border-radius:10px; margin-bottom:0.5rem; border-left:3px solid #7B61FF; display:flex; justify-content:space-between; align-items:center;}
+  .apercu-item strong { color:#5B21B6;}
+
+  .loading-card { display:flex; align-items:center; gap:1.5rem; justify-content:center; background:#FFE5EF; border-radius:20px; padding:2rem; border:2px solid #FFC9DE;}
+  .spinner { width:40px; height:40px; border:4px solid #FFC9DE; border-top:4px solid #FF6B9D; border-radius:50%; animation:spin 1s linear infinite;}
+  @keyframes spin { to { transform:rotate(360deg);}}
+
+  @media (max-width: 800px) {
+    .cartes-partage { grid-template-columns:1fr;}
+  }
+</style>
+
+<script>
+let fichierImport = null;
+let dataImport = null;
+
+document.addEventListener('DOMContentLoaded', chargerCours);
+
+function chargerCours() {
+  fetch('/api/cours/liste').then(r=>r.json()).then(d=>{
+    const sel = document.getElementById('select-cours');
+    sel.innerHTML = '<option value="">📚 Choisis un cours...</option>';
+    (d.cours || []).forEach(c => {
+      const opt = document.createElement('option');
+      opt.value = c.id;
+      opt.textContent = c.nom + ' (' + (c.matiere || 'Général') + ')';
+      sel.appendChild(opt);
+    });
+  });
+}
+
+function exporter() {
+  const id = document.getElementById('select-cours').value;
+  const createur = document.getElementById('createur').value.trim() || 'Anonyme';
+  if (!id) { alert('⚠️ Choisis un cours à exporter !'); return; }
+
+  document.getElementById('loading').style.display = 'flex';
+  fetch('/api/partage/exporter', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({id_cours: parseInt(id), createur: createur})
+  })
+  .then(r=>r.blob())
+  .then(blob=>{
+    document.getElementById('loading').style.display = 'none';
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'cours_NOKIROVA_' + Date.now() + '.nokirova';
+    a.click();
+    alert('✅ Fichier exporté ! Envoie-le à tes amis 🌸');
+  })
+  .catch(e=>{
+    document.getElementById('loading').style.display = 'none';
+    alert('❌ ' + e.message);
+  });
+}
+
+function fichierChoisi(e) {
+  const f = e.target.files[0];
+  if (!f) return;
+  fichierImport = f;
+  document.getElementById('nom-fic').textContent = '📎 ' + f.name;
+
+  // Aperçu
+  const fd = new FormData();
+  fd.append('fichier', f);
+  document.getElementById('loading').style.display = 'flex';
+  fetch('/api/partage/apercu', {method:'POST', body: fd})
+  .then(r=>r.json())
+  .then(d=>{
+    document.getElementById('loading').style.display = 'none';
+    if (d.succes) {
+      dataImport = d.data;
+      afficherApercu(d.data);
+      document.getElementById('btn-importer').disabled = false;
+    } else {
+      alert('❌ ' + d.erreur);
+    }
+  });
+}
+
+function afficherApercu(data) {
+  const c = document.getElementById('apercu-contenu');
+  const cours = data.cours || {};
+  const stats = data.stats || {};
+  c.innerHTML = `
+    <div class="apercu-item"><strong>👤 Créateur :</strong><span>${esc(data.createur || 'Inconnu')}</span></div>
+    <div class="apercu-item"><strong>📅 Date :</strong><span>${esc(data.date_export || '—')}</span></div>
+    <div class="apercu-item"><strong>📚 Cours :</strong><span>${esc(cours.nom || 'Sans nom')}</span></div>
+    <div class="apercu-item"><strong>🎯 Matière :</strong><span>${esc(cours.matiere || '—')}</span></div>
+    <div class="apercu-item"><strong>📝 Notes incluses :</strong><span>${stats.nb_notes || 0}</span></div>
+    <div class="apercu-item"><strong>🃏 Flashcards :</strong><span>${stats.nb_flashcards || 0}</span></div>
+    <div class="apercu-item"><strong>📜 Historique :</strong><span>${stats.nb_historique || 0}</span></div>
+  `;
+  document.getElementById('apercu-import').style.display = 'block';
+  document.getElementById('apercu-import').scrollIntoView({behavior:'smooth'});
+}
+
+function importer() {
+  if (dataImport) { confirmerImport(); }
+}
+
+function confirmerImport() {
+  document.getElementById('loading').style.display = 'flex';
+  fetch('/api/partage/importer', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({data: dataImport})
+  })
+  .then(r=>r.json())
+  .then(d=>{
+    document.getElementById('loading').style.display = 'none';
+    if (d.succes) {
+      alert('✅ Import réussi !\n📚 ' + d.nom + '\n📝 ' + d.nb_notes + ' notes\n🃏 ' + d.nb_fc + ' flashcards');
+      document.getElementById('apercu-import').style.display = 'none';
+      document.getElementById('btn-importer').disabled = true;
+      document.getElementById('nom-fic').textContent = '';
+      chargerCours();
+    } else {
+      alert('❌ ' + d.erreur);
+    }
+  });
+}
+
+function esc(t) { const d = document.createElement('div'); d.textContent = t || ''; return d.innerHTML; }
+</script>
+{% endblock %}

@@ -1,0 +1,12 @@
+{
+  "notif_windows": true,
+  "notif_rappels": true,
+  "notif_motivation": true,
+  "notif_matin": true,
+  "heure_matin": "08:00",
+  "minutes_avant_tache": 10,
+  "son_actif": true,
+  "ne_pas_deranger": false,
+  "dernier_rappel_matin": "2026-06-04",
+  "taches_deja_notifiees": []
+}

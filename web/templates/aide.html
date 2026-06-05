@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+{% block title %}Aide - NOKIROVA{% endblock %}
+{% block contenu %}
+<div class="aide-page">
+
+  <div class="page-header" style="background: linear-gradient(135deg, #D8B4FE, #EDE9FE); border-left: 5px solid #7B61FF;">
+    <div class="page-header-icon" style="background: linear-gradient(135deg, #7B61FF, #5B21B6);">⌨️</div>
+    <div>
+      <h1 class="page-title" style="color: #5B21B6;">Aide & Raccourcis</h1>
+      <p class="page-subtitle" style="color: #7B61FF;">Tout ce que tu dois savoir 📖</p>
+    </div>
+  </div>
+
+  <div class="aide-bloc">
+    <h2 style="color:#5B21B6;">⌨️ RACCOURCIS CLAVIER</h2>
+    <div class="raccourcis-grid">
+      <div class="rac"><kbd>Ctrl + H</kbd><span>🏠 Accueil</span></div>
+      <div class="rac"><kbd>Ctrl + B</kbd><span>📚 Bibliothèque</span></div>
+      <div class="rac"><kbd>Ctrl + L</kbd><span>📜 Historique</span></div>
+      <div class="rac"><kbd>Ctrl + N</kbd><span>✍️ Notes</span></div>
+      <div class="rac"><kbd>Ctrl + F</kbd><span>🃏 Flashcards</span></div>
+      <div class="rac"><kbd>Ctrl + P</kbd><span>⏱️ Pomodoro</span></div>
+      <div class="rac"><kbd>Ctrl + K</kbd><span>🔍 Recherche</span></div>
+      <div class="rac"><kbd>Ctrl + G</kbd><span>📊 Graphiques</span></div>
+      <div class="rac"><kbd>Ctrl + J</kbd><span>📅 Planificateur</span></div>
+      <div class="rac"><kbd>Ctrl + I</kbd><span>📥 Import cours</span></div>
+      <div class="rac"><kbd>Ctrl + R</kbd><span>📝 Résumé</span></div>
+      <div class="rac"><kbd>Ctrl + Q</kbd><span>🎯 QCM</span></div>
+      <div class="rac"><kbd>Ctrl + S</kbd><span>🔒 PIN</span></div>
+      <div class="rac"><kbd>Ctrl + D</kbd><span>🌙 Mode sombre</span></div>
+      <div class="rac"><kbd>F1</kbd><span>❓ Aide</span></div>
+    </div>
+  </div>
+
+  <div class="aide-bloc">
+    <h2 style="color:#F59E0B;">⏱️ POMODORO</h2>
+    <ul>
+      <li>Configure travail / pause / pause longue</li>
+      <li>Lance le timer et travaille !</li>
+      <li>Le timer continue même si tu changes de page</li>
+      <li>Son + notification à la fin</li>
+      <li>XP bonus à chaque session terminée</li>
+    </ul>
+  </div>
+
+  <div class="aide-bloc">
+    <h2 style="color:#00C853;">🔍 RECHERCHE</h2>
+    <ul>
+      <li>Cherche dans <strong>TOUS</strong> tes cours</li>
+      <li>Filtre par matière</li>
+      <li>Mots-clés surlignés dans les résultats</li>
+    </ul>
+  </div>
+
+  <div class="aide-bloc">
+    <h2 style="color:#2962FF;">📅 PLANIFICATEUR</h2>
+    <ul>
+      <li>3 vues : Jour / Semaine / Mois</li>
+      <li>Tâches récurrentes</li>
+      <li>Couleurs par matière</li>
+      <li>Rappels automatiques</li>
+    </ul>
+  </div>
+
+  <div class="aide-bloc">
+    <h2 style="color:#FF6B9D;">🌍 TRADUCTION</h2>
+    <ul>
+      <li><strong>11 langues</strong> disponibles</li>
+      <li>Traduction intelligente avec contexte</li>
+      <li>Utilise directement ton cours chargé</li>
+    </ul>
+  </div>
+
+  <div class="aide-bloc">
+    <h2 style="color:#A855F7;">🎬 VIDÉOS RÉVISION</h2>
+    <ul>
+      <li>Recherche YouTube intégrée</li>
+      <li>Suggestions par matière</li>
+      <li>Trouve les meilleures vidéos pour ton cours</li>
+    </ul>
+  </div>
+
+  <div class="aide-bloc">
+    <h2 style="color:#EF4444;">🤝 PARTAGE DE COURS</h2>
+    <ul>
+      <li>Exporte tes cours en fichier <code>.nokirova</code></li>
+      <li>Inclus notes, flashcards, historique</li>
+      <li>Partage facilement avec tes amis</li>
+    </ul>
+  </div>
+
+  <div class="aide-bloc" style="background:linear-gradient(135deg, #FFE5EF, #FFC9DE); border-left:5px solid #FF6B9D;">
+    <h2 style="color:#C2185B;">🌸 CRÉDITS</h2>
+    <p><strong>NOKIROVA</strong> — Application éducative créée par <strong>Hénoc</strong> 💎</p>
+    <p>✨ Version Web 2026 — Powered by Flask + Python 🚀</p>
+    <p>🤖 7 IA en rotation automatique : Cerebras, Groq, Gemini, Together, OpenRouter, Mistral, HuggingFace</p>
+  </div>
+</div>
+
+<style>
+  .aide-page { padding:2rem; max-width:1000px; margin:0 auto;}
+  .page-header { display:flex; align-items:center; gap:1.2rem; border-radius:20px; padding:1.5rem 2rem; margin-bottom:1.5rem; box-shadow:0 4px 20px rgba(0,0,0,0.05);}
+  .page-header-icon { width:60px; height:60px; border-radius:16px; display:flex; align-items:center; justify-content:center; font-size:1.8rem; color:white;}
+  .page-title { font-size:1.6rem; font-weight:800; margin:0;}
+  .page-subtitle { margin:0.2rem 0 0; font-size:0.95rem;}
+
+  .aide-bloc { background:white; border-radius:18px; padding:1.5rem; margin-bottom:1rem; box-shadow:0 4px 15px rgba(0,0,0,0.05); border-left:5px solid #7B61FF;}
+  .aide-bloc h2 { font-size:1.2rem; margin-bottom:1rem; font-weight:700;}
+  .aide-bloc ul { padding-left:1.5rem; line-height:2; color:#374151;}
+  .aide-bloc p { line-height:1.8; color:#374151; margin-bottom:0.5rem;}
+  .aide-bloc code { background:#FFE5EF; color:#C2185B; padding:0.15rem 0.5rem; border-radius:6px; font-size:0.9rem;}
+
+  .raccourcis-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(240px, 1fr)); gap:0.6rem;}
+  .rac { display:flex; align-items:center; gap:0.8rem; background:#F9FAFB; padding:0.6rem 0.9rem; border-radius:10px; border-left:3px solid #7B61FF;}
+  .rac kbd { background:linear-gradient(135deg, #7B61FF, #5B21B6); color:white; padding:0.3rem 0.6rem; border-radius:6px; font-weight:700; font-size:0.85rem; min-width:90px; text-align:center; font-family:'Courier New', monospace;}
+  .rac span { color:#374151; font-weight:500;}
+</style>
+{% endblock %}

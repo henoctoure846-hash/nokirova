@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+{% block title %}Bibliothèque - NOKIROVA{% endblock %}
+{% block contenu %}
+<div class="page-container">
+
+  <div class="page-header" style="background: linear-gradient(135deg, #FFF3B0, #FFE66D); border-left: 5px solid #FFD93D;">
+    <div class="page-header-icon" style="background: linear-gradient(135deg, #F59E0B, #FFD93D);">📚</div>
+    <div>
+      <h1 class="page-title" style="color: #B45309;">Bibliothèque</h1>
+      <p class="page-subtitle" style="color: #92400E;">Tous tes cours importés en un coup d'œil 📖</p>
+    </div>
+  </div>
+
+  <div class="filtres-bar">
+    <input type="text" id="recherche-locale" placeholder="🔍 Filtrer par nom..." oninput="filtrer()" />
+    <select id="filtre-matiere" onchange="filtrer()">
+      <option value="">📚 Toutes les matières</option>
+    </select>
+    <span id="nb-cours" class="badge-nb">0 cours</span>
+  </div>
+
+  <div id="liste-cours" class="liste-cours"></div>
+
+  <div id="empty-state" class="empty-state" style="display:none;">
+    <div style="font-size:4rem;">📂</div>
+    <h2>Aucun cours importé</h2>
+    <p>Commence par importer ton premier cours pour le voir apparaître ici !</p>
+    <a href="/import" class="btn-empty">📥 Importer un cours</a>
+  </div>
+</div>
+
+<style>
+  .page-container { padding:2rem; max-width:1200px; margin:0 auto;}
+  .page-header { display:flex; align-items:center; gap:1.2rem; border-radius:20px; padding:1.5rem 2rem; margin-bottom:1.5rem; box-shadow:0 4px 20px rgba(0,0,0,0.05);}
+  .page-header-icon { width:60px; height:60px; border-radius:16px; display:flex; align-items:center; justify-content:center; font-size:1.8rem; color:white;}
+  .page-title { font-size:1.6rem; font-weight:800; margin:0;}
+  .page-subtitle { margin:0.2rem 0 0; font-size:0.95rem;}
+
+  .filtres-bar { display:flex; gap:0.8rem; margin-bottom:1.5rem; flex-wrap:wrap; align-items:center; background:white; padding:1rem; border-radius:16px; box-shadow:0 2px 12px rgba(0,0,0,0.05);}
+  .filtres-bar input, .filtres-bar select { padding:0.7rem 1rem; border:2px solid #FFE66D; border-radius:12px; font-size:0.9rem; outline:none; transition:0.2s;}
+  .filtres-bar input { flex:1; min-width:200px;}
+  .filtres-bar input:focus, .filtres-bar select:focus { border-color:#F59E0B;}
+  .badge-nb { background:#FFD93D; color:#92400E; font-weight:700; padding:0.4rem 1rem; border-radius:20px; font-size:0.85rem;}
+
+  .liste-cours { display:grid; grid-template-columns:repeat(auto-fill, minmax(280px, 1fr)); gap:1rem;}
+  .cours-card { background:white; border-radius:18px; padding:1.3rem; box-shadow:0 4px 15px rgba(0,0,0,0.06); border-left:5px solid #FFD93D; transition:all 0.3s; cursor:pointer;}
+  .cours-card:hover { transform:translateY(-4px); box-shadow:0 8px 25px rgba(255,217,61,0.25);}
+  .cours-matiere { display:inline-block; background:#FFF3B0; color:#92400E; font-weight:700; font-size:0.75rem; padding:0.3rem 0.8rem; border-radius:20px; margin-bottom:0.8rem;}
+  .cours-nom { font-weight:700; color:#1F2937; font-size:1rem; margin-bottom:0.5rem; line-height:1.4; word-break:break-word;}
+  .cours-date { color:#9CA3AF; font-size:0.8rem; margin-bottom:1rem;}
+  .cours-actions { display:flex; gap:0.5rem; flex-wrap:wrap;}
+  .btn-card { padding:0.4rem 0.8rem; border-radius:10px; font-size:0.8rem; font-weight:600; cursor:pointer; border:2px solid transparent; transition:0.2s;}
+  .btn-charger { background:#D1FAE5; color:#00C853; border-color:#00C853;}
+  .btn-charger:hover { background:#00C853; color:white;}
+  .btn-supprimer { background:#FEE2E2; color:#EF4444; border-color:#EF4444;}
+  .btn-supprimer:hover { background:#EF4444; color:white;}
+
+  .empty-state { text-align:center; padding:4rem 2rem; background:white; border-radius:20px; box-shadow:0 4px 20px rgba(0,0,0,0.05);}
+  .empty-state h2 { color:#374151; margin:1rem 0 0.5rem;}
+  .empty-state p { color:#9CA3AF; margin-bottom:1.5rem;}
+  .btn-empty { background:linear-gradient(135deg, #F59E0B, #FFD93D); color:white; padding:0.8rem 2rem; border-radius:20px; text-decoration:none; font-weight:700; display:inline-block;}
+</style>
+
+<script>
+let tousCours = [];
+
+document.addEventListener('DOMContentLoaded', charger);
+
+function charger() {
+  fetch('/api/cours/liste').then(r=>r.json()).then(d=>{
+    tousCours = d.cours || [];
+    document.getElementById('nb-cours').textContent = tousCours.length + ' cours';
+
+    // Remplir le filtre matière
+    const matieres = [...new Set(tousCours.map(c=>c.matiere).filter(m=>m))];
+    const sel = document.getElementById('filtre-matiere');
+    matieres.forEach(m=>{
+      const opt = document.createElement('option');
+      opt.value = m; opt.textContent = m;
+      sel.appendChild(opt);
+    });
+
+    afficher(tousCours);
+  });
+}
+
+function afficher(cours) {
+  const c = document.getElementById('liste-cours');
+  const empty = document.getElementById('empty-state');
+  c.innerHTML = '';
+
+  if (!cours || cours.length === 0) {
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+
+  cours.forEach(co => {
+    const card = document.createElement('div');
+    card.className = 'cours-card';
+    card.innerHTML = `
+      <span class="cours-matiere">${esc(co.matiere || '📚 Général')}</span>
+      <div class="cours-nom">${esc(co.nom)}</div>
+      <div class="cours-date">📅 ${esc(co.date_import || '')}</div>
+      <div class="cours-actions">
+        <button class="btn-card btn-charger" onclick="charger_cours(${co.id})">📂 Charger</button>
+        <button class="btn-card btn-supprimer" onclick="supprimer_cours(${co.id})">🗑️ Supprimer</button>
+      </div>
+    `;
+    c.appendChild(card);
+  });
+}
+
+function filtrer() {
+  const q = document.getElementById('recherche-locale').value.toLowerCase();
+  const mat = document.getElementById('filtre-matiere').value;
+  let res = tousCours;
+  if (q) res = res.filter(c=>c.nom.toLowerCase().includes(q));
+  if (mat) res = res.filter(c=>c.matiere === mat);
+  afficher(res);
+}
+
+function charger_cours(id) {
+  fetch('/api/cours/charger/'+id, {method:'POST'}).then(r=>r.json()).then(d=>{
+    if (d.succes) {
+      alert('✅ Cours chargé : ' + d.nom);
+      window.location.href = '/';
+    } else {
+      alert('❌ ' + (d.erreur || 'Erreur'));
+    }
+  });
+}
+
+function supprimer_cours(id) {
+  if (!confirm('🗑️ Supprimer ce cours ? (action irréversible)')) return;
+  fetch('/api/cours/supprimer/'+id, {method:'DELETE'}).then(r=>r.json()).then(d=>{
+    if (d.succes) charger();
+    else alert('❌ ' + d.erreur);
+  });
+}
+
+function esc(t) { const d = document.createElement('div'); d.textContent = t; return d.innerHTML; }
+</script>
+{% endblock %}

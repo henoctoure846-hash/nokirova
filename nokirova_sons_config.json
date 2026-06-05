@@ -1,0 +1,23 @@
+{
+  "sons_actifs": true,
+  "son_pomodoro_fin": "pomodoro_fin.mp3",
+  "actif_pomodoro_fin": true,
+  "son_notification": "notification.mp3",
+  "actif_notification": true,
+  "son_xp_gagne": "xp_gagne.mp3",
+  "actif_xp_gagne": true,
+  "son_badge_unlock": "xp_gagne.mp3",
+  "actif_badge_unlock": true,
+  "son_succes": "succes.mp3",
+  "actif_succes": true,
+  "son_rappel": "rappel.mp3",
+  "actif_rappel": true,
+  "son_qcm_bon": "qcm_bon.mp3",
+  "actif_qcm_bon": true,
+  "son_qcm_mauvais": "erreur.mp3",
+  "actif_qcm_mauvais": true,
+  "son_clic": "clic.mp3",
+  "actif_clic": true,
+  "son_zen": "médiation.mp3",
+  "actif_zen": true
+}

@@ -1,0 +1,184 @@
+{% extends "base.html" %}
+{% block title %}Sécurité PIN - NOKIROVA{% endblock %}
+{% block contenu %}
+<div class="page-container">
+
+  <div class="page-header" style="background: linear-gradient(135deg, #D8B4FE, #EDE9FE); border-left: 5px solid #7B61FF;">
+    <div class="page-header-icon" style="background: linear-gradient(135deg, #7B61FF, #5B21B6);">🔒</div>
+    <div>
+      <h1 class="page-title" style="color: #5B21B6;">Sécurité PIN</h1>
+      <p class="page-subtitle" style="color: #7B61FF;">Protège ton app avec un code PIN 🔐</p>
+    </div>
+  </div>
+
+  <!-- STATUT -->
+  <div id="statut-card" class="statut-card">
+    <span style="font-size:2rem;" id="statut-emoji">⏳</span>
+    <div>
+      <strong id="statut-titre">Chargement...</strong>
+      <p id="statut-desc">Vérification du statut PIN</p>
+    </div>
+  </div>
+
+  <!-- ZONE CRÉER (si pas de PIN) -->
+  <div id="zone-creer" class="action-card" style="display:none; border-top-color:#00C853;">
+    <h2 style="color:#14532D;">🆕 Créer un code PIN</h2>
+    <p>Choisis un code de 4 à 8 chiffres pour sécuriser ton app.</p>
+
+    <input type="password" id="nouveau-pin" placeholder="🔢 Nouveau PIN (4-8 chiffres)" class="input-pin" maxlength="8" inputmode="numeric"/>
+    <input type="password" id="confirmer-pin" placeholder="🔢 Confirmer le PIN" class="input-pin" maxlength="8" inputmode="numeric"/>
+
+    <button onclick="creerPin()" class="btn-action btn-vert">✅ Activer le PIN</button>
+  </div>
+
+  <!-- ZONE CHANGER/SUPPRIMER (si PIN actif) -->
+  <div id="zone-changer" class="action-card" style="display:none; border-top-color:#F59E0B;">
+    <h2 style="color:#92400E;">🔄 Changer le PIN</h2>
+    <input type="password" id="ancien-pin" placeholder="🔢 Ancien PIN" class="input-pin" maxlength="8" inputmode="numeric"/>
+    <input type="password" id="nouveau-pin2" placeholder="🔢 Nouveau PIN" class="input-pin" maxlength="8" inputmode="numeric"/>
+    <input type="password" id="confirmer-pin2" placeholder="🔢 Confirmer le nouveau" class="input-pin" maxlength="8" inputmode="numeric"/>
+    <button onclick="changerPin()" class="btn-action btn-orange">🔄 Changer le PIN</button>
+  </div>
+
+  <div id="zone-supprimer" class="action-card" style="display:none; border-top-color:#EF4444;">
+    <h2 style="color:#991B1B;">🗑️ Désactiver le PIN</h2>
+    <p>⚠️ N'importe qui pourra ouvrir ton app !</p>
+    <input type="password" id="pin-supprimer" placeholder="🔢 Ton PIN actuel" class="input-pin" maxlength="8" inputmode="numeric"/>
+    <button onclick="supprimerPin()" class="btn-action btn-rouge">🗑️ Désactiver</button>
+  </div>
+
+  <!-- INFO BOX -->
+  <div class="info-box">
+    <h3 style="color:#1E40AF;">💡 Comment ça marche ?</h3>
+    <ul>
+      <li>🔒 Le PIN est chiffré (SHA-256) → personne ne peut le lire</li>
+      <li>📱 Si tu oublies ton PIN, il faudra réinstaller l'app</li>
+      <li>🌐 Sur Web : le PIN sera demandé à chaque connexion</li>
+      <li>🔢 Recommandé : minimum 4 chiffres, idéal 6 chiffres</li>
+    </ul>
+  </div>
+
+  <div id="message" class="message-toast" style="display:none;"></div>
+</div>
+
+<style>
+  .page-container { padding:2rem; max-width:900px; margin:0 auto;}
+  .page-header { display:flex; align-items:center; gap:1.2rem; border-radius:20px; padding:1.5rem 2rem; margin-bottom:1.5rem; box-shadow:0 4px 20px rgba(0,0,0,0.05);}
+  .page-header-icon { width:60px; height:60px; border-radius:16px; display:flex; align-items:center; justify-content:center; font-size:1.8rem; color:white;}
+  .page-title { font-size:1.6rem; font-weight:800; margin:0;}
+  .page-subtitle { margin:0.2rem 0 0; font-size:0.95rem;}
+
+  .statut-card { background:white; border-radius:18px; padding:1.5rem; margin-bottom:1.5rem; display:flex; align-items:center; gap:1.2rem; box-shadow:0 4px 20px rgba(0,0,0,0.06); border-left:5px solid #7B61FF;}
+  .statut-card.actif { border-left-color:#00C853;}
+  .statut-card.inactif { border-left-color:#EF4444;}
+  .statut-card strong { display:block; font-size:1.1rem; color:#1F2937;}
+  .statut-card p { color:#6B7280; font-size:0.9rem; margin-top:0.2rem;}
+
+  .action-card { background:white; border-radius:18px; padding:1.8rem; margin-bottom:1.2rem; box-shadow:0 4px 20px rgba(0,0,0,0.06); border-top:4px solid;}
+  .action-card h2 { font-size:1.1rem; margin-bottom:0.5rem;}
+  .action-card p { color:#6B7280; font-size:0.9rem; margin-bottom:1rem;}
+
+  .input-pin { width:100%; padding:1rem; border:2px solid #D8B4FE; border-radius:14px; font-size:1.5rem; text-align:center; letter-spacing:8px; font-weight:700; margin-bottom:0.8rem; outline:none; background:#FAF5FF; color:#5B21B6;}
+  .input-pin:focus { border-color:#7B61FF;}
+
+  .btn-action { width:100%; padding:0.9rem; border:none; border-radius:14px; font-weight:700; font-size:1rem; cursor:pointer; transition:0.2s; color:white;}
+  .btn-vert { background:linear-gradient(135deg, #00C853, #7ED321); box-shadow:0 4px 15px rgba(0,200,83,0.4);}
+  .btn-orange { background:linear-gradient(135deg, #F59E0B, #B45309); box-shadow:0 4px 15px rgba(245,158,11,0.4);}
+  .btn-rouge { background:linear-gradient(135deg, #EF4444, #991B1B); box-shadow:0 4px 15px rgba(239,68,68,0.4);}
+  .btn-action:hover { transform:translateY(-2px);}
+
+  .info-box { background:#EFF6FF; border-radius:16px; padding:1.5rem; border-left:5px solid #2962FF;}
+  .info-box h3 { font-size:1.05rem; margin-bottom:0.8rem;}
+  .info-box ul { padding-left:1.5rem; color:#374151; line-height:2;}
+
+  .message-toast { position:fixed; bottom:30px; right:30px; padding:1rem 1.5rem; border-radius:12px; font-weight:700; box-shadow:0 8px 25px rgba(0,0,0,0.2); animation:slideIn 0.3s ease; z-index:1000;}
+  .message-toast.ok { background:#00C853; color:white;}
+  .message-toast.err { background:#EF4444; color:white;}
+  @keyframes slideIn { from { transform:translateX(100%);} to { transform:translateX(0);}}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', verifierStatut);
+
+function verifierStatut() {
+  fetch('/api/pin/statut').then(r=>r.json()).then(d=>{
+    const c = document.getElementById('statut-card');
+    if (d.actif) {
+      c.classList.add('actif');
+      document.getElementById('statut-emoji').textContent = '✅';
+      document.getElementById('statut-titre').textContent = 'PIN ACTIVÉ';
+      document.getElementById('statut-desc').textContent = 'Ton app est protégée par un code PIN 🔒';
+      document.getElementById('zone-creer').style.display = 'none';
+      document.getElementById('zone-changer').style.display = 'block';
+      document.getElementById('zone-supprimer').style.display = 'block';
+    } else {
+      c.classList.add('inactif');
+      document.getElementById('statut-emoji').textContent = '🔓';
+      document.getElementById('statut-titre').textContent = 'PIN DÉSACTIVÉ';
+      document.getElementById('statut-desc').textContent = 'Aucune protection active. Active un PIN pour sécuriser ton app !';
+      document.getElementById('zone-creer').style.display = 'block';
+      document.getElementById('zone-changer').style.display = 'none';
+      document.getElementById('zone-supprimer').style.display = 'none';
+    }
+  });
+}
+
+function creerPin() {
+  const p = document.getElementById('nouveau-pin').value;
+  const c = document.getElementById('confirmer-pin').value;
+  if (p.length < 4) return toast('⚠️ Min 4 chiffres', 'err');
+  if (!/^\d+$/.test(p)) return toast('⚠️ Que des chiffres', 'err');
+  if (p !== c) return toast('❌ PINs différents', 'err');
+
+  fetch('/api/pin/set', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({pin: p})
+  }).then(r=>r.json()).then(d=>{
+    if (d.succes) { toast('✅ PIN activé !', 'ok'); verifierStatut(); }
+    else toast('❌ ' + d.erreur, 'err');
+  });
+}
+
+function changerPin() {
+  const a = document.getElementById('ancien-pin').value;
+  const n = document.getElementById('nouveau-pin2').value;
+  const c = document.getElementById('confirmer-pin2').value;
+  if (!a) return toast('⚠️ Entre l\'ancien PIN', 'err');
+  if (n.length < 4) return toast('⚠️ Min 4 chiffres', 'err');
+  if (n !== c) return toast('❌ Nouveaux PINs différents', 'err');
+
+  fetch('/api/pin/changer', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ancien: a, nouveau: n})
+  }).then(r=>r.json()).then(d=>{
+    if (d.succes) {
+      toast('✅ PIN changé !', 'ok');
+      document.getElementById('ancien-pin').value = '';
+      document.getElementById('nouveau-pin2').value = '';
+      document.getElementById('confirmer-pin2').value = '';
+    } else toast('❌ ' + d.erreur, 'err');
+  });
+}
+
+function supprimerPin() {
+  const p = document.getElementById('pin-supprimer').value;
+  if (!p) return toast('⚠️ Entre ton PIN', 'err');
+  if (!confirm('🗑️ Vraiment désactiver le PIN ?')) return;
+  fetch('/api/pin/supprimer', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({pin: p})
+  }).then(r=>r.json()).then(d=>{
+    if (d.succes) { toast('🔓 PIN désactivé', 'ok'); verifierStatut(); }
+    else toast('❌ ' + d.erreur, 'err');
+  });
+}
+
+function toast(msg, type) {
+  const t = document.getElementById('message');
+  t.textContent = msg;
+  t.className = 'message-toast ' + type;
+  t.style.display = 'block';
+  setTimeout(()=>{ t.style.display = 'none'; }, 3000);
+}
+</script>
+{% endblock %}

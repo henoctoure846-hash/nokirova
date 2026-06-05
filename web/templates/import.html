@@ -1,0 +1,340 @@
+{% extends "base.html" %}
+
+{% block title %}📥 Importer un cours - NOKIROVA{% endblock %}
+
+{% block contenu %}
+
+<!-- 🎨 TITRE DE PAGE -->
+<div class="titre-page" style="background: var(--bleu-royal);">
+    📥 Importer un cours
+</div>
+
+<!-- 📥 ZONE D'UPLOAD -->
+<div class="carte-import">
+    <div class="import-icone">📁</div>
+    <h2 class="import-titre">Choisis ton fichier de cours</h2>
+    <p class="import-sous-titre">📄 Formats acceptés : PDF, Word, PowerPoint, TXT</p>
+
+    <form id="formImport" enctype="multipart/form-data">
+        <input type="file"
+               id="fichierInput"
+               name="fichier"
+               accept=".pdf,.docx,.pptx,.txt"
+               class="input-fichier"
+               hidden>
+
+        <label for="fichierInput" class="btn-choisir">
+            📂 Choisir un fichier
+        </label>
+
+        <div id="nomFichier" class="nom-fichier"></div>
+
+        <button type="submit" class="btn-importer" id="btnImporter" style="display:none;">
+            🚀 Importer ce cours
+        </button>
+    </form>
+</div>
+
+<!-- 🔄 ZONE DE CHARGEMENT -->
+<div id="zoneChargement" class="zone-chargement" style="display:none;">
+    <div class="spinner"></div>
+    <p>📖 Lecture du fichier en cours...</p>
+</div>
+
+<!-- ✅ ZONE RÉSULTAT -->
+<div id="zoneResultat" class="zone-resultat" style="display:none;">
+    <div class="resultat-succes">
+        <div class="succes-icone">✅</div>
+        <h2 id="succesTitre">Cours importé avec succès !</h2>
+        <p id="succesMatiere"></p>
+    </div>
+
+    <div class="apercu-cours">
+        <h3>📄 Aperçu du contenu :</h3>
+        <textarea id="apercuContenu" readonly></textarea>
+    </div>
+
+    <h3 style="margin-top: 20px; color: var(--gris-texte);">🚀 Que veux-tu faire maintenant ?</h3>
+
+    <div class="actions-rapides">
+        <a href="/resume" class="action-btn action-resume">
+            📝 Résumé
+        </a>
+        <a href="/qcm" class="action-btn action-qcm">
+            🎯 QCM
+        </a>
+        <a href="/explication" class="action-btn action-explication">
+            💡 Explication
+        </a>
+        <a href="/flashcards" class="action-btn action-flashcards">
+            🃏 Flashcards
+        </a>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_css %}
+<style>
+/* Styles spécifiques page Import */
+.titre-page {
+    padding: 20px;
+    border-radius: 18px;
+    text-align: center;
+    color: white;
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.carte-import {
+    background: white;
+    padding: 40px;
+    border-radius: 20px;
+    text-align: center;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    margin-bottom: 20px;
+}
+
+.import-icone {
+    font-size: 80px;
+    margin-bottom: 15px;
+}
+
+.import-titre {
+    color: var(--bleu-royal);
+    font-size: 24px;
+    margin-bottom: 10px;
+}
+
+.import-sous-titre {
+    color: var(--gris-doux);
+    font-size: 14px;
+    margin-bottom: 25px;
+}
+
+.btn-choisir {
+    display: inline-block;
+    background: linear-gradient(135deg, var(--bleu-royal), var(--bleu-ciel));
+    color: white;
+    padding: 15px 35px;
+    border-radius: 14px;
+    font-weight: bold;
+    font-size: 16px;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(41, 98, 255, 0.3);
+    transition: all 0.3s;
+}
+
+.btn-choisir:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(41, 98, 255, 0.4);
+}
+
+.nom-fichier {
+    margin-top: 20px;
+    padding: 12px;
+    background: var(--bleu-tres-pale);
+    border-radius: 10px;
+    color: var(--bleu-royal);
+    font-weight: bold;
+    display: none;
+}
+
+.nom-fichier.visible {
+    display: block;
+}
+
+.btn-importer {
+    display: inline-block;
+    background: linear-gradient(135deg, var(--vert-emeraude), var(--vert-printemps));
+    color: white;
+    padding: 15px 35px;
+    border-radius: 14px;
+    font-weight: bold;
+    font-size: 16px;
+    cursor: pointer;
+    border: none;
+    margin-top: 15px;
+    box-shadow: 0 4px 12px rgba(0, 200, 83, 0.3);
+    transition: all 0.3s;
+}
+
+.btn-importer:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(0, 200, 83, 0.4);
+}
+
+.zone-chargement {
+    background: white;
+    padding: 40px;
+    border-radius: 20px;
+    text-align: center;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+}
+
+.spinner {
+    border: 5px solid var(--gris-perle);
+    border-top: 5px solid var(--violet-premium);
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    margin: 0 auto 20px;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.zone-resultat {
+    background: white;
+    padding: 30px;
+    border-radius: 20px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+}
+
+.resultat-succes {
+    text-align: center;
+    padding: 20px;
+    background: linear-gradient(135deg, #E8F5E9, #C8E6C9);
+    border-radius: 15px;
+    margin-bottom: 20px;
+}
+
+.succes-icone {
+    font-size: 60px;
+    margin-bottom: 10px;
+}
+
+.resultat-succes h2 {
+    color: var(--vert-emeraude);
+    margin-bottom: 10px;
+}
+
+.apercu-cours {
+    margin-top: 20px;
+}
+
+.apercu-cours h3 {
+    color: var(--gris-texte);
+    margin-bottom: 10px;
+}
+
+.apercu-cours textarea {
+    width: 100%;
+    min-height: 300px;
+    padding: 15px;
+    border: 2px solid var(--bleu-tres-pale);
+    border-radius: 12px;
+    font-family: 'Segoe UI', sans-serif;
+    font-size: 14px;
+    resize: vertical;
+    line-height: 1.6;
+}
+
+.actions-rapides {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-top: 15px;
+}
+
+.action-btn {
+    display: block;
+    padding: 18px;
+    border-radius: 14px;
+    text-align: center;
+    font-weight: bold;
+    font-size: 15px;
+    text-decoration: none;
+    color: white;
+    transition: all 0.3s;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+}
+
+.action-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
+}
+
+.action-resume { background: linear-gradient(135deg, var(--bleu-royal), var(--bleu-ciel)); }
+.action-qcm { background: linear-gradient(135deg, var(--rose-sakura), var(--rose-clair)); color: var(--gris-texte); }
+.action-explication { background: linear-gradient(135deg, var(--jaune-soleil), var(--jaune-clair)); color: var(--gris-texte); }
+.action-flashcards { background: linear-gradient(135deg, var(--bleu-ciel), var(--bleu-pale)); color: var(--gris-texte); }
+
+@media (max-width: 768px) {
+    .actions-rapides {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const fichierInput = document.getElementById('fichierInput');
+const nomFichierDiv = document.getElementById('nomFichier');
+const btnImporter = document.getElementById('btnImporter');
+const formImport = document.getElementById('formImport');
+const zoneChargement = document.getElementById('zoneChargement');
+const zoneResultat = document.getElementById('zoneResultat');
+
+// Quand on choisit un fichier
+fichierInput.addEventListener('change', function(e) {
+    const fichier = e.target.files[0];
+    if (fichier) {
+        nomFichierDiv.textContent = `📄 ${fichier.name}`;
+        nomFichierDiv.classList.add('visible');
+        btnImporter.style.display = 'inline-block';
+    }
+});
+
+// Quand on soumet le formulaire
+formImport.addEventListener('submit', async function(e) {
+    e.preventDefault();
+
+    const fichier = fichierInput.files[0];
+    if (!fichier) {
+        alert('⚠️ Choisis d\'abord un fichier !');
+        return;
+    }
+
+    // Afficher chargement
+    document.querySelector('.carte-import').style.display = 'none';
+    zoneChargement.style.display = 'block';
+
+    const formData = new FormData();
+    formData.append('fichier', fichier);
+
+    try {
+        const reponse = await fetch('/api/import', {
+            method: 'POST',
+            body: formData
+        });
+
+        const data = await reponse.json();
+
+        zoneChargement.style.display = 'none';
+
+        if (data.succes) {
+            document.getElementById('succesTitre').textContent = `✅ ${data.nom} importé !`;
+            if (data.matiere) {
+                document.getElementById('succesMatiere').textContent = `🎯 Matière détectée : ${data.matiere}`;
+            }
+            document.getElementById('apercuContenu').value = data.apercu;
+            zoneResultat.style.display = 'block';
+        } else {
+            alert(`⚠️ Erreur : ${data.erreur}`);
+            document.querySelector('.carte-import').style.display = 'block';
+        }
+    } catch (error) {
+        zoneChargement.style.display = 'none';
+        document.querySelector('.carte-import').style.display = 'block';
+        alert(`⚠️ Erreur : ${error}`);
+    }
+});
+</script>
+{% endblock %}

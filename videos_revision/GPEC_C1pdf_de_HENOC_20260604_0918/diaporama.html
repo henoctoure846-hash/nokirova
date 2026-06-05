@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>🎬 GPEC_C1.pdf [de HENOC] - NOKIROVA</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #0F1419;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .header {
+      color: white;
+      text-align: center;
+      margin-bottom: 20px;
+      font-size: 24px;
+      font-weight: bold;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    }
+    .matiere {
+      color: white;
+      font-size: 16px;
+      margin-bottom: 30px;
+      opacity: 0.9;
+    }
+    .diaporama {
+      width: 90%;
+      max-width: 900px;
+      background: #1A1B26;
+      border-radius: 20px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      padding: 60px 50px;
+      min-height: 450px;
+      position: relative;
+    }
+    .slide {
+      display: none;
+      animation: fadeIn 0.6s ease-in;
+    }
+    .slide.active { display: block; }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .slide-numero {
+      color: #7ED321;
+      font-size: 14px;
+      font-weight: bold;
+      margin-bottom: 15px;
+    }
+    .slide-titre {
+      color: #FFD93D;
+      font-size: 36px;
+      font-weight: bold;
+      margin-bottom: 25px;
+      line-height: 1.2;
+    }
+    .slide-texte {
+      color: #C0CAF5;
+      font-size: 20px;
+      line-height: 1.6;
+      white-space: pre-wrap;
+    }
+    .controls {
+      display: flex;
+      gap: 15px;
+      margin-top: 30px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    button {
+      background: #7ED321;
+      color: white;
+      border: none;
+      padding: 14px 28px;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(0,0,0,0.3);
+    }
+    .progress-bar {
+      width: 90%;
+      max-width: 900px;
+      height: 6px;
+      background: rgba(255,255,255,0.3);
+      border-radius: 3px;
+      margin-top: 20px;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      background: #7ED321;
+      width: 0%;
+      transition: width 0.3s;
+    }
+    .info {
+      color: white;
+      margin-top: 15px;
+      font-size: 14px;
+      opacity: 0.8;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">🎬  GPEC_C1.pdf [de HENOC]</div>
+  <div class="matiere">🎯 💰 Économie • Powered by NOKIROVA 🌸</div>
+
+  <div class="diaporama">
+    
+            <div class="slide active" data-duree="18" data-audio="slide_1.mp3">
+              <div class="slide-numero">Slide 1 / 8</div>
+              <h2 class="slide-titre">Introduction Economie</h2>
+              <div class="slide-texte">L'économie est une science humaine qui étudie le comportement des individus au sein de la société. Elle a pour objet d'étude l'être humain et ses interactions avec les ressources disponibles. Le constat de départ est que les ressources sont limitées et que les besoins sont illimités.</div>
+            </div>
+            
+            <div class="slide " data-duree="15" data-audio="slide_2.mp3">
+              <div class="slide-numero">Slide 2 / 8</div>
+              <h2 class="slide-titre">Prérequis Mathématiques</h2>
+              <div class="slide-texte">Les prérequis mathématiques pour ce cours incluent la compréhension des graphiques, la factorisation et l'ordre des opérations, les équations du premier degré et les systèmes de deux équations du premier degré, ainsi que les dérivées usuelles et partielles.</div>
+            </div>
+            
+            <div class="slide " data-duree="11" data-audio="slide_3.mp3">
+              <div class="slide-numero">Slide 3 / 8</div>
+              <h2 class="slide-titre">Bibliographie</h2>
+              <div class="slide-texte">La bibliographie pour ce cours inclut les ouvrages de Algan Y. et l’équipe Core, Mankiw, Gregory, et Taylor, Mark, ainsi que Stiglitz, Joseph, Walsh, Carl, et Lafay, Jean-Dominique.</div>
+            </div>
+            
+            <div class="slide " data-duree="16" data-audio="slide_4.mp3">
+              <div class="slide-numero">Slide 4 / 8</div>
+              <h2 class="slide-titre">Introduction au Cours</h2>
+              <div class="slide-texte">Ce cours a pour objectif de comprendre les grands problèmes économiques contemporains et de maîtriser les instruments théoriques pour les analyser. Les grandes questions contemporaines incluent les inégalités, les enjeux environnementaux, les marchés, la mondialisation et les conséquences économiques du Covid-19.</div>
+            </div>
+            
+            <div class="slide " data-duree="10" data-audio="slide_5.mp3">
+              <div class="slide-numero">Slide 5 / 8</div>
+              <h2 class="slide-titre">Sommaire du Cours</h2>
+              <div class="slide-texte">Le sommaire du cours inclut la définition et l'objet de l'économie, une brève histoire de la pensée économique et les 10 principes fondateurs de l'analyse économique.</div>
+            </div>
+            
+            <div class="slide " data-duree="17" data-audio="slide_6.mp3">
+              <div class="slide-numero">Slide 6 / 8</div>
+              <h2 class="slide-titre">Objectif du Cours</h2>
+              <div class="slide-texte">L'objectif du cours est de comprendre les grands problèmes économiques contemporains et de maîtriser les instruments théoriques pour les analyser. Les outils de l'analyse économique incluent les indicateurs statistiques fondamentaux, la représentation graphique d'un équilibre offre-demande et l'étude de l'effet de chocs exogènes.</div>
+            </div>
+            
+            <div class="slide " data-duree="14" data-audio="slide_7.mp3">
+              <div class="slide-numero">Slide 7 / 8</div>
+              <h2 class="slide-titre">Comprendre les Grands Problèmes</h2>
+              <div class="slide-texte">Pour comprendre les grands problèmes économiques contemporains, il est nécessaire de maîtriser les outils de l'analyse économique. Les outils incluent les indicateurs statistiques fondamentaux, la représentation graphique d'un équilibre offre-demande et l'étude de l'effet de chocs exogènes.</div>
+            </div>
+            
+            <div class="slide " data-duree="18" data-audio="slide_8.mp3">
+              <div class="slide-numero">Slide 8 / 8</div>
+              <h2 class="slide-titre">Conclusion et Perspectives</h2>
+              <div class="slide-texte">En conclusion, ce cours a pour objectif de comprendre les grands problèmes économiques contemporains et de maîtriser les instruments théoriques pour les analyser. Les perspectives incluent la capacité de répondre à des questions économiques fondamentales et de prendre des décisions éclairées dans un contexte économique complexe.</div>
+            </div>
+            
+
+    <div class="controls">
+      <button onclick="precedent()">⬅️ Précédent</button>
+      <button onclick="togglePlay()" id="btnPlay">▶️ Lecture auto</button>
+      <button onclick="suivant()">Suivant ➡️</button>
+    </div>
+  </div>
+
+  <div class="progress-bar">
+    <div class="progress-fill" id="progress"></div>
+  </div>
+  <div class="info" id="info">Slide 1 sur 8</div>
+
+  <audio id="player" preload="auto"></audio>
+
+  <script>
+    let current = 0;
+    const slides = document.querySelectorAll('.slide');
+    const total = slides.length;
+    const player = document.getElementById('player');
+    const progress = document.getElementById('progress');
+    const info = document.getElementById('info');
+    const btnPlay = document.getElementById('btnPlay');
+    let autoPlay = false;
+    let timer = null;
+
+    function afficher(idx) {
+      slides.forEach(s => s.classList.remove('active'));
+      slides[idx].classList.add('active');
+      progress.style.width = ((idx + 1) / total * 100) + '%';
+      info.textContent = 'Slide ' + (idx + 1) + ' sur ' + total;
+
+      if (autoPlay) {
+        const audio = slides[idx].dataset.audio;
+        player.src = audio;
+        player.play().catch(e => console.log('Audio:', e));
+
+        const duree = parseInt(slides[idx].dataset.duree) * 1000;
+        clearTimeout(timer);
+        timer = setTimeout(() => {
+          if (current < total - 1) {
+            current++;
+            afficher(current);
+          } else {
+            autoPlay = false;
+            btnPlay.textContent = '▶️ Lecture auto';
+          }
+        }, duree + 500);
+      }
+    }
+
+    function suivant() {
+      if (current < total - 1) {
+        current++;
+        afficher(current);
+      }
+    }
+
+    function precedent() {
+      if (current > 0) {
+        current--;
+        afficher(current);
+      }
+    }
+
+    function togglePlay() {
+      autoPlay = !autoPlay;
+      btnPlay.textContent = autoPlay ? '⏸️ Pause' : '▶️ Lecture auto';
+      if (autoPlay) {
+        afficher(current);
+      } else {
+        player.pause();
+        clearTimeout(timer);
+      }
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight') suivant();
+      if (e.key === 'ArrowLeft') precedent();
+      if (e.key === ' ') { e.preventDefault(); togglePlay(); }
+    });
+
+    afficher(0);
+  </script>
+</body>
+</html>

@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block title %}Vidéos Révision - NOKIROVA{% endblock %}
+{% block contenu %}
+<div class="page-container">
+
+  <div class="page-header" style="background: linear-gradient(135deg, #FCA5A5, #FECACA); border-left: 5px solid #DC2626;">
+    <div class="page-header-icon" style="background: linear-gradient(135deg, #DC2626, #EF4444);">🎬</div>
+    <div>
+      <h1 class="page-title" style="color: #991B1B;">Vidéos Révision</h1>
+      <p class="page-subtitle" style="color: #B91C1C;">Trouve les meilleures vidéos pour réviser 📺</p>
+    </div>
+  </div>
+
+  <div class="search-card">
+    <input type="text" id="recherche" placeholder="🔍 Ex: microéconomie, dérivées, marketing..." onkeypress="if(event.key==='Enter') chercher()"/>
+    <button onclick="chercher()" class="btn-rouge">📺 Chercher</button>
+  </div>
+
+  <div class="suggestions">
+    <p style="color:#6B7280; margin-bottom:0.5rem;">💡 Suggestions populaires :</p>
+    <div class="tags">
+      <span class="tag" onclick="rechercheRapide('microéconomie')">📊 Microéconomie</span>
+      <span class="tag" onclick="rechercheRapide('macroéconomie')">📈 Macroéconomie</span>
+      <span class="tag" onclick="rechercheRapide('mathématiques licence')">➗ Maths Licence</span>
+      <span class="tag" onclick="rechercheRapide('statistiques')">📉 Statistiques</span>
+      <span class="tag" onclick="rechercheRapide('comptabilité')">📒 Comptabilité</span>
+      <span class="tag" onclick="rechercheRapide('marketing')">📣 Marketing</span>
+      <span class="tag" onclick="rechercheRapide('gestion entreprise')">🏢 Gestion</span>
+      <span class="tag" onclick="rechercheRapide('droit')">⚖️ Droit</span>
+    </div>
+  </div>
+
+  <div id="zone-iframe" style="display:none;" class="iframe-container">
+    <h3 style="color:#991B1B; margin-bottom:1rem;">📺 Résultats sur YouTube</h3>
+    <iframe id="yt-iframe" allowfullscreen></iframe>
+    <p style="color:#9CA3AF; font-size:0.85rem; margin-top:0.5rem;">💡 Astuce : ouvre une vidéo dans un nouvel onglet en cliquant sur le titre</p>
+  </div>
+</div>
+
+<style>
+  .page-container { padding:2rem; max-width:1100px; margin:0 auto;}
+  .page-header { display:flex; align-items:center; gap:1.2rem; border-radius:20px; padding:1.5rem 2rem; margin-bottom:1.5rem; box-shadow:0 4px 20px rgba(0,0,0,0.05);}
+  .page-header-icon { width:60px; height:60px; border-radius:16px; display:flex; align-items:center; justify-content:center; font-size:1.8rem; color:white;}
+  .page-title { font-size:1.6rem; font-weight:800; margin:0;}
+  .page-subtitle { margin:0.2rem 0 0; font-size:0.95rem;}
+
+  .search-card { background:white; border-radius:18px; padding:1.5rem; margin-bottom:1.5rem; box-shadow:0 4px 20px rgba(220,38,38,0.1); display:flex; gap:0.8rem; flex-wrap:wrap;}
+  .search-card input { flex:1; min-width:250px; padding:0.9rem 1.2rem; border:2px solid #FCA5A5; border-radius:14px; font-size:1rem; outline:none;}
+  .search-card input:focus { border-color:#DC2626;}
+  .btn-rouge { background:linear-gradient(135deg, #DC2626, #991B1B); color:white; border:none; padding:0.9rem 1.8rem; border-radius:14px; font-weight:700; cursor:pointer; box-shadow:0 4px 12px rgba(220,38,38,0.3);}
+  .btn-rouge:hover { transform:translateY(-2px);}
+
+  .suggestions { background:white; border-radius:18px; padding:1.5rem; margin-bottom:1.5rem; box-shadow:0 4px 15px rgba(0,0,0,0.05);}
+  .tags { display:flex; flex-wrap:wrap; gap:0.5rem;}
+  .tag { background:#FEE2E2; color:#991B1B; padding:0.5rem 1rem; border-radius:20px; font-size:0.85rem; font-weight:600; cursor:pointer; transition:0.2s; border:2px solid transparent;}
+  .tag:hover { background:#DC2626; color:white; transform:translateY(-2px);}
+
+  .iframe-container { background:white; border-radius:18px; padding:1.5rem; box-shadow:0 4px 20px rgba(0,0,0,0.08);}
+  iframe { width:100%; height:600px; border:none; border-radius:14px; box-shadow:0 4px 15px rgba(0,0,0,0.1);}
+</style>
+
+<script>
+function chercher() {
+  const q = document.getElementById('recherche').value.trim();
+  if (!q) { alert('⚠️ Tape ce que tu veux chercher !'); return; }
+  const url = 'https://www.youtube.com/embed?listType=search&list=' + encodeURIComponent(q + ' cours révision');
+  document.getElementById('yt-iframe').src = url;
+  document.getElementById('zone-iframe').style.display = 'block';
+  document.getElementById('zone-iframe').scrollIntoView({behavior:'smooth'});
+}
+
+function rechercheRapide(q) {
+  document.getElementById('recherche').value = q;
+  chercher();
+}
+</script>
+{% endblock %}

@@ -1,0 +1,243 @@
+{% extends "base.html" %}
+{% block title %}Pomodoro - NOKIROVA{% endblock %}
+{% block contenu %}
+<div class="page-container">
+
+  <div class="page-header" style="background: linear-gradient(135deg, #FDBA74, #FED7AA); border-left: 5px solid #EF4444;">
+    <div class="page-header-icon" style="background: linear-gradient(135deg, #EF4444, #F59E0B);">⏱️</div>
+    <div>
+      <h1 class="page-title" style="color: #991B1B;">Pomodoro Timer</h1>
+      <p class="page-subtitle" style="color: #B91C1C;">25 min de travail / 5 min de pause 🍅</p>
+    </div>
+  </div>
+
+  <!-- TIMER PRINCIPAL -->
+  <div class="timer-card">
+    <div class="mode-badge" id="mode-badge">🍅 TRAVAIL</div>
+
+    <div class="timer-display" id="timer-display">25:00</div>
+
+    <div class="timer-bar">
+      <div class="timer-bar-fill" id="timer-bar-fill"></div>
+    </div>
+
+    <div class="timer-controls">
+      <button id="btn-start" onclick="demarrer()" class="btn-timer btn-play">▶️ Démarrer</button>
+      <button id="btn-pause" onclick="pause()" class="btn-timer btn-pause" style="display:none;">⏸️ Pause</button>
+      <button onclick="reset()" class="btn-timer btn-reset">🔄 Reset</button>
+    </div>
+
+    <div class="duree-options">
+      <button onclick="setDuree(25, 'travail')" class="btn-mode actif" id="mode-travail">🍅 25min Travail</button>
+      <button onclick="setDuree(5, 'pause')" class="btn-mode" id="mode-pause">☕ 5min Pause</button>
+      <button onclick="setDuree(15, 'longue')" class="btn-mode" id="mode-longue">🌴 15min Longue</button>
+    </div>
+
+    <input type="text" id="matiere" placeholder="📚 Matière étudiée (optionnel)" class="input-matiere"/>
+  </div>
+
+  <!-- STATS -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-emoji">🎯</div>
+      <div class="stat-val" id="sessions-today">0</div>
+      <div class="stat-name">Sessions aujourd'hui</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-emoji">⏱️</div>
+      <div class="stat-val" id="minutes-today">0</div>
+      <div class="stat-name">Minutes aujourd'hui</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-emoji">🏆</div>
+      <div class="stat-val" id="total-sessions">0</div>
+      <div class="stat-name">Total sessions</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-emoji">⭐</div>
+      <div class="stat-val" id="total-heures">0h</div>
+      <div class="stat-name">Total heures</div>
+    </div>
+  </div>
+
+  <!-- HISTORIQUE RAPIDE -->
+  <div class="histo-card">
+    <h3 style="color:#991B1B;">📜 Sessions récentes</h3>
+    <div id="liste-sessions"></div>
+  </div>
+</div>
+
+<style>
+  .page-container { padding:2rem; max-width:1000px; margin:0 auto;}
+  .page-header { display:flex; align-items:center; gap:1.2rem; border-radius:20px; padding:1.5rem 2rem; margin-bottom:1.5rem; box-shadow:0 4px 20px rgba(0,0,0,0.05);}
+  .page-header-icon { width:60px; height:60px; border-radius:16px; display:flex; align-items:center; justify-content:center; font-size:1.8rem; color:white;}
+  .page-title { font-size:1.6rem; font-weight:800; margin:0;}
+  .page-subtitle { margin:0.2rem 0 0; font-size:0.95rem;}
+
+  .timer-card { background:linear-gradient(135deg, white, #FFF7ED); border-radius:24px; padding:3rem 2rem; text-align:center; box-shadow:0 8px 30px rgba(239,68,68,0.15); margin-bottom:1.5rem;}
+  .mode-badge { display:inline-block; background:linear-gradient(135deg, #EF4444, #F59E0B); color:white; padding:0.5rem 1.5rem; border-radius:20px; font-weight:700; font-size:0.9rem; margin-bottom:1.5rem; letter-spacing:1px;}
+
+  .timer-display { font-size:6rem; font-weight:800; color:#991B1B; letter-spacing:4px; margin-bottom:1rem; font-family:'Courier New', monospace;}
+
+  .timer-bar { width:100%; height:12px; background:#FED7AA; border-radius:10px; overflow:hidden; margin-bottom:1.5rem;}
+  .timer-bar-fill { height:100%; background:linear-gradient(90deg, #EF4444, #F59E0B); width:100%; transition:width 1s linear; border-radius:10px;}
+
+  .timer-controls { display:flex; gap:1rem; justify-content:center; margin-bottom:1.5rem; flex-wrap:wrap;}
+  .btn-timer { padding:0.9rem 2rem; border:none; border-radius:14px; font-weight:700; font-size:1rem; cursor:pointer; transition:all 0.2s;}
+  .btn-play { background:linear-gradient(135deg, #00C853, #7ED321); color:white; box-shadow:0 4px 15px rgba(0,200,83,0.4);}
+  .btn-play:hover { transform:translateY(-2px);}
+  .btn-pause { background:linear-gradient(135deg, #F59E0B, #FB923C); color:white; box-shadow:0 4px 15px rgba(245,158,11,0.4);}
+  .btn-pause:hover { transform:translateY(-2px);}
+  .btn-reset { background:#FEE2E2; color:#EF4444; border:2px solid #EF4444;}
+  .btn-reset:hover { background:#EF4444; color:white;}
+
+  .duree-options { display:flex; gap:0.5rem; justify-content:center; flex-wrap:wrap; margin-bottom:1rem;}
+  .btn-mode { padding:0.5rem 1.2rem; border:2px solid #FDBA74; background:white; color:#991B1B; border-radius:20px; font-weight:600; font-size:0.85rem; cursor:pointer; transition:0.2s;}
+  .btn-mode:hover { background:#FED7AA;}
+  .btn-mode.actif { background:linear-gradient(135deg, #EF4444, #F59E0B); color:white; border-color:transparent;}
+
+  .input-matiere { width:100%; max-width:400px; padding:0.7rem 1rem; border:2px solid #FDBA74; border-radius:12px; font-size:0.9rem; outline:none; margin-top:1rem;}
+  .input-matiere:focus { border-color:#EF4444;}
+
+  .stats-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(160px, 1fr)); gap:1rem; margin-bottom:1.5rem;}
+  .stat-card { background:white; border-radius:16px; padding:1.2rem; text-align:center; box-shadow:0 4px 15px rgba(0,0,0,0.06); border-top:4px solid #EF4444;}
+  .stat-emoji { font-size:2rem;}
+  .stat-val { font-size:1.8rem; font-weight:800; color:#991B1B; margin:0.3rem 0;}
+  .stat-name { font-size:0.8rem; color:#9CA3AF; font-weight:600; text-transform:uppercase;}
+
+  .histo-card { background:white; border-radius:20px; padding:1.5rem; box-shadow:0 4px 20px rgba(0,0,0,0.05);}
+  .histo-card h3 { font-size:1.1rem; font-weight:700; margin-bottom:1rem;}
+  .session-item { display:flex; justify-content:space-between; padding:0.7rem 1rem; background:#FFF7ED; border-radius:10px; margin-bottom:0.5rem; border-left:3px solid #EF4444; font-size:0.9rem;}
+</style>
+
+<script>
+let dureeInitiale = 25 * 60;
+let secondesRestantes = dureeInitiale;
+let intervalId = null;
+let modeActuel = 'travail';
+let enCours = false;
+
+document.addEventListener('DOMContentLoaded', ()=>{
+  affichageTimer();
+  chargerStats();
+  chargerSessions();
+});
+
+function setDuree(min, mode) {
+  if (enCours) { alert('⚠️ Arrête d\'abord le timer en cours !'); return; }
+  dureeInitiale = min * 60;
+  secondesRestantes = dureeInitiale;
+  modeActuel = mode;
+  document.querySelectorAll('.btn-mode').forEach(b=>b.classList.remove('actif'));
+  document.getElementById('mode-' + mode).classList.add('actif');
+  const labels = {travail:'🍅 TRAVAIL', pause:'☕ PAUSE', longue:'🌴 PAUSE LONGUE'};
+  document.getElementById('mode-badge').textContent = labels[mode];
+  affichageTimer();
+}
+
+function affichageTimer() {
+  const m = Math.floor(secondesRestantes / 60);
+  const s = secondesRestantes % 60;
+  document.getElementById('timer-display').textContent =
+    String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+  const pct = (secondesRestantes / dureeInitiale) * 100;
+  document.getElementById('timer-bar-fill').style.width = pct + '%';
+}
+
+function demarrer() {
+  if (intervalId) return;
+  enCours = true;
+  document.getElementById('btn-start').style.display = 'none';
+  document.getElementById('btn-pause').style.display = 'inline-block';
+
+  intervalId = setInterval(()=>{
+    secondesRestantes--;
+    affichageTimer();
+    if (secondesRestantes <= 0) {
+      clearInterval(intervalId);
+      intervalId = null;
+      enCours = false;
+      terminer();
+    }
+  }, 1000);
+}
+
+function pause() {
+  if (intervalId) {
+    clearInterval(intervalId);
+    intervalId = null;
+    enCours = false;
+    document.getElementById('btn-start').style.display = 'inline-block';
+    document.getElementById('btn-start').textContent = '▶️ Reprendre';
+    document.getElementById('btn-pause').style.display = 'none';
+  }
+}
+
+function reset() {
+  if (intervalId) { clearInterval(intervalId); intervalId = null; }
+  enCours = false;
+  secondesRestantes = dureeInitiale;
+  affichageTimer();
+  document.getElementById('btn-start').style.display = 'inline-block';
+  document.getElementById('btn-start').textContent = '▶️ Démarrer';
+  document.getElementById('btn-pause').style.display = 'none';
+}
+
+function terminer() {
+  // Son simple
+  try {
+    const audio = new Audio('data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=');
+    audio.play();
+  } catch(e) {}
+
+  const matiere = document.getElementById('matiere').value.trim() || 'Général';
+  const dureeMin = Math.floor(dureeInitiale / 60);
+
+  fetch('/api/pomodoro/session', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({duree: dureeMin, type: modeActuel, matiere: matiere})
+  }).then(()=>{
+    chargerStats();
+    chargerSessions();
+  });
+
+  alert('🎉 Session terminée !\n' +
+        (modeActuel === 'travail' ? '✅ Bravo ! Prends une pause ☕' : '🍅 Allez, on repart au boulot !'));
+  reset();
+}
+
+function chargerStats() {
+  fetch('/api/pomodoro/stats').then(r=>r.json()).then(d=>{
+    if (d.succes) {
+      document.getElementById('sessions-today').textContent = d.stats.sessions_today || 0;
+      document.getElementById('minutes-today').textContent = d.stats.minutes_today || 0;
+      document.getElementById('total-sessions').textContent = d.stats.total_sessions || 0;
+      document.getElementById('total-heures').textContent = (d.stats.total_heures || 0) + 'h';
+    }
+  });
+}
+
+function chargerSessions() {
+  fetch('/api/pomodoro/sessions').then(r=>r.json()).then(d=>{
+    const c = document.getElementById('liste-sessions');
+    c.innerHTML = '';
+    const sess = d.sessions || [];
+    if (sess.length === 0) {
+      c.innerHTML = '<p style="color:#9CA3AF; text-align:center;">Aucune session pour l\'instant 🍅</p>';
+      return;
+    }
+    sess.slice(0, 10).forEach(s => {
+      const div = document.createElement('div');
+      div.className = 'session-item';
+      div.innerHTML = `
+        <span>🍅 ${esc(s.matiere)} • ${s.duree} min</span>
+        <span style="color:#9CA3AF;">📅 ${esc(s.date)}</span>
+      `;
+      c.appendChild(div);
+    });
+  });
+}
+
+function esc(t) { const d = document.createElement('div'); d.textContent = t || ''; return d.innerHTML; }
+</script>
+{% endblock %}

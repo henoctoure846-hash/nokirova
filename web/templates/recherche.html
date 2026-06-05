@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+{% block title %}Recherche - NOKIROVA{% endblock %}
+{% block contenu %}
+<div class="page-container">
+
+  <div class="page-header" style="background: linear-gradient(135deg, #9FD93B, #BBF7D0); border-left: 5px solid #00C853;">
+    <div class="page-header-icon" style="background: linear-gradient(135deg, #00C853, #7ED321);">🔍</div>
+    <div>
+      <h1 class="page-title" style="color: #14532D;">Recherche intelligente</h1>
+      <p class="page-subtitle" style="color: #166534;">Cherche un mot ou un concept dans tous tes cours</p>
+    </div>
+  </div>
+
+  <div class="search-box">
+    <input type="text" id="champ-recherche" placeholder="🔍 Tape ton mot-clé... (ex: 'inflation', 'PIB')" onkeypress="if(event.key==='Enter') rechercher()" />
+    <button onclick="rechercher()" class="btn-search">🔎 Rechercher</button>
+  </div>
+
+  <div id="loading" style="display:none; text-align:center; padding:2rem;">
+    <div class="spinner-mini"></div>
+    <p style="color:#00C853; font-weight:700; margin-top:1rem;">🔍 Recherche en cours...</p>
+  </div>
+
+  <div id="nb-resultats" style="display:none;" class="badge-resultats"></div>
+  <div id="resultats"></div>
+
+  <div id="empty-state" class="empty-state">
+    <div style="font-size:4rem;">🔍</div>
+    <h2>Lance ta recherche</h2>
+    <p>Tape un mot-clé pour trouver ce que tu cherches dans tous tes cours</p>
+  </div>
+</div>
+
+<style>
+  .page-container { padding:2rem; max-width:1100px; margin:0 auto;}
+  .page-header { display:flex; align-items:center; gap:1.2rem; border-radius:20px; padding:1.5rem 2rem; margin-bottom:1.5rem; box-shadow:0 4px 20px rgba(0,0,0,0.05);}
+  .page-header-icon { width:60px; height:60px; border-radius:16px; display:flex; align-items:center; justify-content:center; font-size:1.8rem; color:white;}
+  .page-title { font-size:1.6rem; font-weight:800; margin:0;}
+  .page-subtitle { margin:0.2rem 0 0; font-size:0.95rem;}
+
+  .search-box { background:white; padding:1.5rem; border-radius:20px; box-shadow:0 4px 20px rgba(0,200,83,0.1); display:flex; gap:0.8rem; margin-bottom:1.5rem; flex-wrap:wrap;}
+  .search-box input { flex:1; min-width:250px; padding:0.9rem 1.2rem; border:2px solid #9FD93B; border-radius:14px; font-size:1rem; outline:none;}
+  .search-box input:focus { border-color:#00C853;}
+  .btn-search { background:linear-gradient(135deg, #00C853, #7ED321); color:white; border:none; padding:0.9rem 1.8rem; border-radius:14px; font-weight:700; font-size:1rem; cursor:pointer; box-shadow:0 4px 12px rgba(0,200,83,0.3);}
+  .btn-search:hover { transform:translateY(-2px);}
+
+  .spinner-mini { width:40px; height:40px; border:4px solid #BBF7D0; border-top:4px solid #00C853; border-radius:50%; animation:spin 1s linear infinite; margin:0 auto;}
+  @keyframes spin { to { transform:rotate(360deg);}}
+
+  .badge-resultats { background:#D1FAE5; color:#065F46; font-weight:700; padding:0.6rem 1.2rem; border-radius:20px; display:inline-block; margin-bottom:1rem;}
+
+  .resultat-card { background:white; border-radius:16px; padding:1.3rem; margin-bottom:1rem; box-shadow:0 4px 15px rgba(0,0,0,0.06); border-left:5px solid #00C853; transition:transform 0.2s;}
+  .resultat-card:hover { transform:translateX(4px);}
+  .resultat-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem; flex-wrap:wrap; gap:0.5rem;}
+  .resultat-nom { font-weight:700; color:#14532D; font-size:1.05rem;}
+  .resultat-matiere { background:#BBF7D0; color:#14532D; font-weight:600; font-size:0.75rem; padding:0.3rem 0.8rem; border-radius:20px;}
+  .resultat-occurrences { background:#00C853; color:white; font-weight:700; font-size:0.75rem; padding:0.3rem 0.8rem; border-radius:20px;}
+  .resultat-extrait { color:#374151; font-size:0.92rem; line-height:1.6; background:#F0FDF4; padding:0.8rem; border-radius:10px; border-left:3px solid #00C853;}
+  .resultat-extrait mark { background:#FFD93D; padding:0 4px; border-radius:4px; font-weight:700;}
+  .resultat-date { color:#9CA3AF; font-size:0.8rem; margin-top:0.5rem;}
+
+  .empty-state { text-align:center; padding:4rem 2rem; background:white; border-radius:20px; box-shadow:0 4px 20px rgba(0,0,0,0.05);}
+  .empty-state h2 { color:#374151; margin:1rem 0 0.5rem;}
+  .empty-state p { color:#9CA3AF;}
+</style>
+
+<script>
+let motActuel = '';
+
+function rechercher() {
+  const mot = document.getElementById('champ-recherche').value.trim();
+  if (!mot) { alert('⚠️ Tape un mot-clé !'); return; }
+  motActuel = mot;
+
+  document.getElementById('empty-state').style.display = 'none';
+  document.getElementById('resultats').innerHTML = '';
+  document.getElementById('nb-resultats').style.display = 'none';
+  document.getElementById('loading').style.display = 'block';
+
+  fetch('/api/recherche', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({mot: mot})
+  })
+  .then(r=>r.json())
+  .then(d=>{
+    document.getElementById('loading').style.display = 'none';
+    if (d.succes) afficher(d.resultats);
+    else alert('❌ ' + d.erreur);
+  });
+}
+
+function afficher(res) {
+  const c = document.getElementById('resultats');
+  const nb = document.getElementById('nb-resultats');
+
+  if (!res || res.length === 0) {
+    nb.textContent = '😔 Aucun résultat trouvé';
+    nb.style.display = 'inline-block';
+    nb.style.background = '#FEE2E2';
+    nb.style.color = '#EF4444';
+    return;
+  }
+
+  nb.textContent = `✅ ${res.length} résultat(s) trouvé(s)`;
+  nb.style.display = 'inline-block';
+  nb.style.background = '#D1FAE5';
+  nb.style.color = '#065F46';
+
+  res.forEach(r => {
+    const card = document.createElement('div');
+    card.className = 'resultat-card';
+    const extraitHL = surligner(r.extrait, motActuel);
+    card.innerHTML = `
+      <div class="resultat-header">
+        <span class="resultat-nom">📄 ${esc(r.nom)}</span>
+        <div>
+          <span class="resultat-matiere">${esc(r.matiere || '📚')}</span>
+          <span class="resultat-occurrences">🎯 ${r.nb_occurrences} fois</span>
+        </div>
+      </div>
+      <div class="resultat-extrait">${extraitHL}</div>
+      <div class="resultat-date">📅 ${esc(r.date_import || '')}</div>
+    `;
+    c.appendChild(card);
+  });
+}
+
+function surligner(texte, mot) {
+  const safe = esc(texte);
+  const regex = new RegExp('(' + mot.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi');
+  return safe.replace(regex, '<mark>$1</mark>');
+}
+
+function esc(t) { const d = document.createElement('div'); d.textContent = t || ''; return d.innerHTML; }
+</script>
+{% endblock %}

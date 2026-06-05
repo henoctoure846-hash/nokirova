@@ -1,0 +1,228 @@
+{% extends "base.html" %}
+{% block title %}Mes Notes - NOKIROVA{% endblock %}
+{% block contenu %}
+<div class="page-container">
+
+  <div class="page-header" style="background: linear-gradient(135deg, #FFE66D, #FFF3B0); border-left: 5px solid #00C853;">
+    <div class="page-header-icon" style="background: linear-gradient(135deg, #00C853, #7ED321);">✍️</div>
+    <div>
+      <h1 class="page-title" style="color: #14532D;">Mes Notes</h1>
+      <p class="page-subtitle" style="color: #166534;">Crée et organise tes notes par couleur 📒</p>
+    </div>
+  </div>
+
+  <!-- ZONE CRÉATION/ÉDITION -->
+  <div class="note-editor">
+    <input type="text" id="note-titre" placeholder="📝 Titre de la note..." class="note-input-titre"/>
+    <textarea id="note-contenu" placeholder="✍️ Écris tes notes ici..." rows="6" class="note-input-contenu"></textarea>
+
+    <div class="editor-options">
+      <input type="text" id="note-matiere" placeholder="📚 Matière (ex: Économie)" class="note-input-matiere"/>
+
+      <div class="couleurs">
+        <span>🎨 Couleur :</span>
+        <div class="couleur-puce" data-couleur="#FFE66D" style="background:#FFE66D" onclick="choisirCouleur('#FFE66D', this)"></div>
+        <div class="couleur-puce" data-couleur="#FFC9DE" style="background:#FFC9DE" onclick="choisirCouleur('#FFC9DE', this)"></div>
+        <div class="couleur-puce" data-couleur="#A5D8FF" style="background:#A5D8FF" onclick="choisirCouleur('#A5D8FF', this)"></div>
+        <div class="couleur-puce" data-couleur="#9FD93B" style="background:#9FD93B" onclick="choisirCouleur('#9FD93B', this)"></div>
+        <div class="couleur-puce" data-couleur="#D8B4FE" style="background:#D8B4FE" onclick="choisirCouleur('#D8B4FE', this)"></div>
+        <div class="couleur-puce" data-couleur="#FDBA74" style="background:#FDBA74" onclick="choisirCouleur('#FDBA74', this)"></div>
+      </div>
+    </div>
+
+    <div class="editor-actions">
+      <button id="btn-save" onclick="sauvegarder()" class="btn-save">💾 Sauvegarder</button>
+      <button onclick="annulerEdition()" class="btn-cancel" id="btn-cancel" style="display:none;">❌ Annuler</button>
+    </div>
+  </div>
+
+  <!-- BARRE FILTRE -->
+  <div class="filtres-notes">
+    <input type="text" id="recherche-locale" placeholder="🔍 Rechercher dans les notes..." oninput="filtrer()"/>
+    <span id="nb-notes" class="badge-nb">0 notes</span>
+  </div>
+
+  <!-- GRILLE DES NOTES -->
+  <div id="grille-notes" class="grille-notes"></div>
+
+  <div id="empty-state" class="empty-state" style="display:none;">
+    <div style="font-size:4rem;">📒</div>
+    <h2>Aucune note pour l'instant</h2>
+    <p>Crée ta première note ci-dessus !</p>
+  </div>
+</div>
+
+<style>
+  .page-container { padding:2rem; max-width:1200px; margin:0 auto;}
+  .page-header { display:flex; align-items:center; gap:1.2rem; border-radius:20px; padding:1.5rem 2rem; margin-bottom:1.5rem; box-shadow:0 4px 20px rgba(0,0,0,0.05);}
+  .page-header-icon { width:60px; height:60px; border-radius:16px; display:flex; align-items:center; justify-content:center; font-size:1.8rem; color:white;}
+  .page-title { font-size:1.6rem; font-weight:800; margin:0;}
+  .page-subtitle { margin:0.2rem 0 0; font-size:0.95rem;}
+
+  .note-editor { background:white; border-radius:20px; padding:1.8rem; margin-bottom:1.5rem; box-shadow:0 4px 20px rgba(0,200,83,0.1); border-top:4px solid #00C853;}
+  .note-input-titre { width:100%; padding:0.8rem 1rem; border:2px solid #BBF7D0; border-radius:12px; font-size:1.1rem; font-weight:700; margin-bottom:0.8rem; outline:none; transition:0.2s;}
+  .note-input-titre:focus { border-color:#00C853;}
+  .note-input-contenu { width:100%; padding:0.8rem 1rem; border:2px solid #BBF7D0; border-radius:12px; font-size:0.95rem; outline:none; resize:vertical; font-family:inherit; line-height:1.6; transition:0.2s;}
+  .note-input-contenu:focus { border-color:#00C853;}
+
+  .editor-options { display:flex; gap:1rem; margin-top:1rem; flex-wrap:wrap; align-items:center;}
+  .note-input-matiere { flex:1; min-width:180px; padding:0.6rem 1rem; border:2px solid #BBF7D0; border-radius:10px; font-size:0.9rem; outline:none;}
+  .note-input-matiere:focus { border-color:#00C853;}
+
+  .couleurs { display:flex; gap:0.4rem; align-items:center; flex-wrap:wrap;}
+  .couleurs span { font-size:0.85rem; color:#374151; font-weight:600; margin-right:0.4rem;}
+  .couleur-puce { width:30px; height:30px; border-radius:50%; cursor:pointer; transition:all 0.2s; border:3px solid transparent;}
+  .couleur-puce:hover { transform:scale(1.15);}
+  .couleur-puce.actif { border-color:#374151; transform:scale(1.2);}
+
+  .editor-actions { display:flex; gap:0.6rem; margin-top:1.2rem; justify-content:flex-end;}
+  .btn-save { background:linear-gradient(135deg, #00C853, #7ED321); color:white; padding:0.7rem 1.5rem; border:none; border-radius:12px; font-weight:700; cursor:pointer; box-shadow:0 4px 12px rgba(0,200,83,0.3);}
+  .btn-save:hover { transform:translateY(-2px);}
+  .btn-cancel { background:#FEE2E2; color:#EF4444; padding:0.7rem 1.2rem; border:2px solid #EF4444; border-radius:12px; font-weight:700; cursor:pointer;}
+  .btn-cancel:hover { background:#EF4444; color:white;}
+
+  .filtres-notes { display:flex; gap:0.8rem; margin-bottom:1.5rem; align-items:center; background:white; padding:1rem; border-radius:16px; box-shadow:0 2px 12px rgba(0,0,0,0.05);}
+  .filtres-notes input { flex:1; padding:0.7rem 1rem; border:2px solid #BBF7D0; border-radius:12px; font-size:0.9rem; outline:none;}
+  .badge-nb { background:#00C853; color:white; font-weight:700; padding:0.4rem 1rem; border-radius:20px; font-size:0.85rem;}
+
+  .grille-notes { display:grid; grid-template-columns:repeat(auto-fill, minmax(280px, 1fr)); gap:1rem;}
+  .note-card { border-radius:16px; padding:1.3rem; box-shadow:0 4px 15px rgba(0,0,0,0.08); transition:all 0.3s; position:relative;}
+  .note-card:hover { transform:translateY(-4px); box-shadow:0 8px 25px rgba(0,0,0,0.15);}
+  .note-card-titre { font-weight:800; font-size:1.05rem; color:#1F2937; margin-bottom:0.5rem; word-break:break-word;}
+  .note-card-matiere { background:rgba(255,255,255,0.6); display:inline-block; font-size:0.7rem; font-weight:700; padding:0.2rem 0.6rem; border-radius:12px; margin-bottom:0.6rem; color:#374151;}
+  .note-card-contenu { color:#374151; font-size:0.9rem; line-height:1.5; white-space:pre-wrap; max-height:150px; overflow:hidden; position:relative; word-break:break-word;}
+  .note-card-date { color:rgba(55,65,81,0.6); font-size:0.75rem; margin-top:0.8rem;}
+  .note-card-actions { display:flex; gap:0.4rem; margin-top:0.8rem;}
+  .btn-mini { padding:0.3rem 0.7rem; border-radius:8px; font-size:0.75rem; font-weight:600; cursor:pointer; border:none; background:rgba(255,255,255,0.8); color:#374151;}
+  .btn-mini:hover { background:white; transform:scale(1.05);}
+  .btn-mini.sup { background:rgba(239,68,68,0.2); color:#EF4444;}
+  .btn-mini.sup:hover { background:#EF4444; color:white;}
+
+  .empty-state { text-align:center; padding:4rem 2rem; background:white; border-radius:20px; box-shadow:0 4px 20px rgba(0,0,0,0.05);}
+  .empty-state h2 { color:#374151; margin:1rem 0 0.5rem;}
+  .empty-state p { color:#9CA3AF;}
+</style>
+
+<script>
+let toutesNotes = [];
+let couleurActuelle = '#FFE66D';
+let idEnEdition = null;
+
+document.addEventListener('DOMContentLoaded', ()=>{
+  // Pré-sélectionner la première couleur
+  document.querySelector('.couleur-puce').classList.add('actif');
+  charger();
+});
+
+function choisirCouleur(c, el) {
+  couleurActuelle = c;
+  document.querySelectorAll('.couleur-puce').forEach(p=>p.classList.remove('actif'));
+  el.classList.add('actif');
+}
+
+function charger() {
+  fetch('/api/notes/liste').then(r=>r.json()).then(d=>{
+    toutesNotes = d.notes || [];
+    afficher(toutesNotes);
+  });
+}
+
+function afficher(notes) {
+  const grille = document.getElementById('grille-notes');
+  const empty = document.getElementById('empty-state');
+  grille.innerHTML = '';
+  document.getElementById('nb-notes').textContent = notes.length + ' notes';
+
+  if (!notes || notes.length === 0) { empty.style.display = 'block'; return; }
+  empty.style.display = 'none';
+
+  notes.forEach(n => {
+    const card = document.createElement('div');
+    card.className = 'note-card';
+    card.style.background = n.couleur || '#FFE66D';
+    card.innerHTML = `
+      <div class="note-card-titre">📌 ${esc(n.titre)}</div>
+      <span class="note-card-matiere">${esc(n.matiere || 'Général')}</span>
+      <div class="note-card-contenu">${esc(n.contenu)}</div>
+      <div class="note-card-date">📅 ${esc(n.date_modification || n.date_creation || '')}</div>
+      <div class="note-card-actions">
+        <button class="btn-mini" onclick="editer(${n.id})">✏️ Modifier</button>
+        <button class="btn-mini sup" onclick="supprimer(${n.id})">🗑️ Supprimer</button>
+      </div>
+    `;
+    grille.appendChild(card);
+  });
+}
+
+function filtrer() {
+  const q = document.getElementById('recherche-locale').value.toLowerCase();
+  if (!q) afficher(toutesNotes);
+  else afficher(toutesNotes.filter(n=>
+    (n.titre||'').toLowerCase().includes(q) ||
+    (n.contenu||'').toLowerCase().includes(q) ||
+    (n.matiere||'').toLowerCase().includes(q)
+  ));
+}
+
+function sauvegarder() {
+  const titre = document.getElementById('note-titre').value.trim();
+  const contenu = document.getElementById('note-contenu').value.trim();
+  const matiere = document.getElementById('note-matiere').value.trim() || 'Général';
+
+  if (!titre || !contenu) {
+    alert('⚠️ Titre et contenu obligatoires !');
+    return;
+  }
+
+  const data = {titre, contenu, matiere, couleur: couleurActuelle};
+  let url = '/api/notes/creer';
+  if (idEnEdition) { url = '/api/notes/modifier/' + idEnEdition; }
+
+  fetch(url, {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify(data)
+  }).then(r=>r.json()).then(d=>{
+    if (d.succes) {
+      annulerEdition();
+      charger();
+    } else {
+      alert('❌ ' + d.erreur);
+    }
+  });
+}
+
+function editer(id) {
+  const n = toutesNotes.find(x=>x.id === id);
+  if (!n) return;
+  document.getElementById('note-titre').value = n.titre || '';
+  document.getElementById('note-contenu').value = n.contenu || '';
+  document.getElementById('note-matiere').value = n.matiere || '';
+  couleurActuelle = n.couleur || '#FFE66D';
+  document.querySelectorAll('.couleur-puce').forEach(p=>{
+    p.classList.toggle('actif', p.dataset.couleur === couleurActuelle);
+  });
+  idEnEdition = id;
+  document.getElementById('btn-save').textContent = '💾 Mettre à jour';
+  document.getElementById('btn-cancel').style.display = 'inline-block';
+  document.querySelector('.note-editor').scrollIntoView({behavior:'smooth'});
+}
+
+function annulerEdition() {
+  document.getElementById('note-titre').value = '';
+  document.getElementById('note-contenu').value = '';
+  document.getElementById('note-matiere').value = '';
+  idEnEdition = null;
+  document.getElementById('btn-save').textContent = '💾 Sauvegarder';
+  document.getElementById('btn-cancel').style.display = 'none';
+}
+
+function supprimer(id) {
+  if (!confirm('🗑️ Supprimer cette note ?')) return;
+  fetch('/api/notes/supprimer/' + id, {method:'DELETE'}).then(r=>r.json()).then(d=>{
+    if (d.succes) charger();
+  });
+}
+
+function esc(t) { const d = document.createElement('div'); d.textContent = t || ''; return d.innerHTML; }
+</script>
+{% endblock %}

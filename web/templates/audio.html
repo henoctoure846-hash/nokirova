@@ -1,0 +1,188 @@
+{% extends "base.html" %}
+{% block title %}Audio - NOKIROVA{% endblock %}
+{% block contenu %}
+<div class="page-container">
+
+  <div class="page-header" style="background: linear-gradient(135deg, #D8B4FE, #EDE9FE); border-left: 5px solid #7B61FF;">
+    <div class="page-header-icon" style="background: linear-gradient(135deg, #7B61FF, #A855F7);">🎧</div>
+    <div>
+      <h1 class="page-title" style="color: #5B21B6;">Audio Cours</h1>
+      <p class="page-subtitle" style="color: #7B61FF;">Écoute ton cours lu par une voix naturelle 🎙️</p>
+    </div>
+  </div>
+
+  <div id="alerte-cours" class="alerte-warning" style="display:none;">
+    <span>⚠️</span>
+    <div>
+      <strong>Aucun cours chargé !</strong>
+      <p>Importe un cours pour le transformer en audio.</p>
+      <a href="/import" class="btn-alerte">📥 Importer un cours</a>
+    </div>
+  </div>
+
+  <div id="statut-cours" class="statut-cours-card" style="display:none;">
+    <span style="font-size:1.5rem;">📚</span>
+    <div><strong>Cours :</strong> <span id="nom-cours-affiche" style="color:#5B21B6; font-weight:700;"></span></div>
+    <span class="badge-ok">✅</span>
+  </div>
+
+  <div class="control-panel">
+    <h2 style="color:#5B21B6;">🎙️ Choisis ta voix</h2>
+
+    <div class="voix-grid">
+      <button class="voix-btn actif" data-voix="femme" onclick="choisirVoix(this, 'femme')">
+        <span class="voix-emoji">👩</span><br>
+        <strong>Denise</strong><br>
+        <small>Femme adulte</small>
+      </button>
+      <button class="voix-btn" data-voix="homme" onclick="choisirVoix(this, 'homme')">
+        <span class="voix-emoji">👨</span><br>
+        <strong>Henri</strong><br>
+        <small>Homme adulte</small>
+      </button>
+      <button class="voix-btn" data-voix="jeune_femme" onclick="choisirVoix(this, 'jeune_femme')">
+        <span class="voix-emoji">👧</span><br>
+        <strong>Vivienne</strong><br>
+        <small>Jeune femme</small>
+      </button>
+      <button class="voix-btn" data-voix="jeune_homme" onclick="choisirVoix(this, 'jeune_homme')">
+        <span class="voix-emoji">👦</span><br>
+        <strong>Rémy</strong><br>
+        <small>Jeune homme</small>
+      </button>
+    </div>
+
+    <label class="slider-label" style="margin-top:1.5rem;">
+      📝 Type de contenu à écouter :
+    </label>
+    <select id="type-contenu" class="select-violet">
+      <option value="cours">📚 Le cours complet</option>
+      <option value="resume">📝 Un résumé du cours</option>
+      <option value="explication">💡 Une explication simple</option>
+    </select>
+
+    <button id="btn-generer" onclick="generer()" class="btn-violet">🎧 Générer l'audio</button>
+  </div>
+
+  <div id="loading" class="loading-card" style="display:none;">
+    <div class="spinner"></div>
+    <div>
+      <p style="font-weight:700; color:#5B21B6;">🎙️ Génération audio...</p>
+      <p style="color:#9CA3AF; font-size:0.85rem;">Peut prendre 20-60 secondes selon la taille</p>
+    </div>
+  </div>
+
+  <div id="zone-audio" style="display:none;">
+    <div class="audio-card">
+      <h3 style="color:#5B21B6;">🎵 Ton audio est prêt !</h3>
+      <audio id="audio-player" controls style="width:100%; margin-top:1rem;"></audio>
+      <div class="audio-actions">
+        <a id="btn-download" download class="btn-download">💾 Télécharger MP3</a>
+        <button onclick="generer()" class="btn-regen">🔄 Régénérer</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .page-container { padding:2rem; max-width:1000px; margin:0 auto;}
+  .page-header { display:flex; align-items:center; gap:1.2rem; border-radius:20px; padding:1.5rem 2rem; margin-bottom:1.5rem; box-shadow:0 4px 20px rgba(0,0,0,0.05);}
+  .page-header-icon { width:60px; height:60px; border-radius:16px; display:flex; align-items:center; justify-content:center; font-size:1.8rem; color:white;}
+  .page-title { font-size:1.6rem; font-weight:800; margin:0;}
+  .page-subtitle { margin:0.2rem 0 0; font-size:0.95rem;}
+
+  .alerte-warning { display:flex; align-items:flex-start; gap:1rem; background:#FFF3CD; border:2px solid #FFD93D; border-radius:16px; padding:1.2rem 1.5rem; margin-bottom:1.5rem;}
+  .alerte-warning span { font-size:1.5rem;}
+  .alerte-warning p { margin:0.2rem 0 0.5rem; color:#6B7280; font-size:0.9rem;}
+  .btn-alerte { display:inline-block; background:#FFD93D; color:#374151; font-weight:700; padding:0.4rem 1rem; border-radius:20px; text-decoration:none; font-size:0.85rem;}
+  .statut-cours-card { display:flex; align-items:center; gap:1rem; background:#EDE9FE; border:2px solid #D8B4FE; border-radius:16px; padding:1rem 1.5rem; margin-bottom:1.5rem;}
+  .badge-ok { margin-left:auto; background:#00C853; color:white; font-weight:700; padding:0.3rem 0.8rem; border-radius:20px;}
+
+  .control-panel { background:white; border-radius:20px; padding:2rem; margin-bottom:1.5rem; box-shadow:0 4px 20px rgba(123,97,255,0.1); border-top:4px solid #7B61FF;}
+  .control-panel h2 { font-size:1.1rem; font-weight:700; margin-bottom:1rem;}
+
+  .voix-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(140px, 1fr)); gap:0.8rem;}
+  .voix-btn { background:#F9FAFB; border:2px solid #E5E7EB; border-radius:14px; padding:1rem 0.5rem; cursor:pointer; transition:0.2s; font-size:0.9rem; color:#374151;}
+  .voix-btn:hover { background:#EDE9FE; border-color:#7B61FF; transform:translateY(-2px);}
+  .voix-btn.actif { background:linear-gradient(135deg, #7B61FF, #A855F7); color:white; border-color:transparent; box-shadow:0 4px 15px rgba(123,97,255,0.4);}
+  .voix-btn.actif small { color:rgba(255,255,255,0.85);}
+  .voix-emoji { font-size:2rem; display:block; margin-bottom:0.3rem;}
+
+  .slider-label { display:block; font-weight:600; color:#374151; margin-bottom:0.5rem;}
+  .select-violet { width:100%; padding:0.8rem 1rem; border:2px solid #D8B4FE; border-radius:12px; font-size:0.95rem; background:#FAF5FF; color:#5B21B6; font-weight:600; outline:none; cursor:pointer;}
+  .select-violet:focus { border-color:#7B61FF;}
+
+  .btn-violet { width:100%; padding:1rem; background:linear-gradient(135deg, #7B61FF, #5B21B6); color:white; border:none; border-radius:14px; font-weight:700; font-size:1.05rem; cursor:pointer; box-shadow:0 4px 15px rgba(123,97,255,0.4); margin-top:1.5rem;}
+  .btn-violet:hover { transform:translateY(-2px);}
+  .btn-violet:disabled { background:#D1D5DB; cursor:not-allowed;}
+
+  .loading-card { display:flex; align-items:center; gap:1.5rem; background:#EDE9FE; border:2px solid #D8B4FE; border-radius:20px; padding:2rem; margin-bottom:1.5rem;}
+  .spinner { width:50px; height:50px; border:5px solid #D8B4FE; border-top:5px solid #7B61FF; border-radius:50%; animation:spin 1s linear infinite;}
+  @keyframes spin { to { transform:rotate(360deg);}}
+
+  .audio-card { background:white; border-radius:20px; padding:2rem; box-shadow:0 4px 25px rgba(123,97,255,0.15); border-top:4px solid #7B61FF;}
+  .audio-card h3 { font-size:1.2rem; margin-bottom:0.5rem;}
+  .audio-actions { display:flex; gap:0.8rem; margin-top:1rem; flex-wrap:wrap;}
+  .btn-download { background:linear-gradient(135deg, #00C853, #7ED321); color:white; padding:0.7rem 1.5rem; border-radius:12px; font-weight:700; text-decoration:none; box-shadow:0 4px 12px rgba(0,200,83,0.3);}
+  .btn-download:hover { transform:translateY(-2px);}
+  .btn-regen { background:#EDE9FE; color:#5B21B6; border:2px solid #7B61FF; padding:0.7rem 1.5rem; border-radius:12px; font-weight:700; cursor:pointer;}
+  .btn-regen:hover { background:#7B61FF; color:white;}
+</style>
+
+<script>
+let voixActuelle = 'femme';
+
+document.addEventListener('DOMContentLoaded', verifierCours);
+
+function verifierCours() {
+  fetch('/api/statut-cours').then(r=>r.json()).then(d=>{
+    if (d.cours_charge) {
+      document.getElementById('nom-cours-affiche').textContent = d.nom_cours;
+      document.getElementById('statut-cours').style.display = 'flex';
+      document.getElementById('alerte-cours').style.display = 'none';
+      document.getElementById('btn-generer').disabled = false;
+    } else {
+      document.getElementById('alerte-cours').style.display = 'flex';
+      document.getElementById('btn-generer').disabled = true;
+    }
+  });
+}
+
+function choisirVoix(btn, voix) {
+  voixActuelle = voix;
+  document.querySelectorAll('.voix-btn').forEach(b=>b.classList.remove('actif'));
+  btn.classList.add('actif');
+}
+
+function generer() {
+  const typeContenu = document.getElementById('type-contenu').value;
+  document.getElementById('zone-audio').style.display = 'none';
+  document.getElementById('loading').style.display = 'flex';
+  document.getElementById('btn-generer').disabled = true;
+
+  fetch('/api/audio/generer', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({voix: voixActuelle, type_contenu: typeContenu})
+  })
+  .then(r=>r.json())
+  .then(d=>{
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('btn-generer').disabled = false;
+    if (d.succes) {
+      document.getElementById('audio-player').src = d.url + '?t=' + Date.now();
+      document.getElementById('btn-download').href = d.url;
+      document.getElementById('btn-download').setAttribute('download', d.nom);
+      document.getElementById('zone-audio').style.display = 'block';
+      document.getElementById('zone-audio').scrollIntoView({behavior:'smooth'});
+    } else {
+      alert('❌ ' + (d.erreur || 'Erreur génération'));
+    }
+  })
+  .catch(e=>{
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('btn-generer').disabled = false;
+    alert('❌ ' + e.message);
+  });
+}
+</script>
+{% endblock %}

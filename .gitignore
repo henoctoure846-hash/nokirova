@@ -1,25 +1,27 @@
-# Environnement virtuel
+# Environnement Python
 .venv/
-venv/
 __pycache__/
 *.pyc
+*.pyo
 
-# Config sensible
+# 🔒 SÉCURITÉ - JAMAIS sur GitHub !
 config.py
 
-# Sorties
-outputs/
+# Fichiers utilisateur
 uploads/
+outputs/
+partages/
+nokirova_memory.db
+nokirova_profil.json
+nokirova_partage.json
+nokirova_securite.json
+nokirova_tts.json
 
-# DB locale
-*.db
-
-# PyCharm
+# IDE
 .idea/
+.vscode/
+*.swp
 
-# Polices lourdes
-fonts/
-
-# Système
+# OS
 .DS_Store
 Thumbs.db

@@ -1,0 +1,673 @@
+{% extends "base.html" %}
+
+{% block title %}QCM Interactif - NOKIROVA{% endblock %}
+
+{% block contenu %}
+<div class="page-container">
+
+  <!-- ══════════════════════════════════ -->
+  <!-- 🎯 EN-TÊTE PAGE                   -->
+  <!-- ══════════════════════════════════ -->
+  <div class="page-header" style="background: linear-gradient(135deg, #FFC9DE, #FFE5EF); border-left: 5px solid #FF6B9D;">
+    <div class="page-header-icon" style="background: linear-gradient(135deg, #FF6B9D, #FFC9DE);">
+      🎯
+    </div>
+    <div>
+      <h1 class="page-title" style="color: #C2185B;">QCM Interactif</h1>
+      <p class="page-subtitle" style="color: #E91E8C;">
+        Génère des questions à choix multiples depuis ton cours
+      </p>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════ -->
+  <!-- ⚠️ ALERTE SI PAS DE COURS         -->
+  <!-- ══════════════════════════════════ -->
+  <div id="alerte-cours" class="alerte-warning" style="display:none;">
+    <span>⚠️</span>
+    <div>
+      <strong>Aucun cours chargé !</strong>
+      <p>Tu dois d'abord importer un cours pour générer des QCM.</p>
+      <a href="/import" class="btn-alerte">📥 Importer un cours</a>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════ -->
+  <!-- ✅ COURS CHARGÉ (statut)           -->
+  <!-- ══════════════════════════════════ -->
+  <div id="statut-cours" class="statut-cours-card" style="display:none;">
+    <span style="font-size:1.5rem;">📚</span>
+    <div>
+      <strong>Cours chargé :</strong>
+      <span id="nom-cours-affiche" style="color:#C2185B; font-weight:700;"></span>
+    </div>
+    <span class="badge-ok">✅ Prêt</span>
+  </div>
+
+  <!-- ══════════════════════════════════ -->
+  <!-- 🎛️ PANNEAU DE CONTRÔLE            -->
+  <!-- ══════════════════════════════════ -->
+  <div class="control-panel" style="border-top: 4px solid #FF6B9D;">
+
+    <h2 class="control-title" style="color:#C2185B;">⚙️ Paramètres du QCM</h2>
+
+    <div class="slider-container">
+      <label class="slider-label">
+        📊 Nombre de questions :
+        <span id="valeur-slider" class="slider-value" style="background:#FF6B9D;">5</span>
+      </label>
+      <input
+        type="range"
+        id="slider-qcm"
+        min="3"
+        max="20"
+        value="5"
+        class="slider-qcm"
+        oninput="majSlider(this.value)"
+      />
+      <div class="slider-info">
+        <span>3 (rapide ⚡)</span>
+        <span>10 (moyen 📚)</span>
+        <span>20 (complet 💎)</span>
+      </div>
+    </div>
+
+    <button
+      id="btn-generer"
+      onclick="genererQCM()"
+      class="btn-primary btn-rose"
+    >
+      🎯 Générer les QCM
+    </button>
+
+  </div>
+
+  <!-- ══════════════════════════════════ -->
+  <!-- ⏳ LOADING                        -->
+  <!-- ══════════════════════════════════ -->
+  <div id="loading-qcm" class="loading-card" style="display:none;">
+    <div class="spinner" style="border-top-color:#FF6B9D;"></div>
+    <div>
+      <p style="font-weight:700; color:#C2185B;">🎯 Génération en cours...</p>
+      <p style="color:#9CA3AF; font-size:0.85rem;">L'IA prépare tes QCM 🤖✨</p>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════ -->
+  <!-- 📋 RÉSULTAT QCM                   -->
+  <!-- ══════════════════════════════════ -->
+  <div id="zone-resultat" style="display:none;">
+
+    <!-- Barre d'actions -->
+    <div class="actions-bar" style="border-left: 4px solid #FF6B9D;">
+      <span style="font-weight:700; color:#C2185B;">✅ QCM générés !</span>
+      <div class="actions-buttons">
+        <button onclick="copierQCM()" class="btn-action btn-copy">
+          📋 Copier
+        </button>
+        <button onclick="telechargerQCMPDF()" class="btn-action btn-download">
+          📄 Télécharger PDF
+        </button>
+        <button onclick="partagerQCM()" class="btn-action btn-partage">
+          🤝 Partager
+        </button>
+        <button onclick="genererQCM()" class="btn-action btn-regen" style="border-color:#FF6B9D; color:#C2185B;">
+          🔄 Régénérer
+        </button>
+      </div>
+    </div>
+
+    <!-- Affichage QCM formatés -->
+    <div id="qcm-display" class="qcm-display"></div>
+
+    <!-- Texte brut caché -->
+    <textarea id="qcm-brut" style="display:none;"></textarea>
+
+  </div>
+
+</div>
+
+<!-- Toast notification -->
+<div id="toastGlobal" class="toast-notif"></div>
+
+<style>
+  .page-container {
+    padding: 2rem;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  .page-header {
+    display: flex;
+    align-items: center;
+    gap: 1.2rem;
+    border-radius: 20px;
+    padding: 1.5rem 2rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+  }
+  .page-header-icon {
+    width: 60px; height: 60px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8rem;
+    color: white;
+    flex-shrink: 0;
+  }
+  .page-title {
+    font-size: 1.6rem;
+    font-weight: 800;
+    margin: 0 0 0.2rem;
+  }
+  .page-subtitle {
+    margin: 0;
+    font-size: 0.95rem;
+  }
+
+  .alerte-warning {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    background: #FFF3CD;
+    border: 2px solid #FFD93D;
+    border-radius: 16px;
+    padding: 1.2rem 1.5rem;
+    margin-bottom: 1.5rem;
+    font-size: 0.95rem;
+    color: #374151;
+  }
+  .alerte-warning span { font-size: 1.5rem; }
+  .alerte-warning p { margin: 0.2rem 0 0.5rem; color: #6B7280; font-size:0.9rem;}
+  .btn-alerte {
+    display: inline-block;
+    background: #FFD93D;
+    color: #374151;
+    font-weight: 700;
+    padding: 0.4rem 1rem;
+    border-radius: 20px;
+    text-decoration: none;
+    font-size: 0.85rem;
+    transition: 0.2s;
+  }
+  .btn-alerte:hover { background: #F59E0B; color: white; }
+
+  .statut-cours-card {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    background: #FFE5EF;
+    border: 2px solid #FFC9DE;
+    border-radius: 16px;
+    padding: 1rem 1.5rem;
+    margin-bottom: 1.5rem;
+    font-size: 0.95rem;
+  }
+  .badge-ok {
+    margin-left: auto;
+    background: #00C853;
+    color: white;
+    font-size: 0.8rem;
+    font-weight: 700;
+    padding: 0.3rem 0.8rem;
+    border-radius: 20px;
+  }
+
+  .control-panel {
+    background: white;
+    border-radius: 20px;
+    padding: 2rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 4px 20px rgba(255,107,157,0.1);
+  }
+  .control-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+  }
+
+  .slider-container { margin-bottom: 1.5rem; }
+  .slider-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 0.8rem;
+    font-size: 0.95rem;
+  }
+  .slider-value {
+    color: white;
+    font-weight: 700;
+    padding: 0.2rem 0.7rem;
+    border-radius: 20px;
+    font-size: 1rem;
+    min-width: 35px;
+    text-align: center;
+  }
+  .slider-qcm {
+    width: 100%;
+    height: 8px;
+    border-radius: 10px;
+    background: #FFE5EF;
+    outline: none;
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+  }
+  .slider-qcm::-webkit-slider-thumb {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: #FF6B9D;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(255,107,157,0.4);
+    transition: transform 0.2s;
+  }
+  .slider-qcm::-webkit-slider-thumb:hover { transform: scale(1.2); }
+  .slider-info {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.78rem;
+    color: #9CA3AF;
+    margin-top: 0.4rem;
+  }
+
+  .btn-primary {
+    width: 100%;
+    padding: 1rem;
+    border: none;
+    border-radius: 16px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    letter-spacing: 0.5px;
+  }
+  .btn-rose {
+    background: linear-gradient(135deg, #FF6B9D, #C2185B);
+    color: white;
+    box-shadow: 0 4px 15px rgba(255,107,157,0.4);
+  }
+  .btn-rose:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(255,107,157,0.5);
+  }
+  .btn-rose:disabled {
+    background: #D1D5DB;
+    box-shadow: none;
+    transform: none;
+    cursor: not-allowed;
+  }
+
+  .loading-card {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    background: #FFE5EF;
+    border-radius: 20px;
+    padding: 2rem;
+    margin-bottom: 1.5rem;
+    border: 2px solid #FFC9DE;
+  }
+  .spinner {
+    width: 50px;
+    height: 50px;
+    border: 5px solid #FFC9DE;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    flex-shrink: 0;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .actions-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #FFE5EF;
+    border-radius: 16px;
+    padding: 1rem 1.5rem;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+    gap: 0.8rem;
+  }
+  .actions-buttons { display: flex; gap: 0.6rem; flex-wrap: wrap; }
+  .btn-action {
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: 2px solid transparent;
+  }
+  .btn-copy {
+    background: #EDE9FE;
+    color: #7B61FF;
+    border-color: #7B61FF;
+  }
+  .btn-copy:hover { background: #7B61FF; color: white; }
+
+  /* 🆕 Bouton PDF */
+  .btn-download {
+    background: linear-gradient(135deg, #2962FF, #7EC8FF);
+    color: white;
+    border-color: transparent;
+  }
+  .btn-download:hover {
+    background: linear-gradient(135deg, #1a4fd6, #5ab0f0);
+    color: white;
+  }
+
+  /* 🆕 Bouton Partage */
+  .btn-partage {
+    background: linear-gradient(135deg, #00C853, #7ED321);
+    color: white;
+    border-color: transparent;
+  }
+  .btn-partage:hover {
+    background: linear-gradient(135deg, #00a844, #6ab51d);
+    color: white;
+  }
+
+  .btn-regen {
+    background: #FFE5EF;
+  }
+  .btn-regen:hover { background: #FF6B9D; color: white !important; }
+
+  .qcm-display {
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+  }
+
+  .qcm-card {
+    background: white;
+    border-radius: 20px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 20px rgba(255,107,157,0.08);
+    border-left: 5px solid #FF6B9D;
+    transition: transform 0.2s;
+  }
+  .qcm-card:hover { transform: translateX(4px); }
+
+  .qcm-numero {
+    display: inline-block;
+    background: linear-gradient(135deg, #FF6B9D, #C2185B);
+    color: white;
+    font-weight: 700;
+    font-size: 0.8rem;
+    padding: 0.3rem 0.9rem;
+    border-radius: 20px;
+    margin-bottom: 0.8rem;
+  }
+
+  .qcm-question {
+    font-weight: 700;
+    color: #374151;
+    font-size: 1rem;
+    margin-bottom: 1rem;
+    line-height: 1.5;
+  }
+
+  .qcm-options {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .qcm-option {
+    background: #FFF3F7;
+    border: 2px solid #FFC9DE;
+    border-radius: 10px;
+    padding: 0.6rem 0.9rem;
+    font-size: 0.9rem;
+    color: #374151;
+    transition: 0.2s;
+  }
+  .qcm-option:hover {
+    background: #FFE5EF;
+    border-color: #FF6B9D;
+  }
+  .qcm-option strong { color: #C2185B; }
+
+  .qcm-reponse {
+    background: #D1FAE5;
+    border: 2px solid #00C853;
+    border-radius: 10px;
+    padding: 0.7rem 1rem;
+    font-size: 0.9rem;
+    color: #065F46;
+    margin-bottom: 0.5rem;
+  }
+  .qcm-reponse strong { color: #00C853; }
+
+  .qcm-explication {
+    background: #EFF6FF;
+    border-left: 3px solid #2962FF;
+    border-radius: 0 10px 10px 0;
+    padding: 0.7rem 1rem;
+    font-size: 0.88rem;
+    color: #1E40AF;
+    font-style: italic;
+  }
+
+  /* 🆕 Toast */
+  .toast-notif {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    background: #374151;
+    color: white;
+    padding: 14px 22px;
+    border-radius: 14px;
+    font-weight: bold;
+    font-size: 14px;
+    z-index: 9999;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.4s ease;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+    pointer-events: none;
+  }
+  .toast-notif.show {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  @media (max-width: 600px) {
+    .qcm-options { grid-template-columns: 1fr; }
+    .actions-bar { flex-direction: column; align-items: flex-start; }
+    .page-container { padding: 1rem; }
+  }
+</style>
+
+<script>
+let qcmBrut = '';
+let nomCours = '';
+
+// 🔔 Toast
+function showToast(message, couleur = '#374151') {
+  const toast = document.getElementById('toastGlobal');
+  toast.style.background = couleur;
+  toast.textContent = message;
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 3000);
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+  verifierCours();
+});
+
+function verifierCours() {
+  fetch('/api/statut-cours')
+    .then(r => r.json())
+    .then(data => {
+      if (data.cours_charge) {
+        nomCours = data.nom_cours;
+        document.getElementById('nom-cours-affiche').textContent = nomCours;
+        document.getElementById('statut-cours').style.display = 'flex';
+        document.getElementById('alerte-cours').style.display = 'none';
+        document.getElementById('btn-generer').disabled = false;
+      } else {
+        document.getElementById('alerte-cours').style.display = 'flex';
+        document.getElementById('statut-cours').style.display = 'none';
+        document.getElementById('btn-generer').disabled = true;
+      }
+    })
+    .catch(() => {
+      document.getElementById('btn-generer').disabled = false;
+    });
+}
+
+function majSlider(val) {
+  document.getElementById('valeur-slider').textContent = val;
+}
+
+function genererQCM() {
+  const nombre = document.getElementById('slider-qcm').value;
+
+  document.getElementById('zone-resultat').style.display = 'none';
+  document.getElementById('loading-qcm').style.display = 'flex';
+  document.getElementById('btn-generer').disabled = true;
+
+  fetch('/api/qcm', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ nombre: parseInt(nombre) })
+  })
+  .then(r => r.json())
+  .then(data => {
+    document.getElementById('loading-qcm').style.display = 'none';
+    document.getElementById('btn-generer').disabled = false;
+
+    if (data.succes) {
+      qcmBrut = data.qcm;
+      document.getElementById('qcm-brut').value = qcmBrut;
+      afficherQCM(data.qcm_parse || [], data.qcm);
+      document.getElementById('zone-resultat').style.display = 'block';
+      document.getElementById('zone-resultat').scrollIntoView({
+        behavior: 'smooth', block: 'start'
+      });
+    } else {
+      showToast('❌ Erreur : ' + (data.erreur || 'Inconnue'), '#EF4444');
+    }
+  })
+  .catch(err => {
+    document.getElementById('loading-qcm').style.display = 'none';
+    document.getElementById('btn-generer').disabled = false;
+    showToast('❌ Erreur réseau : ' + err.message, '#EF4444');
+  });
+}
+
+function afficherQCM(qcmsParse, qcmBrutTexte) {
+  const container = document.getElementById('qcm-display');
+  container.innerHTML = '';
+
+  if (qcmsParse && qcmsParse.length > 0) {
+    qcmsParse.forEach((qcm, i) => {
+      const card = document.createElement('div');
+      card.className = 'qcm-card';
+      card.innerHTML = `
+        <span class="qcm-numero">QCM N°${i + 1}</span>
+        <p class="qcm-question">❓ ${escapeHtml(qcm.question || '')}</p>
+        <div class="qcm-options">
+          ${qcm.options ? qcm.options.map(opt => `
+            <div class="qcm-option">
+              <strong>${escapeHtml(opt.lettre || '')})</strong>
+              ${escapeHtml(opt.texte || '')}
+            </div>
+          `).join('') : ''}
+        </div>
+        <div class="qcm-reponse">
+          🔒 <strong>Bonne réponse :</strong> ${escapeHtml(qcm.reponse || '')}
+        </div>
+        ${qcm.explication ? `
+        <div class="qcm-explication">
+          💡 <em>${escapeHtml(qcm.explication)}</em>
+        </div>` : ''}
+      `;
+      container.appendChild(card);
+    });
+  } else {
+    const pre = document.createElement('pre');
+    pre.style.cssText = `
+      background: white;
+      border-radius: 16px;
+      padding: 1.5rem;
+      white-space: pre-wrap;
+      font-family: inherit;
+      font-size: 0.92rem;
+      color: #374151;
+      line-height: 1.7;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+      border-left: 5px solid #FF6B9D;
+    `;
+    pre.textContent = qcmBrutTexte;
+    container.appendChild(pre);
+  }
+}
+
+function copierQCM() {
+  const texte = document.getElementById('qcm-brut').value;
+  navigator.clipboard.writeText(texte).then(() => {
+    showToast('✅ QCM copié !', '#00C853');
+  });
+}
+
+// 🆕 PDF NOKIROVA rose/sakura
+function telechargerQCMPDF() {
+  if (!qcmBrut) {
+    showToast('⚠️ Génère d\'abord des QCM !', '#F59E0B');
+    return;
+  }
+  window.telechargerPDF(
+    '🎯 QCM Interactif',
+    qcmBrut,
+    {
+      couleur: [194, 24, 91],   // Rose NOKIROVA
+      matiere: nomCours || 'Cours',
+      emoji: '🎯'
+    }
+  );
+  showToast('📄 PDF généré avec succès !', '#C2185B');
+}
+
+// 🆕 Partage
+async function partagerQCM() {
+  if (!qcmBrut) {
+    showToast('⚠️ Génère d\'abord des QCM !', '#F59E0B');
+    return;
+  }
+
+  // Mobile Android → Web Share API
+  if (navigator.share) {
+    try {
+      await navigator.share({
+        title: '🎯 QCM NOKIROVA',
+        text: qcmBrut,
+      });
+      showToast('✅ Partagé !', '#00C853');
+    } catch (e) {
+      // Annulé → pas grave
+    }
+    return;
+  }
+
+  // Desktop → copie presse-papier
+  navigator.clipboard.writeText(qcmBrut);
+  showToast('📋 Copié ! Colle-le où tu veux 🌸', '#7B61FF');
+}
+
+function escapeHtml(text) {
+  const d = document.createElement('div');
+  d.appendChild(document.createTextNode(text));
+  return d.innerHTML;
+}
+</script>
+
+{% endblock %}

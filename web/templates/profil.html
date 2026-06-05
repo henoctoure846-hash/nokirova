@@ -1,10 +1,264 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>$Title$</title>
-</head>
-<body>
-$END$
-</body>
-</html>
+{% extends "base.html" %}
+{% block title %}Mon Profil - NOKIROVA{% endblock %}
+{% block contenu %}
+<div class="profil-page">
+
+  <div class="page-header" style="background: linear-gradient(135deg, #D8B4FE, #EDE9FE); border-left: 5px solid #7B61FF;">
+    <div class="page-header-icon" style="background: linear-gradient(135deg, #7B61FF, #5B21B6);">🏆</div>
+    <div>
+      <h1 class="page-title" style="color: #5B21B6;">Mon Profil</h1>
+      <p class="page-subtitle" style="color: #7B61FF;">Tes infos, ta progression, tes badges 💎</p>
+    </div>
+  </div>
+
+  <!-- 👤 CARTE PROFIL TOP -->
+  <div class="profil-top-card">
+    <div class="profil-photo" id="profil-photo">👤</div>
+    <div class="profil-infos">
+      <h2 id="profil-nom">{{ profil.nom_complet or 'Étudiant NOKIROVA' }}</h2>
+      <div class="titre-niveau">{{ titre_niveau or '🌱 Apprenti' }}</div>
+      <div class="profil-meta">
+        ⭐ Niveau {{ stats.niveau }} • ✨ {{ stats.xp }} XP
+      </div>
+      {% if profil.universite %}<div class="profil-meta">🎓 {{ profil.universite }}</div>{% endif %}
+      <button onclick="ouvrirForm()" class="btn-modifier">✏️ Modifier mon profil</button>
+    </div>
+  </div>
+
+  <!-- 📊 BARRE XP -->
+  <div class="xp-card">
+    <div class="xp-bar">
+      <div class="xp-fill" id="xp-fill"></div>
+    </div>
+    <div class="xp-text">
+      🎯 <strong id="xp-text">0/100</strong> XP vers le niveau {{ stats.niveau + 1 }}
+    </div>
+  </div>
+
+  <!-- 📝 INFOS PERSO -->
+  <div class="section-card" id="infos-perso" style="display:none;">
+    <h3 style="color:#5B21B6;">📝 INFORMATIONS PERSONNELLES</h3>
+    <div id="liste-infos"></div>
+  </div>
+
+  <!-- 💭 BIO -->
+  <div class="bio-card" id="bio-card" style="display:none;">
+    <h3 style="color:#C2185B;">💭 À PROPOS DE MOI</h3>
+    <p id="bio-text"></p>
+  </div>
+
+  <!-- 🔥 STREAK -->
+  <div class="streak-card">
+    🔥 STREAK : <strong>{{ stats.streak_jours }} jour(s)</strong> consécutif(s) !
+  </div>
+
+  <!-- 📊 STATS -->
+  <div class="section-card">
+    <h3 style="color:#2962FF;">📊 TES STATISTIQUES</h3>
+    <div class="stats-grid-pro">
+      <div class="stat-pro">📚 Cours : <strong>{{ stats.cours_importes }}</strong></div>
+      <div class="stat-pro">💬 Questions : <strong>{{ stats.questions_posees or 0 }}</strong></div>
+      <div class="stat-pro">🎧 Audios : <strong>{{ stats.audios_crees or 0 }}</strong></div>
+      <div class="stat-pro">🎯 QCM réussis : <strong>{{ stats.qcm_reussis or 0 }}</strong></div>
+      <div class="stat-pro">🍅 Pomodoros : <strong id="nb-pomo">0</strong></div>
+      <div class="stat-pro">⏱️ Minutes : <strong id="min-pomo">0</strong></div>
+    </div>
+  </div>
+
+  <!-- 🏆 BADGES -->
+  <div class="section-card">
+    <h3 style="color:#5B21B6;">🏆 BADGES DÉBLOQUÉS (<span id="nb-badges">0</span>)</h3>
+    <div id="liste-badges" class="badges-pro"></div>
+  </div>
+</div>
+
+<!-- POPUP MODIFIER -->
+<div id="popup-overlay" class="popup-overlay" style="display:none;" onclick="if(event.target===this) fermerForm()">
+  <div class="popup-content">
+    <h2 style="color:#5B21B6; margin-bottom:1rem;">✏️ Modifier mon profil</h2>
+    <input type="text" id="f-nom" placeholder="👤 Nom complet *" class="f-input"/>
+    <input type="email" id="f-email" placeholder="📧 Email" class="f-input"/>
+    <input type="text" id="f-numero" placeholder="📱 Téléphone" class="f-input"/>
+    <input type="text" id="f-univ" placeholder="🎓 Université" class="f-input"/>
+    <input type="text" id="f-annee" placeholder="📅 Année d'étude" class="f-input"/>
+    <input type="text" id="f-date" placeholder="🎂 Date de naissance" class="f-input"/>
+    <textarea id="f-bio" placeholder="💭 Bio (à propos de toi)" rows="4" class="f-input"></textarea>
+
+    <div class="popup-actions">
+      <button onclick="sauver()" class="btn-vert">💾 Sauvegarder</button>
+      <button onclick="fermerForm()" class="btn-rouge">❌ Annuler</button>
+    </div>
+  </div>
+</div>
+
+<style>
+  .profil-page { padding:2rem; max-width:1000px; margin:0 auto;}
+  .page-header { display:flex; align-items:center; gap:1.2rem; border-radius:20px; padding:1.5rem 2rem; margin-bottom:1.5rem; box-shadow:0 4px 20px rgba(0,0,0,0.05);}
+  .page-header-icon { width:60px; height:60px; border-radius:16px; display:flex; align-items:center; justify-content:center; font-size:1.8rem; color:white;}
+  .page-title { font-size:1.6rem; font-weight:800; margin:0;}
+  .page-subtitle { margin:0.2rem 0 0; font-size:0.95rem;}
+
+  .profil-top-card { display:flex; gap:1.5rem; background:linear-gradient(135deg, #EDE9FE, white); border-radius:24px; padding:2rem; margin-bottom:1rem; box-shadow:0 4px 25px rgba(123,97,255,0.15); flex-wrap:wrap;}
+  .profil-photo { width:140px; height:140px; border-radius:50%; background:white; display:flex; align-items:center; justify-content:center; font-size:5rem; box-shadow:0 4px 15px rgba(0,0,0,0.1); flex-shrink:0;}
+  .profil-infos { flex:1; min-width:250px;}
+  .profil-infos h2 { color:#5B21B6; font-size:2rem; margin-bottom:0.3rem;}
+  .titre-niveau { color:#F59E0B; font-weight:700; font-size:1.1rem; margin-bottom:0.5rem;}
+  .profil-meta { color:#374151; font-size:0.95rem; margin-bottom:0.3rem;}
+  .btn-modifier { background:linear-gradient(135deg, #7B61FF, #A855F7); color:white; border:none; padding:0.7rem 1.5rem; border-radius:12px; font-weight:700; cursor:pointer; margin-top:1rem; box-shadow:0 4px 15px rgba(123,97,255,0.4);}
+  .btn-modifier:hover { transform:translateY(-2px);}
+
+  .xp-card { background:linear-gradient(135deg, #FFF3B0, #FFE66D); border-radius:18px; padding:1.5rem; margin-bottom:1rem;}
+  .xp-bar { height:18px; background:white; border-radius:10px; overflow:hidden; margin-bottom:0.5rem;}
+  .xp-fill { height:100%; background:linear-gradient(90deg, #00C853, #7ED321); border-radius:10px; transition:width 1s ease;}
+  .xp-text { text-align:center; color:#374151; font-weight:700;}
+
+  .section-card { background:white; border-radius:18px; padding:1.5rem; margin-bottom:1rem; box-shadow:0 4px 20px rgba(0,0,0,0.06);}
+  .section-card h3 { font-size:1.05rem; margin-bottom:1rem; font-weight:700;}
+
+  .bio-card { background:linear-gradient(135deg, #FFE5EF, #FFC9DE); border-radius:18px; padding:1.5rem; margin-bottom:1rem;}
+  .bio-card h3 { font-size:1.05rem; margin-bottom:0.5rem;}
+  .bio-card p { color:#374151; font-style:italic; line-height:1.6;}
+
+  .streak-card { background:linear-gradient(135deg, #FB923C, #F59E0B); color:white; padding:1.2rem; border-radius:16px; text-align:center; font-size:1.1rem; margin-bottom:1rem; box-shadow:0 4px 15px rgba(245,158,11,0.3);}
+
+  .info-ligne { display:flex; padding:0.6rem 0; border-bottom:1px solid #F3F4F6;}
+  .info-label { color:#9CA3AF; font-weight:600; width:180px;}
+  .info-val { color:#5B21B6; font-weight:600;}
+
+  .stats-grid-pro { display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:0.8rem;}
+  .stat-pro { background:#EFF6FF; padding:0.8rem 1rem; border-radius:10px; color:#374151; border-left:3px solid #2962FF;}
+
+  .badges-pro { display:grid; grid-template-columns:repeat(auto-fill, minmax(120px, 1fr)); gap:0.8rem;}
+  .badge-item-pro { background:linear-gradient(135deg, #FFF3B0, #FFE66D); border-radius:14px; padding:1rem; text-align:center; transition:transform 0.2s;}
+  .badge-item-pro:hover { transform:scale(1.05);}
+  .badge-item-pro.locked { background:#F3F4F6; opacity:0.5;}
+  .badge-emoji-pro { font-size:2.2rem; margin-bottom:0.3rem;}
+  .badge-nom-pro { font-size:0.8rem; font-weight:700; color:#374151;}
+
+  .popup-overlay { position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.6); display:flex; align-items:center; justify-content:center; z-index:9999;}
+  .popup-content { background:white; border-radius:20px; padding:2rem; max-width:500px; width:90%; max-height:90vh; overflow-y:auto; box-shadow:0 20px 60px rgba(0,0,0,0.3);}
+  .f-input { width:100%; padding:0.8rem 1rem; border:2px solid #D8B4FE; border-radius:12px; font-size:0.95rem; margin-bottom:0.7rem; outline:none; font-family:inherit;}
+  .f-input:focus { border-color:#7B61FF;}
+  .popup-actions { display:flex; gap:0.6rem; margin-top:1rem;}
+  .btn-vert { flex:1; background:linear-gradient(135deg, #00C853, #7ED321); color:white; border:none; padding:0.8rem; border-radius:12px; font-weight:700; cursor:pointer;}
+  .btn-rouge { flex:1; background:linear-gradient(135deg, #EF4444, #991B1B); color:white; border:none; padding:0.8rem; border-radius:12px; font-weight:700; cursor:pointer;}
+</style>
+
+<script>
+let profilData = {};
+
+document.addEventListener('DOMContentLoaded', charger);
+
+function charger() {
+  fetch('/api/profil/info').then(r=>r.json()).then(d=>{
+    if (d.succes) {
+      profilData = d.profil || {};
+      afficher(d);
+    }
+  });
+}
+
+function afficher(d) {
+  const p = d.profil || {};
+  const stats = d.stats || {};
+  const pomo = d.pomodoro || {};
+  const badges = d.badges || [];
+
+  // Photo
+  if (p.photo_url) {
+    document.getElementById('profil-photo').innerHTML = `<img src="${p.photo_url}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;"/>`;
+  }
+
+  // Barre XP
+  const xpActuel = (stats.xp || 0) % 100;
+  setTimeout(()=>{
+    document.getElementById('xp-fill').style.width = xpActuel + '%';
+  }, 200);
+  document.getElementById('xp-text').textContent = xpActuel + '/100';
+
+  // Infos perso
+  const infos = [
+    ['📧 Email', p.email],
+    ['📱 Téléphone', p.numero],
+    ['🎓 Université', p.universite],
+    ['📅 Année', p.annee_etude],
+    ['🎂 Naissance', p.date_naissance]
+  ];
+  const infosRemplies = infos.filter(([k,v]) => v && v.trim());
+  if (infosRemplies.length > 0) {
+    const c = document.getElementById('liste-infos');
+    c.innerHTML = '';
+    infosRemplies.forEach(([k, v]) => {
+      const div = document.createElement('div');
+      div.className = 'info-ligne';
+      div.innerHTML = `<span class="info-label">${k}</span><span class="info-val">${esc(v)}</span>`;
+      c.appendChild(div);
+    });
+    document.getElementById('infos-perso').style.display = 'block';
+  }
+
+  // Bio
+  if (p.bio && p.bio.trim()) {
+    document.getElementById('bio-text').textContent = p.bio;
+    document.getElementById('bio-card').style.display = 'block';
+  }
+
+  // Pomodoro
+  document.getElementById('nb-pomo').textContent = pomo.total_sessions || 0;
+  document.getElementById('min-pomo').textContent = pomo.total_minutes || 0;
+
+  // Badges
+  document.getElementById('nb-badges').textContent = badges.length;
+  const b = document.getElementById('liste-badges');
+  b.innerHTML = '';
+  if (badges.length > 0) {
+    badges.forEach(badge => {
+      const div = document.createElement('div');
+      div.className = 'badge-item-pro';
+      div.innerHTML = `<div class="badge-emoji-pro">${badge.emoji || '🏆'}</div><div class="badge-nom-pro">${esc(badge.nom)}</div>`;
+      b.appendChild(div);
+    });
+  } else {
+    b.innerHTML = '<p style="grid-column:1/-1; text-align:center; color:#9CA3AF;">🎯 Continue d\'utiliser NOKIROVA pour débloquer des badges !</p>';
+  }
+}
+
+function ouvrirForm() {
+  document.getElementById('f-nom').value = profilData.nom_complet || '';
+  document.getElementById('f-email').value = profilData.email || '';
+  document.getElementById('f-numero').value = profilData.numero || '';
+  document.getElementById('f-univ').value = profilData.universite || '';
+  document.getElementById('f-annee').value = profilData.annee_etude || '';
+  document.getElementById('f-date').value = profilData.date_naissance || '';
+  document.getElementById('f-bio').value = profilData.bio || '';
+  document.getElementById('popup-overlay').style.display = 'flex';
+}
+
+function fermerForm() {
+  document.getElementById('popup-overlay').style.display = 'none';
+}
+
+function sauver() {
+  const data = {
+    nom_complet: document.getElementById('f-nom').value.trim(),
+    email: document.getElementById('f-email').value.trim(),
+    numero: document.getElementById('f-numero').value.trim(),
+    universite: document.getElementById('f-univ').value.trim(),
+    annee_etude: document.getElementById('f-annee').value.trim(),
+    date_naissance: document.getElementById('f-date').value.trim(),
+    bio: document.getElementById('f-bio').value.trim()
+  };
+  if (!data.nom_complet) { alert('⚠️ Le nom est obligatoire !'); return; }
+
+  fetch('/api/profil/save', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify(data)
+  }).then(r=>r.json()).then(d=>{
+    if (d.succes) { fermerForm(); location.reload(); }
+    else alert('❌ ' + d.erreur);
+  });
+}
+
+function esc(t) { const d = document.createElement('div'); d.textContent = t || ''; return d.innerHTML; }
+</script>
+{% endblock %}

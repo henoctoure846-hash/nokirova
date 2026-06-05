@@ -1,0 +1,404 @@
+{% extends "base.html" %}
+
+{% block title %}💬 Chat IA - NOKIROVA{% endblock %}
+
+{% block contenu %}
+
+<!-- 🎨 TITRE DE PAGE -->
+<div class="titre-page" style="background: var(--violet-premium);">
+    💬 Chat avec NOKIROVA
+</div>
+
+<!-- 💬 ZONE CHAT -->
+<div class="chat-container">
+
+    <!-- 📜 Messages -->
+    <div class="messages-zone" id="messagesZone">
+        <div class="message-bienvenue">
+            <div class="bienvenue-icone">🌸</div>
+            <h2>Bonjour ! Je suis NOKIROVA</h2>
+            <p>✨ Pose-moi <strong>n'importe quelle question</strong> !</p>
+            <div class="suggestions">
+                <button class="suggestion" onclick="poserQuestion('Explique-moi la photosynthèse')">
+                    🌿 Photosynthèse
+                </button>
+                <button class="suggestion" onclick="poserQuestion('Aide-moi avec les mathématiques')">
+                    📐 Maths
+                </button>
+                <button class="suggestion" onclick="poserQuestion('Quelle est la capitale de la France ?')">
+                    🗺️ Géographie
+                </button>
+                <button class="suggestion" onclick="poserQuestion('Donne-moi une astuce pour mieux étudier')">
+                    💡 Astuce
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ⌨️ Input -->
+    <div class="input-zone">
+        <form id="formChat">
+            <textarea
+                id="inputMessage"
+                placeholder="💬 Pose ta question ici..."
+                rows="2"></textarea>
+            <button type="submit" class="btn-envoyer">
+                🚀 Envoyer
+            </button>
+        </form>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.titre-page {
+    padding: 20px;
+    border-radius: 18px;
+    text-align: center;
+    color: white;
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.chat-container {
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 180px);
+    min-height: 500px;
+}
+
+.messages-zone {
+    flex: 1;
+    padding: 25px;
+    overflow-y: auto;
+    background: var(--blanc-casse);
+}
+
+.message-bienvenue {
+    text-align: center;
+    padding: 30px;
+    background: linear-gradient(135deg, var(--violet-pale), var(--rose-pale));
+    border-radius: 20px;
+    margin-bottom: 20px;
+}
+
+.bienvenue-icone {
+    font-size: 60px;
+    margin-bottom: 10px;
+}
+
+.message-bienvenue h2 {
+    color: var(--violet-premium);
+    margin-bottom: 10px;
+}
+
+.message-bienvenue p {
+    color: var(--gris-texte);
+    font-size: 16px;
+}
+
+.suggestions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.suggestion {
+    background: white;
+    color: var(--violet-premium);
+    border: 2px solid var(--violet-premium);
+    padding: 10px 18px;
+    border-radius: 25px;
+    font-weight: bold;
+    cursor: pointer;
+    font-size: 13px;
+    transition: all 0.3s;
+}
+
+.suggestion:hover {
+    background: var(--violet-premium);
+    color: white;
+    transform: scale(1.05);
+}
+
+.message {
+    margin-bottom: 15px;
+    display: flex;
+    gap: 12px;
+    animation: slideIn 0.4s ease;
+}
+
+@keyframes slideIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.message-user {
+    flex-direction: row-reverse;
+}
+
+.avatar {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    flex-shrink: 0;
+}
+
+.avatar-user {
+    background: linear-gradient(135deg, var(--bleu-royal), var(--bleu-ciel));
+}
+
+.avatar-ia {
+    background: linear-gradient(135deg, var(--violet-premium), var(--violet-lavande));
+}
+
+.message-bulle {
+    max-width: 70%;
+    padding: 14px 18px;
+    border-radius: 18px;
+    font-size: 14px;
+    line-height: 1.6;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    word-wrap: break-word;
+    white-space: pre-wrap;
+}
+
+.message-user .message-bulle {
+    background: linear-gradient(135deg, var(--bleu-royal), var(--bleu-ciel));
+    color: white;
+    border-bottom-right-radius: 5px;
+}
+
+.message-ia .message-bulle {
+    background: white;
+    color: var(--gris-texte);
+    border-bottom-left-radius: 5px;
+    border: 1px solid var(--gris-perle);
+}
+
+.chargement {
+    display: flex;
+    gap: 5px;
+    padding: 14px 18px;
+}
+
+.chargement span {
+    width: 8px;
+    height: 8px;
+    background: var(--violet-premium);
+    border-radius: 50%;
+    animation: bounce 1.4s infinite ease-in-out;
+}
+
+.chargement span:nth-child(1) { animation-delay: -0.32s; }
+.chargement span:nth-child(2) { animation-delay: -0.16s; }
+
+@keyframes bounce {
+    0%, 80%, 100% { transform: scale(0); }
+    40% { transform: scale(1); }
+}
+
+.input-zone {
+    padding: 20px;
+    background: white;
+    border-top: 2px solid var(--gris-perle);
+}
+
+.input-zone form {
+    display: flex;
+    gap: 12px;
+    align-items: flex-end;
+}
+
+#inputMessage {
+    flex: 1;
+    padding: 14px 18px;
+    border: 2px solid var(--bleu-tres-pale);
+    border-radius: 14px;
+    font-family: 'Segoe UI', sans-serif;
+    font-size: 14px;
+    resize: none;
+    line-height: 1.5;
+}
+
+#inputMessage:focus {
+    outline: none;
+    border-color: var(--violet-premium);
+    box-shadow: 0 0 0 3px rgba(123, 97, 255, 0.1);
+}
+
+.btn-envoyer {
+    background: linear-gradient(135deg, var(--violet-premium), var(--violet-lavande));
+    color: white;
+    border: none;
+    padding: 14px 25px;
+    border-radius: 14px;
+    font-weight: bold;
+    font-size: 14px;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(123, 97, 255, 0.3);
+    transition: all 0.3s;
+    height: fit-content;
+}
+
+.btn-envoyer:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(123, 97, 255, 0.4);
+}
+
+.btn-envoyer:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* Scrollbar messages */
+.messages-zone::-webkit-scrollbar {
+    width: 8px;
+}
+
+.messages-zone::-webkit-scrollbar-track {
+    background: var(--gris-perle);
+}
+
+.messages-zone::-webkit-scrollbar-thumb {
+    background: var(--violet-pale);
+    border-radius: 4px;
+}
+
+@media (max-width: 768px) {
+    .chat-container {
+        height: calc(100vh - 220px);
+    }
+
+    .message-bulle {
+        max-width: 85%;
+    }
+
+    .suggestion {
+        font-size: 11px;
+        padding: 8px 12px;
+    }
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const formChat = document.getElementById('formChat');
+const inputMessage = document.getElementById('inputMessage');
+const messagesZone = document.getElementById('messagesZone');
+const btnEnvoyer = document.querySelector('.btn-envoyer');
+
+// Fonction pour ajouter un message
+function ajouterMessage(contenu, type) {
+    // Supprimer le message de bienvenue si présent
+    const bienvenue = document.querySelector('.message-bienvenue');
+    if (bienvenue) bienvenue.remove();
+
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `message message-${type}`;
+
+    const avatar = type === 'user' ? '👤' : '🌸';
+    const avatarClass = type === 'user' ? 'avatar-user' : 'avatar-ia';
+
+    messageDiv.innerHTML = `
+        <div class="avatar ${avatarClass}">${avatar}</div>
+        <div class="message-bulle">${contenu}</div>
+    `;
+
+    messagesZone.appendChild(messageDiv);
+    messagesZone.scrollTop = messagesZone.scrollHeight;
+}
+
+// Fonction pour afficher chargement
+function afficherChargement() {
+    const div = document.createElement('div');
+    div.id = 'chargementDiv';
+    div.className = 'message message-ia';
+    div.innerHTML = `
+        <div class="avatar avatar-ia">🌸</div>
+        <div class="message-bulle chargement">
+            <span></span><span></span><span></span>
+        </div>
+    `;
+    messagesZone.appendChild(div);
+    messagesZone.scrollTop = messagesZone.scrollHeight;
+}
+
+// Fonction pour retirer chargement
+function retirerChargement() {
+    const div = document.getElementById('chargementDiv');
+    if (div) div.remove();
+}
+
+// Envoyer message
+async function envoyerMessage(question) {
+    if (!question.trim()) return;
+
+    ajouterMessage(question, 'user');
+    inputMessage.value = '';
+    btnEnvoyer.disabled = true;
+
+    afficherChargement();
+
+    try {
+        const reponse = await fetch('/api/chat', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({question: question})
+        });
+
+        const data = await reponse.json();
+        retirerChargement();
+
+        if (data.succes) {
+            ajouterMessage(data.reponse, 'ia');
+        } else {
+            ajouterMessage(`⚠️ Erreur : ${data.erreur}`, 'ia');
+        }
+    } catch (error) {
+        retirerChargement();
+        ajouterMessage(`⚠️ Erreur : ${error}`, 'ia');
+    }
+
+    btnEnvoyer.disabled = false;
+    inputMessage.focus();
+}
+
+// Soumission du formulaire
+formChat.addEventListener('submit', function(e) {
+    e.preventDefault();
+    envoyerMessage(inputMessage.value);
+});
+
+// Enter pour envoyer (Shift+Enter pour saut de ligne)
+inputMessage.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        envoyerMessage(inputMessage.value);
+    }
+});
+
+// Suggestions
+function poserQuestion(q) {
+    envoyerMessage(q);
+}
+
+// Focus auto
+inputMessage.focus();
+</script>
+{% endblock %}

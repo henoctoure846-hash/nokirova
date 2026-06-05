@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+
+{% block title %}🌸 NOKIROVA - Accueil{% endblock %}
+
+{% block contenu %}
+
+<!-- 🎨 HEADER ACCUEIL (Logo + Titre) -->
+<div class="header-accueil">
+    <img src="{{ url_for('logo') }}" alt="Logo" class="header-logo">
+    <div class="header-texte">
+        <h1>Bienvenue dans NOKIROVA !</h1>
+        <p>✨ Ton professeur intelligent personnel ✨</p>
+    </div>
+</div>
+
+<!-- 💜 BANNIÈRE VIOLETTE -->
+<div class="banniere-date">
+    <strong>{{ salutation }} ! • {{ date_actuelle }}</strong>
+    <div class="banniere-sous-texte">
+        ⚠️ Aucune tâche prévue aujourd'hui !<br>
+        📅 Clique sur Planificateur pour en ajouter.
+    </div>
+</div>
+
+<!-- 📊 3 CARTES STATS -->
+<div class="cartes-stats">
+    <div class="carte-stat carte-niveau">
+        <div class="stat-icone">⭐</div>
+        <div class="stat-valeur">Niveau {{ stats.niveau }}</div>
+        <div class="stat-label">{{ stats.xp }} XP</div>
+    </div>
+    <div class="carte-stat carte-streak">
+        <div class="stat-icone">🔥</div>
+        <div class="stat-valeur">{{ stats.streak_jours }} jour(s)</div>
+        <div class="stat-label">Streak quotidien</div>
+    </div>
+    <div class="carte-stat carte-cours">
+        <div class="stat-icone">📚</div>
+        <div class="stat-valeur">{{ stats.cours_importes }}</div>
+        <div class="stat-label">Cours importés</div>
+    </div>
+</div>
+
+<!-- 🎯 6 CARTES D'ACCÈS RAPIDE -->
+<div class="cartes-rapides">
+    <a href="/bibliotheque" class="carte-rapide carte-bibli">
+        <div class="carte-rapide-icone">📚</div>
+        <div class="carte-rapide-titre">Bibliothèque</div>
+        <div class="carte-rapide-btn">→ Ouvrir</div>
+    </a>
+    <a href="/planificateur" class="carte-rapide carte-plani">
+        <div class="carte-rapide-icone">📅</div>
+        <div class="carte-rapide-titre">Planificateur</div>
+        <div class="carte-rapide-btn">→ Ouvrir</div>
+    </a>
+    <a href="/scan_multi" class="carte-rapide carte-scan">
+        <div class="carte-rapide-icone">📸</div>
+        <div class="carte-rapide-titre">Scan Multi</div>
+        <div class="carte-rapide-btn">→ Ouvrir</div>
+    </a>
+    <a href="/qcm" class="carte-rapide carte-qcm">
+        <div class="carte-rapide-icone">🎯</div>
+        <div class="carte-rapide-titre">QCM</div>
+        <div class="carte-rapide-btn">→ Ouvrir</div>
+    </a>
+    <a href="/flashcards" class="carte-rapide carte-flash">
+        <div class="carte-rapide-icone">🃏</div>
+        <div class="carte-rapide-titre">Flashcards</div>
+        <div class="carte-rapide-btn">→ Ouvrir</div>
+    </a>
+    <a href="/pomodoro" class="carte-rapide carte-pomo">
+        <div class="carte-rapide-icone">⏱️</div>
+        <div class="carte-rapide-titre">Pomodoro</div>
+        <div class="carte-rapide-btn">→ Ouvrir</div>
+    </a>
+</div>
+
+<!-- 🎯 OBJECTIF DU JOUR -->
+<div class="objectif">
+    <div class="objectif-titre">🎯 OBJECTIF DU JOUR</div>
+    <div class="objectif-texte">
+        📚 Importe un cours et fais au moins 5 QCM !<br>
+        Tu vas y arriver ! 💪
+    </div>
+</div>
+
+<!-- 🚀 BOUTON COMMENCER MAINTENANT -->
+<a href="/import" class="btn-commencer" style="display:block; text-decoration:none;">
+    🚀 COMMENCER MAINTENANT
+</a>
+
+{% endblock %}

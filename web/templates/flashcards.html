@@ -1,0 +1,293 @@
+{% extends "base.html" %}
+{% block title %}Flashcards - NOKIROVA{% endblock %}
+{% block contenu %}
+<div class="page-container">
+
+  <div class="page-header" style="background: linear-gradient(135deg, #A5D8FF, #D0EBFF); border-left: 5px solid #2962FF;">
+    <div class="page-header-icon" style="background: linear-gradient(135deg, #2962FF, #7EC8FF);">🃏</div>
+    <div>
+      <h1 class="page-title" style="color: #1E40AF;">Flashcards</h1>
+      <p class="page-subtitle" style="color: #2962FF;">Mémorise avec des cartes recto/verso interactives</p>
+    </div>
+  </div>
+
+  <!-- ÉCRAN PRINCIPAL -->
+  <div id="ecran-menu">
+
+    <div id="alerte-cours" class="alerte-warning" style="display:none;">
+      <span>⚠️</span>
+      <div>
+        <strong>Aucun cours chargé !</strong>
+        <p>Pour générer des flashcards depuis un cours, importe-le d'abord.</p>
+        <a href="/import" class="btn-alerte">📥 Importer un cours</a>
+      </div>
+    </div>
+
+    <div id="statut-cours" class="statut-cours-card" style="display:none;">
+      <span style="font-size:1.5rem;">📚</span>
+      <div><strong>Cours chargé :</strong> <span id="nom-cours-affiche" style="color:#1E40AF; font-weight:700;"></span></div>
+      <span class="badge-ok">✅</span>
+    </div>
+
+    <!-- GÉNÉRER AUTOMATIQUEMENT -->
+    <div class="control-panel">
+      <h2 style="color:#1E40AF;">🤖 Générer avec l'IA</h2>
+      <div class="slider-container">
+        <label class="slider-label">
+          🃏 Nombre de flashcards :
+          <span id="valeur-slider" class="slider-value">10</span>
+        </label>
+        <input type="range" id="slider-nb" min="5" max="30" value="10" oninput="majSlider(this.value)"/>
+      </div>
+      <button id="btn-generer" onclick="genererIA()" class="btn-bleu">🤖 Générer depuis le cours</button>
+    </div>
+
+    <!-- LISTE DES DECKS -->
+    <div class="control-panel">
+      <h2 style="color:#1E40AF;">📚 Mes Decks</h2>
+      <div id="liste-decks"></div>
+      <div id="aucun-deck" class="empty-mini" style="display:none;">
+        <p>📭 Aucun deck pour l'instant. Génère ton premier deck ci-dessus !</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ÉCRAN RÉVISION -->
+  <div id="ecran-revision" style="display:none;">
+    <div class="revision-header">
+      <button onclick="retourMenu()" class="btn-retour">← Retour</button>
+      <h2 id="deck-titre" style="color:#1E40AF;">Deck</h2>
+      <span id="progression" class="progression">1 / 10</span>
+    </div>
+
+    <div class="flashcard-container" onclick="flipCard()">
+      <div class="flashcard" id="flashcard">
+        <div class="flashcard-face recto">
+          <div class="face-label">🃏 RECTO</div>
+          <div class="face-content" id="recto-content">Question</div>
+          <div class="face-hint">👆 Clique pour retourner</div>
+        </div>
+        <div class="flashcard-face verso">
+          <div class="face-label">💡 VERSO</div>
+          <div class="face-content" id="verso-content">Réponse</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="revision-actions">
+      <button onclick="reponse(false)" class="btn-rate">❌ Difficile</button>
+      <button onclick="reponse(true)" class="btn-reussi">✅ Réussi</button>
+    </div>
+
+    <div class="revision-stats">
+      <span>✅ Réussis : <strong id="nb-ok">0</strong></span>
+      <span>❌ Ratés : <strong id="nb-ko">0</strong></span>
+    </div>
+  </div>
+
+</div>
+
+<style>
+  .page-container { padding:2rem; max-width:1100px; margin:0 auto;}
+  .page-header { display:flex; align-items:center; gap:1.2rem; border-radius:20px; padding:1.5rem 2rem; margin-bottom:1.5rem; box-shadow:0 4px 20px rgba(0,0,0,0.05);}
+  .page-header-icon { width:60px; height:60px; border-radius:16px; display:flex; align-items:center; justify-content:center; font-size:1.8rem; color:white;}
+  .page-title { font-size:1.6rem; font-weight:800; margin:0;}
+  .page-subtitle { margin:0.2rem 0 0; font-size:0.95rem;}
+
+  .alerte-warning { display:flex; align-items:flex-start; gap:1rem; background:#FFF3CD; border:2px solid #FFD93D; border-radius:16px; padding:1.2rem 1.5rem; margin-bottom:1.5rem;}
+  .alerte-warning span { font-size:1.5rem;}
+  .alerte-warning p { margin:0.2rem 0 0.5rem; color:#6B7280; font-size:0.9rem;}
+  .btn-alerte { display:inline-block; background:#FFD93D; color:#374151; font-weight:700; padding:0.4rem 1rem; border-radius:20px; text-decoration:none; font-size:0.85rem;}
+  .statut-cours-card { display:flex; align-items:center; gap:1rem; background:#D0EBFF; border:2px solid #A5D8FF; border-radius:16px; padding:1rem 1.5rem; margin-bottom:1.5rem;}
+  .badge-ok { margin-left:auto; background:#00C853; color:white; font-weight:700; padding:0.3rem 0.8rem; border-radius:20px;}
+
+  .control-panel { background:white; border-radius:20px; padding:2rem; margin-bottom:1.5rem; box-shadow:0 4px 20px rgba(0,0,0,0.08); border-top:4px solid #2962FF;}
+  .control-panel h2 { font-size:1.1rem; margin-bottom:1rem; font-weight:700;}
+  .slider-container { margin-bottom:1.5rem;}
+  .slider-label { display:flex; align-items:center; gap:0.5rem; font-weight:600; color:#374151; margin-bottom:0.8rem;}
+  .slider-value { background:#2962FF; color:white; padding:0.2rem 0.7rem; border-radius:20px; font-size:1rem; font-weight:700; min-width:35px; text-align:center;}
+  input[type="range"] { width:100%; height:8px; border-radius:10px; background:#D0EBFF; outline:none; -webkit-appearance:none;}
+  input[type="range"]::-webkit-slider-thumb { -webkit-appearance:none; width:24px; height:24px; border-radius:50%; background:#2962FF; cursor:pointer; box-shadow:0 2px 8px rgba(41,98,255,0.4);}
+  .btn-bleu { width:100%; padding:1rem; background:linear-gradient(135deg, #2962FF, #1E40AF); color:white; border:none; border-radius:14px; font-weight:700; font-size:1rem; cursor:pointer; box-shadow:0 4px 15px rgba(41,98,255,0.4);}
+  .btn-bleu:hover { transform:translateY(-2px);}
+  .btn-bleu:disabled { background:#D1D5DB; cursor:not-allowed;}
+
+  .empty-mini { text-align:center; color:#9CA3AF; padding:2rem;}
+
+  .deck-card { background:linear-gradient(135deg, #D0EBFF, #A5D8FF); border-radius:14px; padding:1.2rem; margin-bottom:0.8rem; display:flex; align-items:center; gap:1rem; flex-wrap:wrap;}
+  .deck-info { flex:1; min-width:180px;}
+  .deck-nom { font-weight:700; color:#1E40AF; font-size:1rem;}
+  .deck-stats { font-size:0.85rem; color:#374151; margin-top:0.3rem;}
+  .deck-actions { display:flex; gap:0.5rem; flex-wrap:wrap;}
+  .btn-deck { padding:0.5rem 1rem; border-radius:10px; font-weight:600; font-size:0.85rem; cursor:pointer; border:none;}
+  .btn-reviser { background:#00C853; color:white;}
+  .btn-reviser:hover { transform:scale(1.05);}
+  .btn-sup-deck { background:#FEE2E2; color:#EF4444; border:2px solid #EF4444;}
+  .btn-sup-deck:hover { background:#EF4444; color:white;}
+
+  /* RÉVISION */
+  .revision-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:1.5rem; flex-wrap:wrap; gap:0.5rem;}
+  .btn-retour { background:#D0EBFF; color:#1E40AF; padding:0.6rem 1.2rem; border:none; border-radius:10px; font-weight:600; cursor:pointer;}
+  .btn-retour:hover { background:#A5D8FF;}
+  .progression { background:#2962FF; color:white; padding:0.4rem 1rem; border-radius:20px; font-weight:700;}
+
+  .flashcard-container { perspective:1000px; margin:2rem auto; max-width:600px; height:340px; cursor:pointer;}
+  .flashcard { width:100%; height:100%; position:relative; transition:transform 0.6s; transform-style:preserve-3d;}
+  .flashcard.flipped { transform:rotateY(180deg);}
+  .flashcard-face { position:absolute; width:100%; height:100%; backface-visibility:hidden; border-radius:24px; padding:2rem; display:flex; flex-direction:column; align-items:center; justify-content:center; box-shadow:0 8px 30px rgba(0,0,0,0.15); text-align:center;}
+  .recto { background:linear-gradient(135deg, #2962FF, #7EC8FF); color:white;}
+  .verso { background:linear-gradient(135deg, #00C853, #7ED321); color:white; transform:rotateY(180deg);}
+  .face-label { font-weight:700; font-size:0.9rem; opacity:0.9; margin-bottom:1rem; letter-spacing:2px;}
+  .face-content { font-size:1.4rem; font-weight:700; line-height:1.5; flex:1; display:flex; align-items:center; justify-content:center; word-break:break-word; padding:0 1rem;}
+  .face-hint { font-size:0.85rem; opacity:0.8; margin-top:1rem;}
+
+  .revision-actions { display:flex; gap:1rem; justify-content:center; margin:1.5rem 0;}
+  .btn-rate, .btn-reussi { padding:1rem 2.5rem; border:none; border-radius:14px; font-weight:700; font-size:1rem; cursor:pointer; transition:0.2s;}
+  .btn-rate { background:linear-gradient(135deg, #EF4444, #DC2626); color:white; box-shadow:0 4px 15px rgba(239,68,68,0.4);}
+  .btn-rate:hover { transform:translateY(-2px);}
+  .btn-reussi { background:linear-gradient(135deg, #00C853, #7ED321); color:white; box-shadow:0 4px 15px rgba(0,200,83,0.4);}
+  .btn-reussi:hover { transform:translateY(-2px);}
+
+  .revision-stats { display:flex; justify-content:center; gap:2rem; background:white; padding:1rem; border-radius:14px; box-shadow:0 4px 15px rgba(0,0,0,0.05); font-size:0.95rem;}
+</style>
+
+<script>
+let deckActuel = [];
+let indexActuel = 0;
+let nbOk = 0, nbKo = 0;
+
+document.addEventListener('DOMContentLoaded', ()=>{
+  verifierCours();
+  chargerDecks();
+});
+
+function majSlider(v) { document.getElementById('valeur-slider').textContent = v; }
+
+function verifierCours() {
+  fetch('/api/statut-cours').then(r=>r.json()).then(d=>{
+    if (d.cours_charge) {
+      document.getElementById('nom-cours-affiche').textContent = d.nom_cours;
+      document.getElementById('statut-cours').style.display = 'flex';
+      document.getElementById('alerte-cours').style.display = 'none';
+      document.getElementById('btn-generer').disabled = false;
+    } else {
+      document.getElementById('alerte-cours').style.display = 'flex';
+      document.getElementById('btn-generer').disabled = true;
+    }
+  });
+}
+
+function genererIA() {
+  const nb = document.getElementById('slider-nb').value;
+  document.getElementById('btn-generer').disabled = true;
+  document.getElementById('btn-generer').textContent = '⏳ Génération en cours...';
+
+  fetch('/api/flashcards/generer', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({nombre: parseInt(nb)})
+  })
+  .then(r=>r.json())
+  .then(d=>{
+    document.getElementById('btn-generer').disabled = false;
+    document.getElementById('btn-generer').textContent = '🤖 Générer depuis le cours';
+    if (d.succes) {
+      alert('✅ ' + d.nb + ' flashcards créées !');
+      chargerDecks();
+    } else {
+      alert('❌ ' + (d.erreur || 'Erreur'));
+    }
+  });
+}
+
+function chargerDecks() {
+  fetch('/api/flashcards/decks').then(r=>r.json()).then(d=>{
+    const c = document.getElementById('liste-decks');
+    const empty = document.getElementById('aucun-deck');
+    c.innerHTML = '';
+    const decks = d.decks || [];
+
+    if (decks.length === 0) { empty.style.display = 'block'; return; }
+    empty.style.display = 'none';
+
+    decks.forEach(deck => {
+      const div = document.createElement('div');
+      div.className = 'deck-card';
+      div.innerHTML = `
+        <div class="deck-info">
+          <div class="deck-nom">🃏 ${esc(deck.nom)}</div>
+          <div class="deck-stats">📚 ${esc(deck.matiere)} • ${deck.nb} cartes • ✅ ${deck.reussis}/${deck.vus}</div>
+        </div>
+        <div class="deck-actions">
+          <button class="btn-deck btn-reviser" onclick="lancerRevision('${esc(deck.nom)}')">▶️ Réviser</button>
+          <button class="btn-deck btn-sup-deck" onclick="supprimerDeck('${esc(deck.nom)}')">🗑️</button>
+        </div>
+      `;
+      c.appendChild(div);
+    });
+  });
+}
+
+function lancerRevision(nomDeck) {
+  fetch('/api/flashcards/deck/' + encodeURIComponent(nomDeck)).then(r=>r.json()).then(d=>{
+    if (!d.succes || !d.cards || d.cards.length === 0) {
+      alert('❌ Deck vide ou erreur');
+      return;
+    }
+    deckActuel = d.cards;
+    indexActuel = 0; nbOk = 0; nbKo = 0;
+    document.getElementById('deck-titre').textContent = '🃏 ' + nomDeck;
+    document.getElementById('ecran-menu').style.display = 'none';
+    document.getElementById('ecran-revision').style.display = 'block';
+    afficherCarte();
+  });
+}
+
+function afficherCarte() {
+  if (indexActuel >= deckActuel.length) {
+    alert('🎉 Deck terminé !\n✅ ' + nbOk + ' réussis\n❌ ' + nbKo + ' ratés');
+    retourMenu();
+    return;
+  }
+  const card = deckActuel[indexActuel];
+  document.getElementById('flashcard').classList.remove('flipped');
+  document.getElementById('recto-content').textContent = card.recto;
+  document.getElementById('verso-content').textContent = card.verso;
+  document.getElementById('progression').textContent = (indexActuel+1) + ' / ' + deckActuel.length;
+  document.getElementById('nb-ok').textContent = nbOk;
+  document.getElementById('nb-ko').textContent = nbKo;
+}
+
+function flipCard() {
+  document.getElementById('flashcard').classList.toggle('flipped');
+}
+
+function reponse(reussi) {
+  const card = deckActuel[indexActuel];
+  fetch('/api/flashcards/stats', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({id: card.id, reussi: reussi})
+  });
+  if (reussi) nbOk++; else nbKo++;
+  indexActuel++;
+  afficherCarte();
+}
+
+function retourMenu() {
+  document.getElementById('ecran-menu').style.display = 'block';
+  document.getElementById('ecran-revision').style.display = 'none';
+  chargerDecks();
+}
+
+function supprimerDeck(nom) {
+  if (!confirm('🗑️ Supprimer le deck "' + nom + '" ?')) return;
+  fetch('/api/flashcards/deck/supprimer', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({nom: nom})
+  }).then(r=>r.json()).then(d=>{
+    if (d.succes) chargerDecks();
+  });
+}
+
+function esc(t) { const d = document.createElement('div'); d.textContent = t || ''; return d.innerHTML; }
+</script>
+{% endblock %}

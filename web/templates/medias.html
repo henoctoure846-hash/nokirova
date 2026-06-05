@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% block title %}Mes Médias - NOKIROVA{% endblock %}
+{% block contenu %}
+<div class="page-container">
+
+  <div class="page-header" style="background: linear-gradient(135deg, #9FD93B, #BBF7D0); border-left: 5px solid #00C853;">
+    <div class="page-header-icon" style="background: linear-gradient(135deg, #00C853, #7ED321);">🎵</div>
+    <div>
+      <h1 class="page-title" style="color: #14532D;">Mes Médias</h1>
+      <p class="page-subtitle" style="color: #166534;">Tous tes fichiers audio générés 🎧</p>
+    </div>
+  </div>
+
+  <div id="liste-medias" class="medias-grid"></div>
+
+  <div id="empty-state" class="empty-state" style="display:none;">
+    <div style="font-size:4rem;">🎵</div>
+    <h2>Aucun fichier audio</h2>
+    <p>Génère ton premier audio depuis la page Audio !</p>
+    <a href="/audio" class="btn-vert">🎧 Générer un audio</a>
+  </div>
+</div>
+
+<style>
+  .page-container { padding:2rem; max-width:1100px; margin:0 auto;}
+  .page-header { display:flex; align-items:center; gap:1.2rem; border-radius:20px; padding:1.5rem 2rem; margin-bottom:1.5rem; box-shadow:0 4px 20px rgba(0,0,0,0.05);}
+  .page-header-icon { width:60px; height:60px; border-radius:16px; display:flex; align-items:center; justify-content:center; font-size:1.8rem; color:white;}
+  .page-title { font-size:1.6rem; font-weight:800; margin:0;}
+  .page-subtitle { margin:0.2rem 0 0; font-size:0.95rem;}
+
+  .medias-grid { display:grid; gap:1rem;}
+  .media-card { background:white; border-radius:18px; padding:1.3rem; box-shadow:0 4px 15px rgba(0,0,0,0.06); border-left:5px solid #00C853;}
+  .media-titre { font-weight:700; color:#14532D; font-size:1rem; margin-bottom:0.5rem; word-break:break-word;}
+  .media-meta { color:#9CA3AF; font-size:0.8rem; margin-bottom:0.8rem;}
+  .media-card audio { width:100%; margin:0.5rem 0;}
+  .media-actions { display:flex; gap:0.5rem; margin-top:0.5rem;}
+  .btn-media { padding:0.5rem 1rem; border-radius:10px; font-weight:600; font-size:0.85rem; cursor:pointer; border:2px solid transparent; text-decoration:none; display:inline-block; text-align:center;}
+  .btn-dl { background:#D1FAE5; color:#00C853; border-color:#00C853;}
+  .btn-dl:hover { background:#00C853; color:white;}
+  .btn-sup-m { background:#FEE2E2; color:#EF4444; border-color:#EF4444;}
+  .btn-sup-m:hover { background:#EF4444; color:white;}
+
+  .empty-state { text-align:center; padding:4rem 2rem; background:white; border-radius:20px; box-shadow:0 4px 20px rgba(0,0,0,0.05);}
+  .empty-state h2 { color:#374151; margin:1rem 0 0.5rem;}
+  .empty-state p { color:#9CA3AF; margin-bottom:1.5rem;}
+  .btn-vert { background:linear-gradient(135deg, #00C853, #7ED321); color:white; padding:0.8rem 2rem; border-radius:14px; font-weight:700; text-decoration:none; display:inline-block;}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', charger);
+
+function charger() {
+  fetch('/api/medias/liste').then(r=>r.json()).then(d=>{
+    const c = document.getElementById('liste-medias');
+    const empty = document.getElementById('empty-state');
+    c.innerHTML = '';
+    const fichiers = d.fichiers || [];
+    if (fichiers.length === 0) { empty.style.display = 'block'; return; }
+    empty.style.display = 'none';
+
+    fichiers.forEach(f => {
+      const div = document.createElement('div');
+      div.className = 'media-card';
+      div.innerHTML = `
+        <div class="media-titre">🎵 ${esc(f.nom)}</div>
+        <div class="media-meta">💾 ${f.taille} Ko • 📅 ${esc(f.date)}</div>
+        <audio controls src="/audio_file/${encodeURIComponent(f.nom)}"></audio>
+        <div class="media-actions">
+          <a href="/audio_file/${encodeURIComponent(f.nom)}" download="${esc(f.nom)}" class="btn-media btn-dl">💾 Télécharger</a>
+          <button onclick="supprimer('${esc(f.nom)}')" class="btn-media btn-sup-m">🗑️ Supprimer</button>
+        </div>
+      `;
+      c.appendChild(div);
+    });
+  });
+}
+
+function supprimer(nom) {
+  if (!confirm('🗑️ Supprimer ce fichier ?')) return;
+  fetch('/api/medias/supprimer', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({nom: nom})
+  }).then(r=>r.json()).then(d=>{
+    if (d.succes) charger();
+  });
+}
+
+function esc(t) { const d = document.createElement('div'); d.textContent = t || ''; return d.innerHTML; }
+</script>
+{% endblock %}

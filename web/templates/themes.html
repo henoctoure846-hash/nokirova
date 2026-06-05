@@ -1,0 +1,246 @@
+{% extends "base.html" %}
+{% block title %}Thèmes - NOKIROVA{% endblock %}
+{% block contenu %}
+<div class="page-container">
+
+  <div class="page-header" style="background: linear-gradient(135deg, #FFD93D, #FFC9DE, #A5D8FF); border-left: 5px solid #7B61FF;">
+    <div class="page-header-icon" style="background: linear-gradient(135deg, #7B61FF, #A855F7);">🎨</div>
+    <div>
+      <h1 class="page-title" style="color: #5B21B6;">Thèmes & Couleurs</h1>
+      <p class="page-subtitle" style="color: #7B61FF;">Personnalise l'apparence de NOKIROVA ✨</p>
+    </div>
+  </div>
+
+  <!-- MODE CLAIR/SOMBRE -->
+  <div class="theme-section">
+    <h2 style="color:#5B21B6;">🌓 Mode d'affichage</h2>
+    <div class="mode-grid">
+      <div class="mode-card" data-mode="clair" onclick="choisirMode('clair', this)">
+        <div class="mode-emoji">☀️</div>
+        <strong>Mode Clair</strong>
+        <p>Fond blanc, doux pour le jour</p>
+      </div>
+      <div class="mode-card" data-mode="sombre" onclick="choisirMode('sombre', this)">
+        <div class="mode-emoji">🌙</div>
+        <strong>Mode Sombre</strong>
+        <p>Fond noir, parfait la nuit</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- THÈMES COULEURS -->
+  <div class="theme-section">
+    <h2 style="color:#5B21B6;">🎨 Thèmes de couleurs</h2>
+    <p style="color:#9CA3AF; margin-bottom:1rem;">Change la couleur principale de l'app (sidebar, accents)</p>
+
+    <div class="themes-grid">
+      <div class="theme-card" data-theme="printemps" onclick="choisirTheme('printemps', this)" style="background:linear-gradient(135deg, #7ED321, #FFD93D);">
+        <strong>🌸 Printemps</strong>
+        <small>Vert + Jaune (défaut)</small>
+      </div>
+      <div class="theme-card" data-theme="ocean" onclick="choisirTheme('ocean', this)" style="background:linear-gradient(135deg, #2962FF, #7EC8FF);">
+        <strong>🌊 Océan</strong>
+        <small>Bleu profond</small>
+      </div>
+      <div class="theme-card" data-theme="sakura" onclick="choisirTheme('sakura', this)" style="background:linear-gradient(135deg, #FF6B9D, #FFC9DE);">
+        <strong>🌷 Sakura</strong>
+        <small>Rose poudré</small>
+      </div>
+      <div class="theme-card" data-theme="lavande" onclick="choisirTheme('lavande', this)" style="background:linear-gradient(135deg, #7B61FF, #A855F7);">
+        <strong>💜 Lavande</strong>
+        <small>Violet mystique</small>
+      </div>
+      <div class="theme-card" data-theme="coucher" onclick="choisirTheme('coucher', this)" style="background:linear-gradient(135deg, #F59E0B, #EF4444);">
+        <strong>🌅 Coucher</strong>
+        <small>Orange feu</small>
+      </div>
+      <div class="theme-card" data-theme="foret" onclick="choisirTheme('foret', this)" style="background:linear-gradient(135deg, #00C853, #14532D);">
+        <strong>🌲 Forêt</strong>
+        <small>Vert sapin</small>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAILLE TEXTE -->
+  <div class="theme-section">
+    <h2 style="color:#5B21B6;">📏 Taille du texte</h2>
+    <p style="color:#9CA3AF; margin-bottom:1rem;">S'applique à toute l'application</p>
+    <div class="taille-grid">
+      <button class="btn-taille" data-taille="petit" onclick="choisirTaille('petit', this)">
+        <span style="font-size:0.9rem;">A</span> Petit
+      </button>
+      <button class="btn-taille" data-taille="normal" onclick="choisirTaille('normal', this)">
+        <span style="font-size:1.1rem;">A</span> Normal
+      </button>
+      <button class="btn-taille" data-taille="grand" onclick="choisirTaille('grand', this)">
+        <span style="font-size:1.4rem;">A</span> Grand
+      </button>
+      <button class="btn-taille" data-taille="enorme" onclick="choisirTaille('enorme', this)">
+        <span style="font-size:1.8rem;">A</span> Énorme
+      </button>
+    </div>
+  </div>
+
+  <!-- BOUTON RESET -->
+  <div style="text-align:center; margin-top:2rem;">
+    <button onclick="resetTout()" class="btn-reset">🔄 Réinitialiser tout par défaut</button>
+  </div>
+
+  <div id="message" class="message-success" style="display:none;">✅ Préférences sauvegardées !</div>
+</div>
+
+<style>
+  .page-container { padding:2rem; max-width:1100px; margin:0 auto;}
+  .page-header { display:flex; align-items:center; gap:1.2rem; border-radius:20px; padding:1.5rem 2rem; margin-bottom:1.5rem; box-shadow:0 4px 20px rgba(0,0,0,0.05);}
+  .page-header-icon { width:60px; height:60px; border-radius:16px; display:flex; align-items:center; justify-content:center; font-size:1.8rem; color:white;}
+  .page-title { font-size:1.6rem; font-weight:800; margin:0;}
+  .page-subtitle { margin:0.2rem 0 0; font-size:0.95rem;}
+
+  .theme-section { background:white; border-radius:20px; padding:1.8rem; margin-bottom:1.5rem; box-shadow:0 4px 20px rgba(123,97,255,0.08); border-top:4px solid #7B61FF;}
+  .theme-section h2 { font-size:1.2rem; font-weight:700; margin-bottom:1rem;}
+
+  .mode-grid { display:grid; grid-template-columns:1fr 1fr; gap:1rem;}
+  .mode-card { background:#F9FAFB; border:3px solid transparent; border-radius:16px; padding:1.5rem; text-align:center; cursor:pointer; transition:0.3s;}
+  .mode-card:hover { background:#EDE9FE; transform:translateY(-2px);}
+  .mode-card.actif { border-color:#7B61FF !important; background:#EDE9FE !important; box-shadow:0 4px 15px rgba(123,97,255,0.3);}
+  .mode-emoji { font-size:3rem; margin-bottom:0.5rem;}
+  .mode-card strong { display:block; color:#1F2937; font-size:1.1rem; margin-bottom:0.3rem;}
+  .mode-card p { color:#9CA3AF; font-size:0.85rem;}
+
+  .themes-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:1rem;}
+  .theme-card { border-radius:16px; padding:1.5rem; cursor:pointer; transition:0.3s; color:white; box-shadow:0 4px 15px rgba(0,0,0,0.1); border:3px solid transparent;}
+  .theme-card:hover { transform:translateY(-4px); box-shadow:0 8px 25px rgba(0,0,0,0.2);}
+  .theme-card.actif { border-color:#374151 !important; transform:scale(1.05); box-shadow:0 8px 25px rgba(0,0,0,0.3);}
+  .theme-card strong { display:block; font-size:1.1rem; margin-bottom:0.3rem;}
+  .theme-card small { opacity:0.9;}
+
+  .taille-grid { display:flex; gap:0.6rem; flex-wrap:wrap;}
+  .btn-taille { background:#F9FAFB; border:2px solid #E5E7EB; padding:0.7rem 1.2rem; border-radius:12px; font-weight:600; cursor:pointer; color:#374151; transition:0.2s;}
+  .btn-taille:hover { background:#EDE9FE; border-color:#7B61FF;}
+  .btn-taille.actif { background:linear-gradient(135deg, #7B61FF, #5B21B6) !important; color:white !important; border-color:transparent !important;}
+
+  .btn-reset { background:#FEE2E2; color:#EF4444; border:2px solid #EF4444; padding:0.8rem 2rem; border-radius:14px; font-weight:700; cursor:pointer;}
+  .btn-reset:hover { background:#EF4444; color:white;}
+
+  .message-success { position:fixed; bottom:30px; right:30px; background:#00C853; color:white; padding:1rem 1.5rem; border-radius:12px; font-weight:700; box-shadow:0 8px 25px rgba(0,200,83,0.4); z-index:9999;}
+</style>
+
+<script>
+// ════════════════════════════════════
+// 🎨 GESTION DES PRÉFÉRENCES
+// ════════════════════════════════════
+
+document.addEventListener('DOMContentLoaded', ()=>{
+  // 1. Récupérer les valeurs ACTUELLES (depuis le HTML data-*)
+  const modeActuel = document.documentElement.getAttribute('data-mode') || 'clair';
+  const themeActuel = document.documentElement.getAttribute('data-theme') || 'printemps';
+  const tailleActuelle = document.documentElement.getAttribute('data-taille') || 'normal';
+
+  // 2. Marquer les boutons actifs
+  document.querySelector(`.mode-card[data-mode="${modeActuel}"]`)?.classList.add('actif');
+  document.querySelector(`.theme-card[data-theme="${themeActuel}"]`)?.classList.add('actif');
+  document.querySelector(`.btn-taille[data-taille="${tailleActuelle}"]`)?.classList.add('actif');
+
+  console.log('🎨 Préférences actuelles :', {mode: modeActuel, theme: themeActuel, taille: tailleActuelle});
+});
+
+// ════════════════════════════════════
+// 🌙 CHOISIR MODE
+// ════════════════════════════════════
+function choisirMode(mode, el) {
+  document.querySelectorAll('.mode-card').forEach(c=>c.classList.remove('actif'));
+  el.classList.add('actif');
+
+  // Appliquer IMMÉDIATEMENT
+  document.documentElement.setAttribute('data-mode', mode);
+
+  // Sauvegarder dans localStorage (rapide)
+  localStorage.setItem('nokirova-mode', mode);
+
+  // Sauvegarder dans DB (permanent)
+  sauvegarderDB('mode', mode);
+
+  toast('🌓 Mode appliqué : ' + mode);
+}
+
+// ════════════════════════════════════
+// 🎨 CHOISIR THÈME
+// ════════════════════════════════════
+function choisirTheme(theme, el) {
+  document.querySelectorAll('.theme-card').forEach(c=>c.classList.remove('actif'));
+  el.classList.add('actif');
+
+  // Appliquer IMMÉDIATEMENT
+  document.documentElement.setAttribute('data-theme', theme);
+
+  // Sauvegarder
+  localStorage.setItem('nokirova-theme', theme);
+  sauvegarderDB('theme', theme);
+
+  toast('🎨 Thème appliqué : ' + theme);
+}
+
+// ════════════════════════════════════
+// 📏 CHOISIR TAILLE
+// ════════════════════════════════════
+function choisirTaille(taille, el) {
+  document.querySelectorAll('.btn-taille').forEach(b=>b.classList.remove('actif'));
+  el.classList.add('actif');
+
+  // Appliquer IMMÉDIATEMENT
+  document.documentElement.setAttribute('data-taille', taille);
+
+  // Sauvegarder
+  localStorage.setItem('nokirova-taille', taille);
+  sauvegarderDB('taille', taille);
+
+  toast('📏 Taille appliquée : ' + taille);
+}
+
+// ════════════════════════════════════
+// 💾 SAUVEGARDER DANS DB
+// ════════════════════════════════════
+function sauvegarderDB(cle, valeur) {
+  fetch('/api/preferences/set', {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({cle: cle, valeur: valeur})
+  }).then(r=>r.json()).then(d=>{
+    if (!d.succes) console.error('❌ Erreur DB:', d.erreur);
+  }).catch(e=>console.error('❌ Réseau:', e));
+}
+
+// ════════════════════════════════════
+// 🔄 RESET
+// ════════════════════════════════════
+function resetTout() {
+  if (!confirm('🔄 Réinitialiser TOUTES les préférences ?')) return;
+
+  // Reset visuels
+  document.documentElement.setAttribute('data-mode', 'clair');
+  document.documentElement.setAttribute('data-theme', 'printemps');
+  document.documentElement.setAttribute('data-taille', 'normal');
+
+  // Reset localStorage
+  localStorage.setItem('nokirova-mode', 'clair');
+  localStorage.setItem('nokirova-theme', 'printemps');
+  localStorage.setItem('nokirova-taille', 'normal');
+
+  // Reset DB
+  fetch('/api/preferences/reset', {method:'POST'}).then(()=>{
+    toast('✅ Tout réinitialisé !');
+    setTimeout(()=>location.reload(), 1000);
+  });
+}
+
+// ════════════════════════════════════
+// 💬 TOAST
+// ════════════════════════════════════
+function toast(msg) {
+  const m = document.getElementById('message');
+  m.textContent = msg;
+  m.style.display = 'block';
+  setTimeout(()=>{ m.style.display = 'none'; }, 2000);
+}
+</script>
+{% endblock %}

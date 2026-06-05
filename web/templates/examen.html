@@ -1,0 +1,188 @@
+{% extends "base.html" %}
+{% block title %}Exercices Examen - NOKIROVA{% endblock %}
+{% block contenu %}
+<div class="page-container">
+
+  <div class="page-header" style="background: linear-gradient(135deg, #FDBA74, #FED7AA); border-left: 5px solid #F59E0B;">
+    <div class="page-header-icon" style="background: linear-gradient(135deg, #F59E0B, #FB923C);">📚</div>
+    <div>
+      <h1 class="page-title" style="color: #92400E;">Exercices Examen</h1>
+      <p class="page-subtitle" style="color: #B45309;">Génère des exercices type examen avec corrigés détaillés</p>
+    </div>
+  </div>
+
+  <div id="alerte-cours" class="alerte-warning" style="display:none;">
+    <span>⚠️</span>
+    <div>
+      <strong>Aucun cours chargé !</strong>
+      <p>Importe un cours pour générer des exercices.</p>
+      <a href="/import" class="btn-alerte">📥 Importer un cours</a>
+    </div>
+  </div>
+
+  <div id="statut-cours" class="statut-cours-card" style="display:none; background:#FED7AA; border-color:#FDBA74;">
+    <span style="font-size:1.5rem;">📚</span>
+    <div>
+      <strong>Cours chargé :</strong>
+      <span id="nom-cours-affiche" style="color:#92400E; font-weight:700;"></span>
+    </div>
+    <span class="badge-ok">✅ Prêt</span>
+  </div>
+
+  <div class="control-panel" style="border-top: 4px solid #F59E0B;">
+    <h2 class="control-title" style="color:#92400E;">⚙️ Paramètres</h2>
+
+    <div class="slider-container">
+      <label class="slider-label">
+        📝 Nombre d'exercices :
+        <span id="valeur-slider" class="slider-value" style="background:#F59E0B;">3</span>
+      </label>
+      <input type="range" id="slider-nb" min="1" max="10" value="3" class="slider-qcm" style="background:#FED7AA;" oninput="majSlider(this.value)"/>
+      <div class="slider-info">
+        <span>1 ⚡</span><span>5 📚</span><span>10 💎</span>
+      </div>
+    </div>
+
+    <label class="slider-label" style="margin-bottom:0.5rem;">🎚️ Niveau de difficulté :</label>
+    <select id="niveau" style="width:100%; padding:0.7rem; border-radius:10px; border:2px solid #FDBA74; font-size:0.95rem; margin-bottom:1.5rem; background:#FFF7ED; color:#92400E; font-weight:600;">
+      <option value="facile">🟢 Facile</option>
+      <option value="moyen" selected>🟡 Moyen</option>
+      <option value="difficile">🔴 Difficile (niveau examen)</option>
+    </select>
+
+    <button id="btn-generer" onclick="generer()" class="btn-primary btn-orange">📚 Générer les Exercices</button>
+  </div>
+
+  <div id="loading" class="loading-card" style="display:none; background:#FED7AA; border-color:#FDBA74;">
+    <div class="spinner" style="border-color:#FDBA74; border-top-color:#F59E0B;"></div>
+    <div>
+      <p style="font-weight:700; color:#92400E;">📚 Génération en cours...</p>
+      <p style="color:#9CA3AF; font-size:0.85rem;">L'IA prépare tes exercices 🤖</p>
+    </div>
+  </div>
+
+  <div id="zone-resultat" style="display:none;">
+    <div class="actions-bar" style="border-left: 4px solid #F59E0B; background:#FED7AA;">
+      <span style="font-weight:700; color:#92400E;">✅ Exercices générés !</span>
+      <div class="actions-buttons">
+        <button onclick="copier()" class="btn-action btn-copy">📋 Copier</button>
+        <button onclick="telecharger()" class="btn-action btn-download">💾 Télécharger</button>
+        <button onclick="generer()" class="btn-action btn-regen" style="border-color:#F59E0B; color:#92400E; background:#FED7AA;">🔄 Régénérer</button>
+      </div>
+    </div>
+    <div id="display"></div>
+    <textarea id="brut" style="display:none;"></textarea>
+  </div>
+</div>
+
+<style>
+  .page-container { padding: 2rem; max-width: 1100px; margin: 0 auto; }
+  .page-header { display:flex; align-items:center; gap:1.2rem; border-radius:20px; padding:1.5rem 2rem; margin-bottom:1.5rem; box-shadow:0 4px 20px rgba(0,0,0,0.05);}
+  .page-header-icon { width:60px; height:60px; border-radius:16px; display:flex; align-items:center; justify-content:center; font-size:1.8rem; color:white; flex-shrink:0;}
+  .page-title { font-size:1.6rem; font-weight:800; margin:0 0 0.2rem;}
+  .page-subtitle { margin:0; font-size:0.95rem;}
+  .alerte-warning { display:flex; align-items:flex-start; gap:1rem; background:#FFF3CD; border:2px solid #FFD93D; border-radius:16px; padding:1.2rem 1.5rem; margin-bottom:1.5rem;}
+  .alerte-warning span { font-size:1.5rem;}
+  .alerte-warning p { margin:0.2rem 0 0.5rem; color:#6B7280; font-size:0.9rem;}
+  .btn-alerte { display:inline-block; background:#FFD93D; color:#374151; font-weight:700; padding:0.4rem 1rem; border-radius:20px; text-decoration:none; font-size:0.85rem;}
+  .statut-cours-card { display:flex; align-items:center; gap:1rem; border-radius:16px; padding:1rem 1.5rem; margin-bottom:1.5rem; border:2px solid;}
+  .badge-ok { margin-left:auto; background:#00C853; color:white; font-size:0.8rem; font-weight:700; padding:0.3rem 0.8rem; border-radius:20px;}
+  .control-panel { background:white; border-radius:20px; padding:2rem; margin-bottom:1.5rem; box-shadow:0 4px 20px rgba(0,0,0,0.08);}
+  .control-title { font-size:1.1rem; font-weight:700; margin-bottom:1.5rem;}
+  .slider-container { margin-bottom:1.5rem;}
+  .slider-label { display:flex; align-items:center; gap:0.5rem; font-weight:600; color:#374151; margin-bottom:0.8rem;}
+  .slider-value { color:white; font-weight:700; padding:0.2rem 0.7rem; border-radius:20px; font-size:1rem; min-width:35px; text-align:center;}
+  .slider-qcm { width:100%; height:8px; border-radius:10px; outline:none; cursor:pointer; -webkit-appearance:none;}
+  .slider-qcm::-webkit-slider-thumb { -webkit-appearance:none; width:24px; height:24px; border-radius:50%; background:#F59E0B; cursor:pointer; box-shadow:0 2px 8px rgba(245,158,11,0.4);}
+  .slider-info { display:flex; justify-content:space-between; font-size:0.78rem; color:#9CA3AF; margin-top:0.4rem;}
+  .btn-primary { width:100%; padding:1rem; border:none; border-radius:16px; font-size:1.1rem; font-weight:700; cursor:pointer; transition:all 0.3s;}
+  .btn-orange { background:linear-gradient(135deg, #F59E0B, #B45309); color:white; box-shadow:0 4px 15px rgba(245,158,11,0.4);}
+  .btn-orange:hover { transform:translateY(-2px); box-shadow:0 8px 25px rgba(245,158,11,0.5);}
+  .btn-orange:disabled { background:#D1D5DB; cursor:not-allowed;}
+  .loading-card { display:flex; align-items:center; gap:1.5rem; border-radius:20px; padding:2rem; margin-bottom:1.5rem; border:2px solid;}
+  .spinner { width:50px; height:50px; border:5px solid; border-radius:50%; animation:spin 1s linear infinite; flex-shrink:0;}
+  @keyframes spin { to { transform:rotate(360deg);}}
+  .actions-bar { display:flex; align-items:center; justify-content:space-between; border-radius:16px; padding:1rem 1.5rem; margin-bottom:1.5rem; flex-wrap:wrap; gap:0.8rem;}
+  .actions-buttons { display:flex; gap:0.6rem; flex-wrap:wrap;}
+  .btn-action { padding:0.5rem 1rem; border-radius:20px; font-weight:600; font-size:0.85rem; cursor:pointer; border:2px solid transparent;}
+  .btn-copy { background:#EDE9FE; color:#7B61FF; border-color:#7B61FF;}
+  .btn-copy:hover { background:#7B61FF; color:white;}
+  .btn-download { background:#D1FAE5; color:#00C853; border-color:#00C853;}
+  .btn-download:hover { background:#00C853; color:white;}
+  .examen-bloc { background:white; border-radius:20px; padding:1.5rem; margin-bottom:1.5rem; box-shadow:0 4px 20px rgba(245,158,11,0.08); border-left:5px solid #F59E0B; white-space:pre-wrap; font-size:0.95rem; line-height:1.7; color:#374151;}
+</style>
+
+<script>
+let brut = '';
+document.addEventListener('DOMContentLoaded', verifierCours);
+
+function verifierCours() {
+  fetch('/api/statut-cours').then(r=>r.json()).then(d=>{
+    if (d.cours_charge) {
+      document.getElementById('nom-cours-affiche').textContent = d.nom_cours;
+      document.getElementById('statut-cours').style.display = 'flex';
+      document.getElementById('alerte-cours').style.display = 'none';
+      document.getElementById('btn-generer').disabled = false;
+    } else {
+      document.getElementById('alerte-cours').style.display = 'flex';
+      document.getElementById('btn-generer').disabled = true;
+    }
+  });
+}
+
+function majSlider(v) { document.getElementById('valeur-slider').textContent = v; }
+
+function generer() {
+  const nb = document.getElementById('slider-nb').value;
+  const niv = document.getElementById('niveau').value;
+  document.getElementById('zone-resultat').style.display = 'none';
+  document.getElementById('loading').style.display = 'flex';
+  document.getElementById('btn-generer').disabled = true;
+
+  fetch('/api/examen', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({nombre: parseInt(nb), niveau: niv})
+  })
+  .then(r=>r.json())
+  .then(d=>{
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('btn-generer').disabled = false;
+    if (d.succes) {
+      brut = d.texte;
+      document.getElementById('brut').value = brut;
+      const c = document.getElementById('display');
+      c.innerHTML = '';
+      const div = document.createElement('div');
+      div.className = 'examen-bloc';
+      div.textContent = d.texte;
+      c.appendChild(div);
+      document.getElementById('zone-resultat').style.display = 'block';
+      document.getElementById('zone-resultat').scrollIntoView({behavior:'smooth'});
+    } else {
+      alert('❌ ' + (d.erreur || 'Erreur'));
+    }
+  })
+  .catch(e=>{
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('btn-generer').disabled = false;
+    alert('❌ ' + e.message);
+  });
+}
+
+function copier() {
+  navigator.clipboard.writeText(document.getElementById('brut').value).then(()=>{
+    const b = document.querySelector('.btn-copy'); const o = b.textContent;
+    b.textContent = '✅ Copié !'; b.style.background='#00C853'; b.style.color='white';
+    setTimeout(()=>{ b.textContent=o; b.style.background='#EDE9FE'; b.style.color='#7B61FF';}, 2000);
+  });
+}
+
+function telecharger() {
+  const blob = new Blob([document.getElementById('brut').value], {type:'text/plain;charset=utf-8'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'Examen_NOKIROVA_' + new Date().toLocaleDateString('fr-FR').replace(/\//g,'-') + '.txt';
+  a.click();
+}
+</script>
+{% endblock %}

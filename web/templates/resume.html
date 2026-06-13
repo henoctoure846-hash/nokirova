@@ -4,403 +4,535 @@
 
 {% block contenu %}
 
-<!-- 🎨 TITRE DE PAGE -->
-<div class="titre-page" style="background: var(--bleu-royal);">
-    📝 Résumé de cours
-</div>
+<div class="resume-page">
 
-{% if not cours_actuel or cours_actuel == 'Aucun cours chargé' %}
-
-<!-- ⚠️ AUCUN COURS -->
-<div class="alerte-import">
-    <div class="alerte-icone">📭</div>
-    <h2>Aucun cours chargé !</h2>
-    <p>Pour générer un résumé, tu dois d'abord importer un cours.</p>
-    <a href="/import" class="btn-aller">📥 Importer un cours</a>
-</div>
-
-{% else %}
-
-<!-- ✅ COURS CHARGÉ -->
-<div class="info-cours">
-    <div class="cours-icone">📚</div>
-    <div>
-        <strong>Cours actuel :</strong> {{ cours_actuel }}
-        {% if matiere %}<br><small>🎯 Matière : {{ matiere }}</small>{% endif %}
+  <!-- HEADER BLEU -->
+  <div class="resume-header">
+    <div class="resume-header-bg">📝</div>
+    <div class="resume-header-icone">📝</div>
+    <div class="resume-header-texte">
+      <h1>Résumé de cours</h1>
+      <p>✨ L'IA synthétise ton cours en quelques secondes</p>
     </div>
-</div>
+  </div>
 
-<!-- 🚀 BOUTON GÉNÉRER -->
-<button class="btn-generer" id="btnGenerer" onclick="genererResume()">
-    🚀 Générer le résumé
-</button>
+  {% if not cours_actuel or cours_actuel == 'Aucun cours chargé' %}
 
-<!-- 🔄 ZONE DE CHARGEMENT -->
-<div id="zoneChargement" class="zone-chargement" style="display:none;">
-    <div class="spinner"></div>
-    <p>📝 Génération en cours... (peut prendre 10-30 secondes)</p>
-</div>
+  <!-- ALERTE PAS DE COURS -->
+  <div class="resume-alerte">
+    <div class="resume-alerte-icone">📭</div>
+    <div class="resume-alerte-contenu">
+      <h2>Aucun cours chargé !</h2>
+      <p>Pour générer un résumé intelligent, tu dois d'abord importer un cours.</p>
+      <a href="/import" class="resume-alerte-btn">📥 Importer un cours maintenant</a>
+    </div>
+  </div>
 
-<!-- ✨ ZONE RÉSULTAT -->
-<div id="zoneResultat" class="zone-resultat" style="display:none;">
-    <div class="resultat-header">
-        <h2>✨ Résumé généré !</h2>
-        <div class="actions-resultat">
-            <button onclick="copierResume()" class="btn-action">📋 Copier</button>
-            <button onclick="telechargerResumePDF()" class="btn-action btn-pdf">
-                📄 Télécharger PDF
-            </button>
-            <button onclick="partagerResume()" class="btn-action btn-partage">
-                🤝 Partager
-            </button>
-            <button onclick="regenerer()" class="btn-action">🔄 Régénérer</button>
-        </div>
+  {% else %}
+
+  <!-- STATUT COURS -->
+  <div class="resume-statut">
+    <div class="resume-statut-icone">📚</div>
+    <div class="resume-statut-texte">
+      <span class="resume-statut-label">Cours chargé</span>
+      <span class="resume-statut-nom">{{ cours_actuel }}</span>
+      {% if matiere %}
+        <span class="resume-statut-matiere">🎯 {{ matiere }}</span>
+      {% endif %}
+    </div>
+    <div class="resume-statut-badge">✅ Prêt</div>
+  </div>
+
+  <!-- BOUTON GÉNÉRER -->
+  <button class="resume-btn-generer" id="btnGenerer" onclick="genererResume()">
+    <span class="resume-btn-icone">🚀</span>
+    <span class="resume-btn-texte">Générer le résumé</span>
+  </button>
+
+  <!-- LOADING -->
+  <div id="zoneChargement" class="resume-loading" style="display:none;">
+    <div class="resume-spinner"></div>
+    <div class="resume-loading-texte">
+      <p class="resume-loading-titre">📝 Génération en cours...</p>
+      <p class="resume-loading-sous">L'IA analyse et synthétise ton cours ✨</p>
+    </div>
+  </div>
+
+  <!-- RÉSULTAT -->
+  <div id="zoneResultat" class="resume-resultat" style="display:none;">
+    <div class="resume-actions">
+      <div class="resume-actions-titre">
+        <span>✨</span> Résumé généré !
+      </div>
+      <div class="resume-actions-btns">
+        <button onclick="copierResume()" class="resume-action-btn resume-copy">
+          <span>📋</span> Copier
+        </button>
+        <button onclick="telechargerResumePDF()" class="resume-action-btn resume-pdf">
+          <span>📄</span> PDF
+        </button>
+        <button onclick="partagerResume()" class="resume-action-btn resume-partage">
+          <span>🤝</span> Partager
+        </button>
+        <button onclick="regenerer()" class="resume-action-btn resume-regen">
+          <span>🔄</span> Régénérer
+        </button>
+      </div>
     </div>
 
-    <div class="contenu-resume" id="contenuResume"></div>
+    <div class="resume-contenu-wrapper">
+      <div class="resume-contenu" id="contenuResume"></div>
+    </div>
+  </div>
+
+  {% endif %}
+
 </div>
 
-{% endif %}
+<div id="toastGlobal" class="toast-notif"></div>
 
-{% endblock %}
-
-{% block extra_css %}
 <style>
-.titre-page {
-    padding: 20px;
-    border-radius: 18px;
-    text-align: center;
-    color: white;
-    font-size: 24px;
-    font-weight: bold;
-    margin-bottom: 20px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+/* ═══════════════════════════════════════════
+   📝 RÉSUMÉ PAGE REDESIGN PRO
+   ═══════════════════════════════════════════ */
+.resume-page {
+  max-width: 1100px;
+  margin: 0 auto;
+  animation: fadeInUp 0.5s ease;
+}
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
-.alerte-import {
-    background: white;
-    padding: 50px;
-    border-radius: 20px;
-    text-align: center;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
-    border-left: 5px solid var(--orange-dore);
+/* HEADER BLEU */
+.resume-header {
+  position: relative;
+  background: linear-gradient(135deg, #2962FF, #1E40AF);
+  border-radius: 28px;
+  padding: 28px 30px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  color: white;
+  box-shadow: 0 10px 30px rgba(41,98,255,0.3);
+  overflow: hidden;
+}
+.resume-header-bg {
+  position: absolute;
+  top: -30px; right: -20px;
+  font-size: 200px;
+  opacity: 0.15;
+  transform: rotate(15deg);
+  pointer-events: none;
+}
+.resume-header-icone {
+  width: 70px; height: 70px;
+  background: white;
+  border-radius: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 36px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+  z-index: 1;
+}
+.resume-header-texte { z-index: 1; }
+.resume-header-texte h1 {
+  font-size: 26px;
+  font-weight: 900;
+  margin: 0;
+  letter-spacing: -0.5px;
+}
+.resume-header-texte p {
+  font-size: 14px;
+  opacity: 0.92;
+  margin-top: 4px;
+  font-weight: 500;
 }
 
-.alerte-icone {
-    font-size: 80px;
-    margin-bottom: 15px;
+/* ALERTE */
+.resume-alerte {
+  display: flex;
+  gap: 20px;
+  background: linear-gradient(135deg, #FEF3C7, #FDE68A);
+  border-radius: 24px;
+  padding: 32px;
+  border-left: 6px solid #F59E0B;
+  align-items: center;
+}
+.resume-alerte-icone {
+  font-size: 70px;
+  flex-shrink: 0;
+}
+.resume-alerte-contenu h2 {
+  color: #92400E;
+  font-size: 22px;
+  font-weight: 800;
+  margin-bottom: 8px;
+}
+.resume-alerte-contenu p {
+  color: #B45309;
+  font-size: 15px;
+  margin-bottom: 16px;
+  line-height: 1.6;
+}
+.resume-alerte-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: linear-gradient(135deg, #F59E0B, #D97706);
+  color: white;
+  font-weight: 800;
+  padding: 12px 24px;
+  border-radius: 50px;
+  text-decoration: none;
+  font-size: 14px;
+  box-shadow: 0 6px 18px rgba(245,158,11,0.4);
+  transition: all 0.3s;
+}
+.resume-alerte-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 25px rgba(245,158,11,0.55);
 }
 
-.alerte-import h2 {
-    color: var(--orange-dore);
-    margin-bottom: 10px;
+/* STATUT */
+.resume-statut {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: white;
+  border-radius: 20px;
+  padding: 18px 22px;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+  border-left: 5px solid #2962FF;
+}
+.resume-statut-icone {
+  width: 54px; height: 54px;
+  background: linear-gradient(135deg, #7EC8FF, #2962FF);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+  color: white;
+  flex-shrink: 0;
+}
+.resume-statut-texte { flex: 1; display: flex; flex-direction: column; gap: 3px; }
+.resume-statut-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #9CA3AF;
+  font-weight: 700;
+}
+.resume-statut-nom {
+  color: #1A1D2E;
+  font-weight: 700;
+  font-size: 15px;
+}
+.resume-statut-matiere {
+  color: #2962FF;
+  font-size: 12px;
+  font-weight: 600;
+  margin-top: 2px;
+}
+.resume-statut-badge {
+  background: linear-gradient(135deg, #00C853, #2E7D32);
+  color: white;
+  padding: 6px 14px;
+  border-radius: 50px;
+  font-weight: 700;
+  font-size: 12px;
+  box-shadow: 0 3px 10px rgba(0,200,83,0.3);
 }
 
-.alerte-import p {
-    color: var(--gris-doux);
-    margin-bottom: 25px;
+/* BOUTON GÉNÉRER */
+.resume-btn-generer {
+  width: 100%;
+  background: linear-gradient(135deg, #00C853, #2E7D32);
+  color: white;
+  border: none;
+  padding: 18px;
+  border-radius: 50px;
+  font-size: 17px;
+  font-weight: 900;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  box-shadow: 0 8px 25px rgba(0,200,83,0.4);
+  transition: all 0.3s;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  margin-bottom: 20px;
+}
+.resume-btn-generer:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 35px rgba(0,200,83,0.55);
+}
+.resume-btn-generer:disabled {
+  background: #D1D5DB;
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+}
+.resume-btn-icone {
+  width: 34px; height: 34px;
+  background: white;
+  color: #00C853;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
 }
 
-.btn-aller {
-    display: inline-block;
-    background: linear-gradient(135deg, var(--bleu-royal), var(--bleu-ciel));
-    color: white;
-    padding: 15px 35px;
-    border-radius: 14px;
-    font-weight: bold;
-    text-decoration: none;
-    box-shadow: 0 4px 12px rgba(41, 98, 255, 0.3);
-    transition: all 0.3s;
+/* LOADING */
+.resume-loading {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  background: white;
+  border-radius: 24px;
+  padding: 32px;
+  margin-bottom: 20px;
+  box-shadow: 0 6px 25px rgba(0,0,0,0.06);
+  border-left: 5px solid #2962FF;
+  animation: pulseGlow 2s ease-in-out infinite;
+}
+@keyframes pulseGlow {
+  0%,100% { box-shadow: 0 6px 25px rgba(0,0,0,0.06); }
+  50% { box-shadow: 0 6px 30px rgba(41,98,255,0.25); }
+}
+.resume-spinner {
+  width: 60px; height: 60px;
+  border: 5px solid #D0EBFF;
+  border-top-color: #2962FF;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  flex-shrink: 0;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.resume-loading-titre {
+  font-size: 17px;
+  font-weight: 800;
+  color: #2962FF;
+  margin: 0;
+}
+.resume-loading-sous {
+  font-size: 13px;
+  color: #9CA3AF;
+  margin-top: 4px;
 }
 
-.btn-aller:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 6px 18px rgba(41, 98, 255, 0.4);
+/* RÉSULTAT */
+.resume-resultat { animation: fadeInUp 0.5s ease; }
+
+.resume-actions {
+  background: white;
+  border-radius: 20px;
+  padding: 18px 22px;
+  margin-bottom: 16px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+  border-left: 5px solid #2962FF;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+.resume-actions-titre {
+  font-weight: 800;
+  color: #1E40AF;
+  font-size: 15px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.resume-actions-btns {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.resume-action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 16px;
+  border-radius: 50px;
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+  border: none;
+  transition: all 0.3s;
+  color: white;
+}
+.resume-action-btn:hover { transform: translateY(-2px); }
+.resume-copy { background: linear-gradient(135deg, #7B61FF, #5B21B6); box-shadow: 0 4px 12px rgba(123,97,255,0.3); }
+.resume-pdf { background: linear-gradient(135deg, #2962FF, #1E40AF); box-shadow: 0 4px 12px rgba(41,98,255,0.3); }
+.resume-partage { background: linear-gradient(135deg, #00C853, #2E7D32); box-shadow: 0 4px 12px rgba(0,200,83,0.3); }
+.resume-regen { background: linear-gradient(135deg, #F59E0B, #B45309); box-shadow: 0 4px 12px rgba(245,158,11,0.3); }
+
+/* CONTENU RÉSUMÉ */
+.resume-contenu-wrapper {
+  background: white;
+  border-radius: 24px;
+  padding: 6px;
+  box-shadow: 0 6px 25px rgba(0,0,0,0.06);
+  border-top: 5px solid #2962FF;
+}
+.resume-contenu {
+  background: linear-gradient(180deg, #FAFBFF, #F0F5FF);
+  padding: 28px;
+  border-radius: 20px;
+  font-size: 15px;
+  line-height: 1.85;
+  color: #1A1D2E;
+  white-space: pre-wrap;
+  min-height: 300px;
+  max-height: 600px;
+  overflow-y: auto;
+  font-family: 'Segoe UI', -apple-system, sans-serif;
+}
+.resume-contenu::-webkit-scrollbar { width: 6px; }
+.resume-contenu::-webkit-scrollbar-track { background: transparent; }
+.resume-contenu::-webkit-scrollbar-thumb {
+  background: #A5D8FF;
+  border-radius: 4px;
 }
 
-.info-cours {
-    background: var(--bleu-tres-pale);
-    padding: 18px;
-    border-radius: 15px;
-    margin-bottom: 20px;
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    border-left: 5px solid var(--bleu-royal);
-}
-
-.cours-icone {
-    font-size: 40px;
-}
-
-.info-cours strong {
-    color: var(--bleu-royal);
-}
-
-.btn-generer {
-    width: 100%;
-    background: linear-gradient(135deg, var(--vert-emeraude), var(--vert-printemps));
-    color: white;
-    padding: 20px;
-    border-radius: 18px;
-    text-align: center;
-    font-weight: bold;
-    font-size: 18px;
-    cursor: pointer;
-    border: none;
-    box-shadow: 0 4px 18px rgba(0, 200, 83, 0.3);
-    transition: all 0.3s;
-    margin-bottom: 20px;
-}
-
-.btn-generer:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 8px 25px rgba(0, 200, 83, 0.45);
-}
-
-.btn-generer:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-}
-
-.zone-chargement {
-    background: white;
-    padding: 50px;
-    border-radius: 20px;
-    text-align: center;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
-}
-
-.spinner {
-    border: 5px solid var(--gris-perle);
-    border-top: 5px solid var(--bleu-royal);
-    border-radius: 50%;
-    width: 60px;
-    height: 60px;
-    margin: 0 auto 20px;
-    animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-
-.zone-resultat {
-    background: white;
-    padding: 30px;
-    border-radius: 20px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
-}
-
-.resultat-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-    flex-wrap: wrap;
-    gap: 15px;
-}
-
-.resultat-header h2 {
-    color: var(--vert-emeraude);
-}
-
-.actions-resultat {
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-}
-
-.btn-action {
-    background: var(--gris-perle);
-    color: var(--gris-texte);
-    border: none;
-    padding: 10px 18px;
-    border-radius: 10px;
-    font-weight: bold;
-    font-size: 13px;
-    cursor: pointer;
-    transition: all 0.3s;
-}
-
-.btn-action:hover {
-    background: var(--bleu-royal);
-    color: white;
-    transform: translateY(-2px);
-}
-
-.btn-pdf {
-    background: linear-gradient(135deg, #2962FF, #7EC8FF);
-    color: white !important;
-}
-
-.btn-pdf:hover {
-    background: linear-gradient(135deg, #1a4fd6, #5ab0f0) !important;
-    transform: translateY(-2px);
-}
-
-.btn-partage {
-    background: linear-gradient(135deg, #00C853, #7ED321);
-    color: white !important;
-}
-
-.btn-partage:hover {
-    background: linear-gradient(135deg, #00a844, #6ab51d) !important;
-    transform: translateY(-2px);
-}
-
-.contenu-resume {
-    background: var(--blanc-casse);
-    padding: 25px;
-    border-radius: 14px;
-    font-size: 15px;
-    line-height: 1.8;
-    color: var(--gris-texte);
-    white-space: pre-wrap;
-    border: 2px solid var(--bleu-tres-pale);
-    min-height: 300px;
-    max-height: 600px;
-    overflow-y: auto;
-}
-
-.contenu-resume::-webkit-scrollbar {
-    width: 8px;
-}
-
-.contenu-resume::-webkit-scrollbar-thumb {
-    background: var(--bleu-pale);
-    border-radius: 4px;
-}
-
+/* TOAST */
 .toast-notif {
-    position: fixed;
-    bottom: 30px;
-    right: 30px;
-    background: #374151;
-    color: white;
-    padding: 14px 22px;
-    border-radius: 14px;
-    font-weight: bold;
-    font-size: 14px;
-    z-index: 9999;
-    opacity: 0;
-    transform: translateY(20px);
-    transition: all 0.4s ease;
-    box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  background: #1A1D2E;
+  color: white;
+  padding: 14px 22px;
+  border-radius: 14px;
+  font-weight: 700;
+  font-size: 14px;
+  z-index: 9999;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: all 0.4s ease;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.25);
+  pointer-events: none;
+}
+.toast-notif.show { opacity: 1; transform: translateY(0); }
+
+/* MODE SOMBRE */
+html[data-mode="sombre"] .resume-statut,
+html[data-mode="sombre"] .resume-loading,
+html[data-mode="sombre"] .resume-actions,
+html[data-mode="sombre"] .resume-contenu-wrapper {
+  background: #1A1D2E !important;
+  color: #F1F5F9 !important;
+}
+html[data-mode="sombre"] .resume-statut-nom { color: #F1F5F9 !important; }
+html[data-mode="sombre"] .resume-actions-titre { color: #93BBFC !important; }
+html[data-mode="sombre"] .resume-contenu {
+  background: linear-gradient(180deg, #2A2D3E, #1F2230) !important;
+  color: #F1F5F9 !important;
 }
 
-.toast-notif.show {
-    opacity: 1;
-    transform: translateY(0);
+/* RESPONSIVE */
+@media (max-width: 768px) {
+  .resume-header { flex-direction: column; text-align: center; padding: 22px; }
+  .resume-header-texte h1 { font-size: 20px; }
+  .resume-alerte { flex-direction: column; text-align: center; padding: 24px; }
+  .resume-alerte-icone { font-size: 50px; }
+  .resume-actions { flex-direction: column; align-items: stretch; }
+  .resume-actions-btns { justify-content: center; }
+  .resume-statut { flex-wrap: wrap; }
+  .resume-statut-badge { margin-left: auto; }
+  .resume-contenu { padding: 20px; font-size: 14px; }
 }
 </style>
-{% endblock %}
 
-{% block extra_js %}
 <script>
 let resumeGenere = '';
 
-// 🔔 Toast rapide
-function showToast(message, couleur) {
-    couleur = couleur || '#374151';
-    let toast = document.getElementById('toastGlobal');
-    if (!toast) {
-        toast = document.createElement('div');
-        toast.id = 'toastGlobal';
-        toast.className = 'toast-notif';
-        document.body.appendChild(toast);
-    }
-    toast.style.background = couleur;
-    toast.textContent = message;
-    toast.classList.add('show');
-    setTimeout(function() { toast.classList.remove('show'); }, 3000);
+function showToast(msg, couleur = '#1A1D2E') {
+  const toast = document.getElementById('toastGlobal');
+  toast.style.background = couleur;
+  toast.textContent = msg;
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 3000);
 }
 
 async function genererResume() {
-    const btn = document.getElementById('btnGenerer');
-    const chargement = document.getElementById('zoneChargement');
-    const resultat = document.getElementById('zoneResultat');
+  const btn = document.getElementById('btnGenerer');
+  const chargement = document.getElementById('zoneChargement');
+  const resultat = document.getElementById('zoneResultat');
 
-    btn.disabled = true;
-    btn.style.display = 'none';
-    chargement.style.display = 'block';
-    resultat.style.display = 'none';
+  btn.disabled = true;
+  btn.style.display = 'none';
+  chargement.style.display = 'flex';
+  resultat.style.display = 'none';
 
-    try {
-        const reponse = await fetch('/api/resume', {method: 'POST'});
-        const data = await reponse.json();
+  try {
+    const r = await fetch('/api/resume', { method: 'POST' });
+    const data = await r.json();
+    chargement.style.display = 'none';
 
-        chargement.style.display = 'none';
-
-        if (data.succes) {
-            resumeGenere = data.resume;
-            document.getElementById('contenuResume').textContent = data.resume;
-            resultat.style.display = 'block';
-        } else {
-            showToast('⚠️ Erreur : ' + data.erreur, '#EF4444');
-            btn.style.display = 'block';
-            btn.disabled = false;
-        }
-    } catch (error) {
-        chargement.style.display = 'none';
-        btn.style.display = 'block';
-        btn.disabled = false;
-        showToast('⚠️ Erreur : ' + error, '#EF4444');
+    if (data.succes) {
+      resumeGenere = data.resume;
+      document.getElementById('contenuResume').textContent = data.resume;
+      resultat.style.display = 'block';
+      resultat.scrollIntoView({ behavior: 'smooth' });
+    } else {
+      showToast('⚠️ ' + data.erreur, '#EF4444');
+      btn.style.display = 'flex';
+      btn.disabled = false;
     }
+  } catch (e) {
+    chargement.style.display = 'none';
+    btn.style.display = 'flex';
+    btn.disabled = false;
+    showToast('⚠️ ' + e, '#EF4444');
+  }
 }
 
 function copierResume() {
-    navigator.clipboard.writeText(resumeGenere);
-    showToast('✅ Résumé copié !', '#00C853');
+  if (!resumeGenere) return showToast('⚠️ Génère d\'abord !', '#F59E0B');
+  navigator.clipboard.writeText(resumeGenere);
+  showToast('✅ Résumé copié !', '#00C853');
 }
 
-// 📄 PDF NOKIROVA stylé
 function telechargerResumePDF() {
-    if (!resumeGenere) {
-        showToast('⚠️ Génère d\'abord un résumé !', '#F59E0B');
-        return;
-    }
-    window.telechargerPDF(
-        '📝 Résumé de cours',
-        resumeGenere,
-        {
-            couleur: [41, 98, 255],
-            matiere: '{{ matiere or "Cours" }}',
-            emoji: '📝'
-        }
-    );
-    showToast('📄 PDF généré avec succès !', '#2962FF');
+  if (!resumeGenere) return showToast('⚠️ Génère d\'abord !', '#F59E0B');
+  window.telechargerPDF('📝 Résumé de cours', resumeGenere, {
+    couleur: [41, 98, 255],
+    matiere: '{{ matiere or "Cours" }}',
+    emoji: '📝'
+  });
+  showToast('📄 PDF généré !', '#2962FF');
 }
 
-// 🤝 Partage
 async function partagerResume() {
-    if (!resumeGenere) {
-        showToast('⚠️ Génère d\'abord un résumé !', '#F59E0B');
-        return;
-    }
-
-    if (navigator.share) {
-        try {
-            await navigator.share({
-                title: '📝 Résumé NOKIROVA',
-                text: resumeGenere
-            });
-            showToast('✅ Partagé !', '#00C853');
-        } catch (e) {
-            // Annulé par l'utilisateur
-        }
-        return;
-    }
-
-    navigator.clipboard.writeText(resumeGenere);
-    showToast('📋 Copié ! Colle-le où tu veux 🌸', '#7B61FF');
+  if (!resumeGenere) return showToast('⚠️ Génère d\'abord !', '#F59E0B');
+  if (navigator.share) {
+    try {
+      await navigator.share({ title: '📝 Résumé NOKIROVA', text: resumeGenere });
+      showToast('✅ Partagé !', '#00C853');
+    } catch (e) {}
+    return;
+  }
+  navigator.clipboard.writeText(resumeGenere);
+  showToast('📋 Copié !', '#7B61FF');
 }
 
 function regenerer() {
-    document.getElementById('zoneResultat').style.display = 'none';
-    document.getElementById('btnGenerer').style.display = 'block';
-    document.getElementById('btnGenerer').disabled = false;
+  document.getElementById('zoneResultat').style.display = 'none';
+  const btn = document.getElementById('btnGenerer');
+  btn.style.display = 'flex';
+  btn.disabled = false;
 }
 </script>
+
 {% endblock %}

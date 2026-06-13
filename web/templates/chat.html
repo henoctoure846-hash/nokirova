@@ -4,401 +4,541 @@
 
 {% block contenu %}
 
-<!-- 🎨 TITRE DE PAGE -->
-<div class="titre-page" style="background: var(--violet-premium);">
-    💬 Chat avec NOKIROVA
-</div>
+<div class="chat-page">
 
-<!-- 💬 ZONE CHAT -->
-<div class="chat-container">
+  <!-- HEADER VIOLET -->
+  <div class="chat-header">
+    <div class="chat-header-bg">💬</div>
+    <div class="chat-header-icone">💬</div>
+    <div class="chat-header-texte">
+      <h1>Chat avec NOKIROVA</h1>
+      <p>✨ Pose-moi <span id="userPrenom">tes</span> questions, je réponds 24h/24 🤖</p>
+    </div>
+  </div>
 
-    <!-- 📜 Messages -->
+  <!-- CHAT BOX -->
+  <div class="chat-box">
+
+    <!-- MESSAGES -->
     <div class="messages-zone" id="messagesZone">
-        <div class="message-bienvenue">
-            <div class="bienvenue-icone">🌸</div>
-            <h2>Bonjour ! Je suis NOKIROVA</h2>
-            <p>✨ Pose-moi <strong>n'importe quelle question</strong> !</p>
-            <div class="suggestions">
-                <button class="suggestion" onclick="poserQuestion('Explique-moi la photosynthèse')">
-                    🌿 Photosynthèse
-                </button>
-                <button class="suggestion" onclick="poserQuestion('Aide-moi avec les mathématiques')">
-                    📐 Maths
-                </button>
-                <button class="suggestion" onclick="poserQuestion('Quelle est la capitale de la France ?')">
-                    🗺️ Géographie
-                </button>
-                <button class="suggestion" onclick="poserQuestion('Donne-moi une astuce pour mieux étudier')">
-                    💡 Astuce
-                </button>
-            </div>
+      <div class="message-bienvenue">
+        <div class="bienvenue-logo">🌸</div>
+        <h2>Bonjour <span id="bienvenueNom">cher étudiant</span> !</h2>
+        <p>Je suis NOKIROVA, ton professeur IA personnel ✨<br>
+           Pose-moi <strong>n'importe quelle question</strong> !</p>
+
+        <div class="suggestions-grid">
+          <button class="suggestion-card" onclick="poserQuestion('Explique-moi la photosynthèse')">
+            <span class="suggestion-icone">🌿</span>
+            <span class="suggestion-titre">Photosynthèse</span>
+            <span class="suggestion-desc">Bio expliquée</span>
+          </button>
+          <button class="suggestion-card" onclick="poserQuestion('Aide-moi avec les maths')">
+            <span class="suggestion-icone">📐</span>
+            <span class="suggestion-titre">Mathématiques</span>
+            <span class="suggestion-desc">Calculs faciles</span>
+          </button>
+          <button class="suggestion-card" onclick="poserQuestion('Quelle est la capitale de la France ?')">
+            <span class="suggestion-icone">🗺️</span>
+            <span class="suggestion-titre">Géographie</span>
+            <span class="suggestion-desc">Explore le monde</span>
+          </button>
+          <button class="suggestion-card" onclick="poserQuestion('Donne-moi 5 astuces pour mieux étudier')">
+            <span class="suggestion-icone">💡</span>
+            <span class="suggestion-titre">Astuces</span>
+            <span class="suggestion-desc">Tips de prof</span>
+          </button>
+          <button class="suggestion-card" onclick="poserQuestion('Explique-moi l\'économie en 5 lignes')">
+            <span class="suggestion-icone">💰</span>
+            <span class="suggestion-titre">Économie</span>
+            <span class="suggestion-desc">Concepts clés</span>
+          </button>
+          <button class="suggestion-card" onclick="poserQuestion('Comment apprendre une langue rapidement ?')">
+            <span class="suggestion-icone">🌍</span>
+            <span class="suggestion-titre">Langues</span>
+            <span class="suggestion-desc">Apprendre vite</span>
+          </button>
         </div>
+      </div>
     </div>
 
-    <!-- ⌨️ Input -->
+    <!-- ZONE INPUT -->
     <div class="input-zone">
-        <form id="formChat">
-            <textarea
-                id="inputMessage"
-                placeholder="💬 Pose ta question ici..."
-                rows="2"></textarea>
-            <button type="submit" class="btn-envoyer">
-                🚀 Envoyer
-            </button>
-        </form>
+      <form id="formChat">
+        <div class="input-wrapper">
+          <textarea id="inputMessage"
+                    placeholder="💬 Pose ta question ici..."
+                    rows="1"></textarea>
+          <button type="submit" class="btn-envoyer" title="Envoyer">
+            <span class="btn-envoyer-icone">🚀</span>
+          </button>
+        </div>
+        <div class="input-info">
+          <span>💡 Entrée pour envoyer</span>
+          <span>•</span>
+          <span>Shift+Entrée pour ligne suivante</span>
+        </div>
+      </form>
     </div>
+  </div>
+
 </div>
 
-{% endblock %}
-
-{% block extra_css %}
 <style>
-.titre-page {
-    padding: 20px;
-    border-radius: 18px;
-    text-align: center;
-    color: white;
-    font-size: 24px;
-    font-weight: bold;
-    margin-bottom: 20px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+/* ═══════════════════════════════════════════
+   💬 CHAT PAGE REDESIGN PRO
+   ═══════════════════════════════════════════ */
+.chat-page {
+  max-width: 1100px;
+  margin: 0 auto;
+  animation: fadeInUp 0.5s ease;
+}
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
-.chat-container {
-    background: white;
-    border-radius: 20px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    height: calc(100vh - 180px);
-    min-height: 500px;
+/* HEADER */
+.chat-header {
+  position: relative;
+  background: linear-gradient(135deg, #7B61FF, #5B21B6);
+  border-radius: 28px;
+  padding: 28px 30px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  color: white;
+  box-shadow: 0 10px 30px rgba(123,97,255,0.3);
+  overflow: hidden;
+}
+.chat-header-bg {
+  position: absolute;
+  top: -30px; right: -20px;
+  font-size: 200px;
+  opacity: 0.15;
+  transform: rotate(15deg);
+  pointer-events: none;
+}
+.chat-header-icone {
+  width: 70px; height: 70px;
+  background: white;
+  border-radius: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 36px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+  z-index: 1;
+}
+.chat-header-texte { z-index: 1; }
+.chat-header-texte h1 {
+  font-size: 26px;
+  font-weight: 900;
+  margin: 0;
+  letter-spacing: -0.5px;
+}
+.chat-header-texte p {
+  font-size: 14px;
+  opacity: 0.92;
+  margin-top: 4px;
+  font-weight: 500;
 }
 
+/* CHAT BOX */
+.chat-box {
+  background: white;
+  border-radius: 28px;
+  box-shadow: 0 10px 35px rgba(0,0,0,0.08);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 230px);
+  min-height: 500px;
+  border-top: 5px solid #7B61FF;
+}
+
+/* MESSAGES ZONE */
 .messages-zone {
-    flex: 1;
-    padding: 25px;
-    overflow-y: auto;
-    background: var(--blanc-casse);
+  flex: 1;
+  padding: 24px;
+  overflow-y: auto;
+  background: linear-gradient(180deg, #FAFAFB, #F4F6F9);
+}
+.messages-zone::-webkit-scrollbar { width: 6px; }
+.messages-zone::-webkit-scrollbar-track { background: transparent; }
+.messages-zone::-webkit-scrollbar-thumb {
+  background: #D8B4FE;
+  border-radius: 4px;
 }
 
+/* BIENVENUE */
 .message-bienvenue {
-    text-align: center;
-    padding: 30px;
-    background: linear-gradient(135deg, var(--violet-pale), var(--rose-pale));
-    border-radius: 20px;
-    margin-bottom: 20px;
+  text-align: center;
+  padding: 30px 20px;
+  background: linear-gradient(135deg, #F3E8FF, #FFE5EF);
+  border-radius: 24px;
+  margin-bottom: 16px;
+  animation: bounceIn 0.6s ease;
 }
-
-.bienvenue-icone {
-    font-size: 60px;
-    margin-bottom: 10px;
+@keyframes bounceIn {
+  0% { opacity: 0; transform: scale(0.85); }
+  60% { transform: scale(1.03); }
+  100% { opacity: 1; transform: scale(1); }
 }
-
+.bienvenue-logo {
+  font-size: 60px;
+  margin-bottom: 12px;
+  display: inline-block;
+  animation: pulse 2s ease-in-out infinite;
+}
+@keyframes pulse {
+  0%,100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
 .message-bienvenue h2 {
-    color: var(--violet-premium);
-    margin-bottom: 10px;
+  color: #5B21B6;
+  font-size: 24px;
+  font-weight: 900;
+  margin-bottom: 10px;
 }
-
 .message-bienvenue p {
-    color: var(--gris-texte);
-    font-size: 16px;
+  color: #6B7280;
+  font-size: 15px;
+  line-height: 1.6;
+  margin-bottom: 24px;
 }
 
-.suggestions {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 10px;
-    margin-top: 20px;
+/* SUGGESTIONS */
+.suggestions-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-top: 20px;
+}
+.suggestion-card {
+  background: white;
+  border: 2px solid #E5E7EB;
+  border-radius: 18px;
+  padding: 16px 12px;
+  cursor: pointer;
+  transition: all 0.3s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  text-align: center;
+}
+.suggestion-card:hover {
+  background: linear-gradient(135deg, #7B61FF, #5B21B6);
+  border-color: transparent;
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20px rgba(123,97,255,0.3);
+}
+.suggestion-card:hover .suggestion-titre,
+.suggestion-card:hover .suggestion-desc { color: white; }
+.suggestion-icone { font-size: 28px; margin-bottom: 4px; }
+.suggestion-titre {
+  font-weight: 800;
+  font-size: 13px;
+  color: #1A1D2E;
+  transition: color 0.3s;
+}
+.suggestion-desc {
+  font-size: 11px;
+  color: #9CA3AF;
+  transition: color 0.3s;
 }
 
-.suggestion {
-    background: white;
-    color: var(--violet-premium);
-    border: 2px solid var(--violet-premium);
-    padding: 10px 18px;
-    border-radius: 25px;
-    font-weight: bold;
-    cursor: pointer;
-    font-size: 13px;
-    transition: all 0.3s;
-}
-
-.suggestion:hover {
-    background: var(--violet-premium);
-    color: white;
-    transform: scale(1.05);
-}
-
+/* MESSAGES */
 .message {
-    margin-bottom: 15px;
-    display: flex;
-    gap: 12px;
-    animation: slideIn 0.4s ease;
+  margin-bottom: 16px;
+  display: flex;
+  gap: 12px;
+  animation: slideIn 0.4s ease;
 }
-
 @keyframes slideIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
-
-.message-user {
-    flex-direction: row-reverse;
-}
+.message-user { flex-direction: row-reverse; }
 
 .avatar {
-    width: 45px;
-    height: 45px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 24px;
-    flex-shrink: 0;
+  width: 42px; height: 42px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  flex-shrink: 0;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.1);
 }
-
 .avatar-user {
-    background: linear-gradient(135deg, var(--bleu-royal), var(--bleu-ciel));
+  background: linear-gradient(135deg, #4FC3F7, #2962FF);
+  color: white;
 }
-
 .avatar-ia {
-    background: linear-gradient(135deg, var(--violet-premium), var(--violet-lavande));
+  background: linear-gradient(135deg, #7B61FF, #5B21B6);
+  color: white;
 }
 
 .message-bulle {
-    max-width: 70%;
-    padding: 14px 18px;
-    border-radius: 18px;
-    font-size: 14px;
-    line-height: 1.6;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-    word-wrap: break-word;
-    white-space: pre-wrap;
+  max-width: 70%;
+  padding: 14px 18px;
+  border-radius: 20px;
+  font-size: 14px;
+  line-height: 1.65;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+  word-wrap: break-word;
+  white-space: pre-wrap;
 }
-
 .message-user .message-bulle {
-    background: linear-gradient(135deg, var(--bleu-royal), var(--bleu-ciel));
-    color: white;
-    border-bottom-right-radius: 5px;
+  background: linear-gradient(135deg, #4FC3F7, #2962FF);
+  color: white;
+  border-bottom-right-radius: 6px;
 }
-
 .message-ia .message-bulle {
-    background: white;
-    color: var(--gris-texte);
-    border-bottom-left-radius: 5px;
-    border: 1px solid var(--gris-perle);
+  background: white;
+  color: #1A1D2E;
+  border: 1px solid #F3E8FF;
+  border-bottom-left-radius: 6px;
 }
 
+/* CHARGEMENT */
 .chargement {
-    display: flex;
-    gap: 5px;
-    padding: 14px 18px;
+  display: flex;
+  gap: 6px;
+  padding: 16px 22px !important;
+  align-items: center;
 }
-
 .chargement span {
-    width: 8px;
-    height: 8px;
-    background: var(--violet-premium);
-    border-radius: 50%;
-    animation: bounce 1.4s infinite ease-in-out;
+  width: 10px; height: 10px;
+  background: #7B61FF;
+  border-radius: 50%;
+  animation: bounce 1.4s infinite ease-in-out;
 }
-
 .chargement span:nth-child(1) { animation-delay: -0.32s; }
 .chargement span:nth-child(2) { animation-delay: -0.16s; }
-
 @keyframes bounce {
-    0%, 80%, 100% { transform: scale(0); }
-    40% { transform: scale(1); }
+  0%,80%,100% { transform: scale(0); opacity: 0.4; }
+  40% { transform: scale(1); opacity: 1; }
 }
 
+/* INPUT ZONE */
 .input-zone {
-    padding: 20px;
-    background: white;
-    border-top: 2px solid var(--gris-perle);
+  padding: 18px 22px;
+  background: white;
+  border-top: 1px solid #F3E8FF;
 }
-
-.input-zone form {
-    display: flex;
-    gap: 12px;
-    align-items: flex-end;
+.input-wrapper {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  background: #FAFAFB;
+  border: 2px solid #E5E7EB;
+  border-radius: 22px;
+  padding: 8px 8px 8px 18px;
+  transition: all 0.3s;
 }
-
+.input-wrapper:focus-within {
+  border-color: #7B61FF;
+  box-shadow: 0 0 0 4px rgba(123,97,255,0.15);
+  background: white;
+}
 #inputMessage {
-    flex: 1;
-    padding: 14px 18px;
-    border: 2px solid var(--bleu-tres-pale);
-    border-radius: 14px;
-    font-family: 'Segoe UI', sans-serif;
-    font-size: 14px;
-    resize: none;
-    line-height: 1.5;
-}
-
-#inputMessage:focus {
-    outline: none;
-    border-color: var(--violet-premium);
-    box-shadow: 0 0 0 3px rgba(123, 97, 255, 0.1);
+  flex: 1;
+  border: none;
+  background: transparent;
+  font-family: inherit;
+  font-size: 14px;
+  resize: none;
+  line-height: 1.5;
+  padding: 10px 0;
+  outline: none;
+  color: #1A1D2E;
+  max-height: 120px;
 }
 
 .btn-envoyer {
-    background: linear-gradient(135deg, var(--violet-premium), var(--violet-lavande));
-    color: white;
-    border: none;
-    padding: 14px 25px;
-    border-radius: 14px;
-    font-weight: bold;
-    font-size: 14px;
-    cursor: pointer;
-    box-shadow: 0 4px 12px rgba(123, 97, 255, 0.3);
-    transition: all 0.3s;
-    height: fit-content;
+  background: linear-gradient(135deg, #7B61FF, #5B21B6);
+  color: white;
+  border: none;
+  width: 46px; height: 46px;
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(123,97,255,0.4);
+  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
 }
-
 .btn-envoyer:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 18px rgba(123, 97, 255, 0.4);
+  transform: scale(1.1) rotate(-15deg);
+  box-shadow: 0 6px 18px rgba(123,97,255,0.55);
 }
-
 .btn-envoyer:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
+  background: #D1D5DB;
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+}
+.btn-envoyer-icone { font-size: 18px; }
+
+.input-info {
+  margin-top: 8px;
+  font-size: 11px;
+  color: #9CA3AF;
+  text-align: center;
+  display: flex;
+  gap: 6px;
+  justify-content: center;
 }
 
-/* Scrollbar messages */
-.messages-zone::-webkit-scrollbar {
-    width: 8px;
+/* MODE SOMBRE */
+html[data-mode="sombre"] .chat-box,
+html[data-mode="sombre"] .input-zone {
+  background: #1A1D2E !important;
 }
-
-.messages-zone::-webkit-scrollbar-track {
-    background: var(--gris-perle);
+html[data-mode="sombre"] .messages-zone {
+  background: linear-gradient(180deg, #1A1D2E, #0F1117) !important;
 }
-
-.messages-zone::-webkit-scrollbar-thumb {
-    background: var(--violet-pale);
-    border-radius: 4px;
+html[data-mode="sombre"] .message-bienvenue {
+  background: linear-gradient(135deg, #2A1D4E, #4A1D3E) !important;
 }
+html[data-mode="sombre"] .message-bienvenue h2 { color: #C4A5FF; }
+html[data-mode="sombre"] .message-bienvenue p { color: #94A3B8; }
+html[data-mode="sombre"] .suggestion-card {
+  background: #2A2D3E !important;
+  border-color: #3A3D4E !important;
+}
+html[data-mode="sombre"] .suggestion-titre { color: #F1F5F9 !important; }
+html[data-mode="sombre"] .message-ia .message-bulle {
+  background: #2A2D3E !important;
+  color: #F1F5F9 !important;
+  border-color: #3A3D4E !important;
+}
+html[data-mode="sombre"] .input-wrapper {
+  background: #2A2D3E !important;
+  border-color: #3A3D4E !important;
+}
+html[data-mode="sombre"] #inputMessage { color: #F1F5F9 !important; }
 
+/* RESPONSIVE */
 @media (max-width: 768px) {
-    .chat-container {
-        height: calc(100vh - 220px);
-    }
+  .chat-header { flex-direction: column; text-align: center; padding: 22px; }
+  .chat-header-texte h1 { font-size: 20px; }
+  .chat-box { height: calc(100vh - 250px); }
+  .message-bulle { max-width: 85%; font-size: 13px; }
+  .suggestions-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .suggestion-icone { font-size: 24px; }
+  .suggestion-titre { font-size: 12px; }
+  .input-zone { padding: 14px; }
+}
 
-    .message-bulle {
-        max-width: 85%;
-    }
-
-    .suggestion {
-        font-size: 11px;
-        padding: 8px 12px;
-    }
+@media (max-width: 480px) {
+  .suggestions-grid { grid-template-columns: 1fr 1fr; }
+  .avatar { width: 36px; height: 36px; font-size: 18px; }
+  .input-info { display: none; }
 }
 </style>
-{% endblock %}
 
-{% block extra_js %}
 <script>
 const formChat = document.getElementById('formChat');
 const inputMessage = document.getElementById('inputMessage');
 const messagesZone = document.getElementById('messagesZone');
 const btnEnvoyer = document.querySelector('.btn-envoyer');
 
-// Fonction pour ajouter un message
+// Personnalisation
+const user = JSON.parse(localStorage.getItem('nokirova_user') || 'null');
+if (user) {
+  document.getElementById('userPrenom').textContent = user.prenom;
+  document.getElementById('bienvenueNom').textContent = user.prenom;
+}
+
 function ajouterMessage(contenu, type) {
-    // Supprimer le message de bienvenue si présent
-    const bienvenue = document.querySelector('.message-bienvenue');
-    if (bienvenue) bienvenue.remove();
+  const bienvenue = document.querySelector('.message-bienvenue');
+  if (bienvenue) bienvenue.remove();
 
-    const messageDiv = document.createElement('div');
-    messageDiv.className = `message message-${type}`;
+  const msgDiv = document.createElement('div');
+  msgDiv.className = `message message-${type}`;
+  const avatar = type === 'user' ? '👤' : '🌸';
+  const avatarClass = type === 'user' ? 'avatar-user' : 'avatar-ia';
 
-    const avatar = type === 'user' ? '👤' : '🌸';
-    const avatarClass = type === 'user' ? 'avatar-user' : 'avatar-ia';
-
-    messageDiv.innerHTML = `
-        <div class="avatar ${avatarClass}">${avatar}</div>
-        <div class="message-bulle">${contenu}</div>
-    `;
-
-    messagesZone.appendChild(messageDiv);
-    messagesZone.scrollTop = messagesZone.scrollHeight;
+  msgDiv.innerHTML = `
+    <div class="avatar ${avatarClass}">${avatar}</div>
+    <div class="message-bulle">${contenu}</div>
+  `;
+  messagesZone.appendChild(msgDiv);
+  messagesZone.scrollTop = messagesZone.scrollHeight;
 }
 
-// Fonction pour afficher chargement
 function afficherChargement() {
-    const div = document.createElement('div');
-    div.id = 'chargementDiv';
-    div.className = 'message message-ia';
-    div.innerHTML = `
-        <div class="avatar avatar-ia">🌸</div>
-        <div class="message-bulle chargement">
-            <span></span><span></span><span></span>
-        </div>
-    `;
-    messagesZone.appendChild(div);
-    messagesZone.scrollTop = messagesZone.scrollHeight;
+  const div = document.createElement('div');
+  div.id = 'chargementDiv';
+  div.className = 'message message-ia';
+  div.innerHTML = `
+    <div class="avatar avatar-ia">🌸</div>
+    <div class="message-bulle chargement">
+      <span></span><span></span><span></span>
+    </div>
+  `;
+  messagesZone.appendChild(div);
+  messagesZone.scrollTop = messagesZone.scrollHeight;
 }
 
-// Fonction pour retirer chargement
 function retirerChargement() {
-    const div = document.getElementById('chargementDiv');
-    if (div) div.remove();
+  const div = document.getElementById('chargementDiv');
+  if (div) div.remove();
 }
 
-// Envoyer message
-async function envoyerMessage(question) {
-    if (!question.trim()) return;
+async function envoyerMessage(q) {
+  if (!q.trim()) return;
+  ajouterMessage(q, 'user');
+  inputMessage.value = '';
+  inputMessage.style.height = 'auto';
+  btnEnvoyer.disabled = true;
+  afficherChargement();
 
-    ajouterMessage(question, 'user');
-    inputMessage.value = '';
-    btnEnvoyer.disabled = true;
-
-    afficherChargement();
-
-    try {
-        const reponse = await fetch('/api/chat', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({question: question})
-        });
-
-        const data = await reponse.json();
-        retirerChargement();
-
-        if (data.succes) {
-            ajouterMessage(data.reponse, 'ia');
-        } else {
-            ajouterMessage(`⚠️ Erreur : ${data.erreur}`, 'ia');
-        }
-    } catch (error) {
-        retirerChargement();
-        ajouterMessage(`⚠️ Erreur : ${error}`, 'ia');
-    }
-
-    btnEnvoyer.disabled = false;
-    inputMessage.focus();
+  try {
+    const r = await fetch('/api/chat', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({question: q})
+    });
+    const data = await r.json();
+    retirerChargement();
+    if (data.succes) ajouterMessage(data.reponse, 'ia');
+    else ajouterMessage(`⚠️ Erreur : ${data.erreur}`, 'ia');
+  } catch (e) {
+    retirerChargement();
+    ajouterMessage(`⚠️ Erreur : ${e}`, 'ia');
+  }
+  btnEnvoyer.disabled = false;
+  inputMessage.focus();
 }
 
-// Soumission du formulaire
-formChat.addEventListener('submit', function(e) {
+formChat.addEventListener('submit', e => {
+  e.preventDefault();
+  envoyerMessage(inputMessage.value);
+});
+
+inputMessage.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !e.shiftKey) {
     e.preventDefault();
     envoyerMessage(inputMessage.value);
+  }
 });
 
-// Enter pour envoyer (Shift+Enter pour saut de ligne)
-inputMessage.addEventListener('keydown', function(e) {
-    if (e.key === 'Enter' && !e.shiftKey) {
-        e.preventDefault();
-        envoyerMessage(inputMessage.value);
-    }
+// Auto-resize textarea
+inputMessage.addEventListener('input', function() {
+  this.style.height = 'auto';
+  this.style.height = Math.min(this.scrollHeight, 120) + 'px';
 });
 
-// Suggestions
-function poserQuestion(q) {
-    envoyerMessage(q);
-}
+function poserQuestion(q) { envoyerMessage(q); }
 
-// Focus auto
 inputMessage.focus();
 </script>
+
 {% endblock %}

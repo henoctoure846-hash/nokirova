@@ -4,276 +4,501 @@
 
 {% block contenu %}
 
-<!-- 🎨 TITRE DE PAGE -->
-<div class="titre-page" style="background: var(--bleu-royal);">
-    📥 Importer un cours
-</div>
+<div class="import-page">
 
-<!-- 📥 ZONE D'UPLOAD -->
-<div class="carte-import">
-    <div class="import-icone">📁</div>
-    <h2 class="import-titre">Choisis ton fichier de cours</h2>
-    <p class="import-sous-titre">📄 Formats acceptés : PDF, Word, PowerPoint, TXT</p>
+  <!-- HEADER BLEU -->
+  <div class="import-header">
+    <div class="import-header-bg">📥</div>
+    <div class="import-header-icone">📥</div>
+    <div class="import-header-texte">
+      <h1>Importer un cours</h1>
+      <p>✨ Glisse-dépose ou clique pour ajouter ton fichier</p>
+    </div>
+  </div>
+
+  <!-- ZONE D'UPLOAD -->
+  <div class="import-zone" id="dropZone">
+    <div class="import-upload-icone">📁</div>
+    <h2 class="import-upload-titre">Choisis ton fichier de cours</h2>
+    <p class="import-upload-sous">Ou glisse-le directement ici 👇</p>
+
+    <div class="import-formats">
+      <div class="format-tag">📕 PDF</div>
+      <div class="format-tag">📘 Word</div>
+      <div class="format-tag">📊 PowerPoint</div>
+      <div class="format-tag">📝 TXT</div>
+    </div>
 
     <form id="formImport" enctype="multipart/form-data">
-        <input type="file"
-               id="fichierInput"
-               name="fichier"
-               accept=".pdf,.docx,.pptx,.txt"
-               class="input-fichier"
-               hidden>
+      <input type="file"
+             id="fichierInput"
+             name="fichier"
+             accept=".pdf,.docx,.pptx,.txt"
+             hidden>
 
-        <label for="fichierInput" class="btn-choisir">
-            📂 Choisir un fichier
-        </label>
+      <label for="fichierInput" class="import-btn-choisir">
+        <span>📂</span> Choisir un fichier
+      </label>
 
-        <div id="nomFichier" class="nom-fichier"></div>
+      <div id="nomFichier" class="import-nom-fichier"></div>
 
-        <button type="submit" class="btn-importer" id="btnImporter" style="display:none;">
-            🚀 Importer ce cours
-        </button>
+      <button type="submit" class="import-btn-importer" id="btnImporter" style="display:none;">
+        <span>🚀</span> Importer ce cours
+      </button>
     </form>
-</div>
+  </div>
 
-<!-- 🔄 ZONE DE CHARGEMENT -->
-<div id="zoneChargement" class="zone-chargement" style="display:none;">
-    <div class="spinner"></div>
-    <p>📖 Lecture du fichier en cours...</p>
-</div>
+  <!-- LOADING -->
+  <div id="zoneChargement" class="import-loading" style="display:none;">
+    <div class="import-spinner"></div>
+    <div class="import-loading-texte">
+      <p class="import-loading-titre">📖 Lecture en cours...</p>
+      <p class="import-loading-sous">Extraction du texte et détection de la matière ✨</p>
+    </div>
+  </div>
 
-<!-- ✅ ZONE RÉSULTAT -->
-<div id="zoneResultat" class="zone-resultat" style="display:none;">
-    <div class="resultat-succes">
-        <div class="succes-icone">✅</div>
+  <!-- RÉSULTAT -->
+  <div id="zoneResultat" class="import-resultat" style="display:none;">
+
+    <div class="import-succes">
+      <div class="import-succes-icone">✅</div>
+      <div class="import-succes-contenu">
         <h2 id="succesTitre">Cours importé avec succès !</h2>
         <p id="succesMatiere"></p>
+      </div>
     </div>
 
-    <div class="apercu-cours">
-        <h3>📄 Aperçu du contenu :</h3>
-        <textarea id="apercuContenu" readonly></textarea>
+    <div class="import-apercu">
+      <div class="import-apercu-titre">
+        <span>📄</span>
+        Aperçu du contenu
+      </div>
+      <textarea id="apercuContenu" readonly></textarea>
     </div>
 
-    <h3 style="margin-top: 20px; color: var(--gris-texte);">🚀 Que veux-tu faire maintenant ?</h3>
-
-    <div class="actions-rapides">
-        <a href="/resume" class="action-btn action-resume">
-            📝 Résumé
+    <div class="import-suite">
+      <h3>🚀 Que veux-tu faire maintenant ?</h3>
+      <div class="import-actions">
+        <a href="/resume" class="import-action import-resume">
+          <div class="import-action-icone">📝</div>
+          <div class="import-action-texte">
+            <strong>Résumé</strong>
+            <span>Synthèse intelligente</span>
+          </div>
         </a>
-        <a href="/qcm" class="action-btn action-qcm">
-            🎯 QCM
+        <a href="/qcm" class="import-action import-qcm">
+          <div class="import-action-icone">🎯</div>
+          <div class="import-action-texte">
+            <strong>QCM</strong>
+            <span>Teste-toi</span>
+          </div>
         </a>
-        <a href="/explication" class="action-btn action-explication">
-            💡 Explication
+        <a href="/explication" class="import-action import-explication">
+          <div class="import-action-icone">💡</div>
+          <div class="import-action-texte">
+            <strong>Explication</strong>
+            <span>Simple et claire</span>
+          </div>
         </a>
-        <a href="/flashcards" class="action-btn action-flashcards">
-            🃏 Flashcards
+        <a href="/flashcards" class="import-action import-flashcards">
+          <div class="import-action-icone">🃏</div>
+          <div class="import-action-texte">
+            <strong>Flashcards</strong>
+            <span>Mémorise</span>
+          </div>
         </a>
+      </div>
     </div>
+  </div>
+
 </div>
 
-{% endblock %}
+<div id="toastGlobal" class="toast-notif"></div>
 
-{% block extra_css %}
 <style>
-/* Styles spécifiques page Import */
-.titre-page {
-    padding: 20px;
-    border-radius: 18px;
-    text-align: center;
-    color: white;
-    font-size: 24px;
-    font-weight: bold;
-    margin-bottom: 20px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+/* ═══════════════════════════════════════════
+   📥 IMPORT PAGE REDESIGN PRO
+   ═══════════════════════════════════════════ */
+.import-page {
+  max-width: 1100px;
+  margin: 0 auto;
+  animation: fadeInUp 0.5s ease;
+}
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
-.carte-import {
-    background: white;
-    padding: 40px;
-    border-radius: 20px;
-    text-align: center;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-    margin-bottom: 20px;
+/* HEADER */
+.import-header {
+  position: relative;
+  background: linear-gradient(135deg, #2962FF, #1E40AF);
+  border-radius: 28px;
+  padding: 28px 30px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  color: white;
+  box-shadow: 0 10px 30px rgba(41,98,255,0.3);
+  overflow: hidden;
+}
+.import-header-bg {
+  position: absolute;
+  top: -30px; right: -20px;
+  font-size: 200px;
+  opacity: 0.15;
+  transform: rotate(15deg);
+  pointer-events: none;
+}
+.import-header-icone {
+  width: 70px; height: 70px;
+  background: white;
+  border-radius: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 36px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+  z-index: 1;
+}
+.import-header-texte { z-index: 1; }
+.import-header-texte h1 {
+  font-size: 26px;
+  font-weight: 900;
+  margin: 0;
+  letter-spacing: -0.5px;
+}
+.import-header-texte p {
+  font-size: 14px;
+  opacity: 0.92;
+  margin-top: 4px;
 }
 
-.import-icone {
-    font-size: 80px;
-    margin-bottom: 15px;
+/* ZONE UPLOAD */
+.import-zone {
+  background: white;
+  border-radius: 28px;
+  padding: 50px 30px;
+  text-align: center;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.06);
+  border: 3px dashed #C7D2FE;
+  transition: all 0.3s;
+  margin-bottom: 20px;
+}
+.import-zone:hover,
+.import-zone.dragover {
+  border-color: #2962FF;
+  background: linear-gradient(135deg, #FAFBFF, #EFF6FF);
+  transform: scale(1.01);
 }
 
-.import-titre {
-    color: var(--bleu-royal);
-    font-size: 24px;
-    margin-bottom: 10px;
+.import-upload-icone {
+  font-size: 80px;
+  margin-bottom: 16px;
+  display: inline-block;
+  animation: bounce 2s ease-in-out infinite;
+}
+@keyframes bounce {
+  0%,100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
 }
 
-.import-sous-titre {
-    color: var(--gris-doux);
-    font-size: 14px;
-    margin-bottom: 25px;
+.import-upload-titre {
+  color: #1A1D2E;
+  font-size: 22px;
+  font-weight: 800;
+  margin-bottom: 8px;
 }
 
-.btn-choisir {
-    display: inline-block;
-    background: linear-gradient(135deg, var(--bleu-royal), var(--bleu-ciel));
-    color: white;
-    padding: 15px 35px;
-    border-radius: 14px;
-    font-weight: bold;
-    font-size: 16px;
-    cursor: pointer;
-    box-shadow: 0 4px 12px rgba(41, 98, 255, 0.3);
-    transition: all 0.3s;
+.import-upload-sous {
+  color: #6B7280;
+  font-size: 15px;
+  margin-bottom: 24px;
 }
 
-.btn-choisir:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 18px rgba(41, 98, 255, 0.4);
+.import-formats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  margin-bottom: 28px;
+}
+.format-tag {
+  background: linear-gradient(135deg, #DBEAFE, #BFDBFE);
+  color: #1E40AF;
+  padding: 8px 16px;
+  border-radius: 50px;
+  font-size: 13px;
+  font-weight: 700;
+  box-shadow: 0 2px 8px rgba(41,98,255,0.1);
 }
 
-.nom-fichier {
-    margin-top: 20px;
-    padding: 12px;
-    background: var(--bleu-tres-pale);
-    border-radius: 10px;
-    color: var(--bleu-royal);
-    font-weight: bold;
-    display: none;
+.import-btn-choisir {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: linear-gradient(135deg, #2962FF, #1E40AF);
+  color: white;
+  padding: 14px 32px;
+  border-radius: 50px;
+  font-weight: 800;
+  font-size: 15px;
+  cursor: pointer;
+  box-shadow: 0 6px 20px rgba(41,98,255,0.35);
+  transition: all 0.3s;
+  text-decoration: none;
+}
+.import-btn-choisir:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 30px rgba(41,98,255,0.5);
+}
+.import-btn-choisir span { font-size: 20px; }
+
+.import-nom-fichier {
+  margin-top: 20px;
+  padding: 14px 22px;
+  background: linear-gradient(135deg, #DBEAFE, #BFDBFE);
+  border-radius: 16px;
+  color: #1E40AF;
+  font-weight: 700;
+  display: none;
+  font-size: 14px;
+}
+.import-nom-fichier.visible { display: inline-block; }
+
+.import-btn-importer {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: linear-gradient(135deg, #00C853, #2E7D32);
+  color: white;
+  padding: 16px 36px;
+  border-radius: 50px;
+  font-weight: 800;
+  font-size: 16px;
+  cursor: pointer;
+  border: none;
+  margin-top: 20px;
+  box-shadow: 0 6px 20px rgba(0,200,83,0.35);
+  transition: all 0.3s;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.import-btn-importer:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 30px rgba(0,200,83,0.5);
+}
+.import-btn-importer span { font-size: 20px; }
+
+/* LOADING */
+.import-loading {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  background: white;
+  border-radius: 24px;
+  padding: 32px;
+  box-shadow: 0 6px 25px rgba(0,0,0,0.06);
+  border-left: 5px solid #2962FF;
+  animation: pulseGlow 2s ease-in-out infinite;
+}
+@keyframes pulseGlow {
+  0%,100% { box-shadow: 0 6px 25px rgba(0,0,0,0.06); }
+  50% { box-shadow: 0 6px 30px rgba(41,98,255,0.25); }
+}
+.import-spinner {
+  width: 60px; height: 60px;
+  border: 5px solid #D0EBFF;
+  border-top-color: #2962FF;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  flex-shrink: 0;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.import-loading-titre {
+  font-size: 17px;
+  font-weight: 800;
+  color: #2962FF;
+  margin: 0;
+}
+.import-loading-sous {
+  font-size: 13px;
+  color: #9CA3AF;
+  margin-top: 4px;
 }
 
-.nom-fichier.visible {
-    display: block;
+/* RÉSULTAT */
+.import-resultat { animation: fadeInUp 0.5s ease; }
+
+.import-succes {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  background: linear-gradient(135deg, #D1FAE5, #A7F3D0);
+  border-radius: 24px;
+  padding: 24px;
+  margin-bottom: 20px;
+  border-left: 6px solid #00C853;
+  animation: bounceIn 0.6s ease;
+}
+@keyframes bounceIn {
+  0% { opacity: 0; transform: scale(0.8); }
+  60% { transform: scale(1.05); }
+  100% { opacity: 1; transform: scale(1); }
+}
+.import-succes-icone {
+  font-size: 50px;
+  flex-shrink: 0;
+}
+.import-succes-contenu h2 {
+  color: #065F46;
+  font-size: 20px;
+  font-weight: 800;
+  margin-bottom: 4px;
+}
+.import-succes-contenu p {
+  color: #047857;
+  font-size: 14px;
+  font-weight: 600;
 }
 
-.btn-importer {
-    display: inline-block;
-    background: linear-gradient(135deg, var(--vert-emeraude), var(--vert-printemps));
-    color: white;
-    padding: 15px 35px;
-    border-radius: 14px;
-    font-weight: bold;
-    font-size: 16px;
-    cursor: pointer;
-    border: none;
-    margin-top: 15px;
-    box-shadow: 0 4px 12px rgba(0, 200, 83, 0.3);
-    transition: all 0.3s;
+/* APERÇU */
+.import-apercu {
+  background: white;
+  border-radius: 24px;
+  padding: 24px;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 18px rgba(0,0,0,0.06);
+  border-top: 5px solid #2962FF;
+}
+.import-apercu-titre {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 16px;
+  font-weight: 800;
+  color: #1A1D2E;
+  margin-bottom: 14px;
+}
+.import-apercu textarea {
+  width: 100%;
+  min-height: 280px;
+  max-height: 400px;
+  padding: 18px;
+  border: 2px solid #DBEAFE;
+  border-radius: 16px;
+  font-family: 'Segoe UI', sans-serif;
+  font-size: 14px;
+  resize: vertical;
+  line-height: 1.7;
+  color: #1A1D2E;
+  background: #FAFBFF;
+  outline: none;
 }
 
-.btn-importer:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 18px rgba(0, 200, 83, 0.4);
+/* ACTIONS SUITE */
+.import-suite { margin-top: 20px; }
+.import-suite h3 {
+  color: #1A1D2E;
+  font-size: 18px;
+  font-weight: 800;
+  margin-bottom: 14px;
 }
 
-.zone-chargement {
-    background: white;
-    padding: 40px;
-    border-radius: 20px;
-    text-align: center;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+.import-actions {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+}
+.import-action {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 18px;
+  border-radius: 20px;
+  text-decoration: none;
+  color: white;
+  font-weight: 700;
+  transition: all 0.3s;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+}
+.import-action:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+}
+.import-action-icone {
+  width: 46px; height: 46px;
+  background: rgba(255,255,255,0.25);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  flex-shrink: 0;
+}
+.import-action-texte { display: flex; flex-direction: column; gap: 2px; }
+.import-action-texte strong { font-size: 14px; }
+.import-action-texte span { font-size: 11px; opacity: 0.9; }
+
+.import-resume { background: linear-gradient(135deg, #2962FF, #1E40AF); }
+.import-qcm { background: linear-gradient(135deg, #FF6B9D, #C2185B); }
+.import-explication { background: linear-gradient(135deg, #F59E0B, #D97706); }
+.import-flashcards { background: linear-gradient(135deg, #4FC3F7, #2962FF); }
+
+/* TOAST */
+.toast-notif {
+  position: fixed;
+  bottom: 30px; right: 30px;
+  background: #1A1D2E;
+  color: white;
+  padding: 14px 22px;
+  border-radius: 14px;
+  font-weight: 700;
+  font-size: 14px;
+  z-index: 9999;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: all 0.4s ease;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.25);
+  pointer-events: none;
+}
+.toast-notif.show { opacity: 1; transform: translateY(0); }
+
+/* MODE SOMBRE */
+html[data-mode="sombre"] .import-zone,
+html[data-mode="sombre"] .import-loading,
+html[data-mode="sombre"] .import-apercu {
+  background: #1A1D2E !important;
+  color: #F1F5F9 !important;
+}
+html[data-mode="sombre"] .import-upload-titre,
+html[data-mode="sombre"] .import-apercu-titre,
+html[data-mode="sombre"] .import-suite h3 {
+  color: #F1F5F9 !important;
+}
+html[data-mode="sombre"] .import-apercu textarea {
+  background: #2A2D3E !important;
+  color: #F1F5F9 !important;
+  border-color: #3A3D4E !important;
 }
 
-.spinner {
-    border: 5px solid var(--gris-perle);
-    border-top: 5px solid var(--violet-premium);
-    border-radius: 50%;
-    width: 60px;
-    height: 60px;
-    margin: 0 auto 20px;
-    animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-
-.zone-resultat {
-    background: white;
-    padding: 30px;
-    border-radius: 20px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
-}
-
-.resultat-succes {
-    text-align: center;
-    padding: 20px;
-    background: linear-gradient(135deg, #E8F5E9, #C8E6C9);
-    border-radius: 15px;
-    margin-bottom: 20px;
-}
-
-.succes-icone {
-    font-size: 60px;
-    margin-bottom: 10px;
-}
-
-.resultat-succes h2 {
-    color: var(--vert-emeraude);
-    margin-bottom: 10px;
-}
-
-.apercu-cours {
-    margin-top: 20px;
-}
-
-.apercu-cours h3 {
-    color: var(--gris-texte);
-    margin-bottom: 10px;
-}
-
-.apercu-cours textarea {
-    width: 100%;
-    min-height: 300px;
-    padding: 15px;
-    border: 2px solid var(--bleu-tres-pale);
-    border-radius: 12px;
-    font-family: 'Segoe UI', sans-serif;
-    font-size: 14px;
-    resize: vertical;
-    line-height: 1.6;
-}
-
-.actions-rapides {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 12px;
-    margin-top: 15px;
-}
-
-.action-btn {
-    display: block;
-    padding: 18px;
-    border-radius: 14px;
-    text-align: center;
-    font-weight: bold;
-    font-size: 15px;
-    text-decoration: none;
-    color: white;
-    transition: all 0.3s;
-    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
-}
-
-.action-btn:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
-}
-
-.action-resume { background: linear-gradient(135deg, var(--bleu-royal), var(--bleu-ciel)); }
-.action-qcm { background: linear-gradient(135deg, var(--rose-sakura), var(--rose-clair)); color: var(--gris-texte); }
-.action-explication { background: linear-gradient(135deg, var(--jaune-soleil), var(--jaune-clair)); color: var(--gris-texte); }
-.action-flashcards { background: linear-gradient(135deg, var(--bleu-ciel), var(--bleu-pale)); color: var(--gris-texte); }
-
+/* RESPONSIVE */
 @media (max-width: 768px) {
-    .actions-rapides {
-        grid-template-columns: repeat(2, 1fr);
-    }
+  .import-header { flex-direction: column; text-align: center; padding: 22px; }
+  .import-header-texte h1 { font-size: 20px; }
+  .import-zone { padding: 30px 20px; }
+  .import-upload-icone { font-size: 60px; }
+  .import-upload-titre { font-size: 18px; }
+  .import-actions { grid-template-columns: repeat(2, 1fr); }
+  .import-succes { flex-direction: column; text-align: center; }
+}
+
+@media (max-width: 480px) {
+  .import-actions { grid-template-columns: 1fr; }
 }
 </style>
-{% endblock %}
 
-{% block extra_js %}
 <script>
 const fichierInput = document.getElementById('fichierInput');
 const nomFichierDiv = document.getElementById('nomFichier');
@@ -281,60 +506,81 @@ const btnImporter = document.getElementById('btnImporter');
 const formImport = document.getElementById('formImport');
 const zoneChargement = document.getElementById('zoneChargement');
 const zoneResultat = document.getElementById('zoneResultat');
+const dropZone = document.getElementById('dropZone');
 
-// Quand on choisit un fichier
-fichierInput.addEventListener('change', function(e) {
-    const fichier = e.target.files[0];
-    if (fichier) {
-        nomFichierDiv.textContent = `📄 ${fichier.name}`;
-        nomFichierDiv.classList.add('visible');
-        btnImporter.style.display = 'inline-block';
-    }
+function showToast(msg, couleur = '#1A1D2E') {
+  const toast = document.getElementById('toastGlobal');
+  toast.style.background = couleur;
+  toast.textContent = msg;
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 3000);
+}
+
+// Drag & Drop
+['dragenter', 'dragover'].forEach(e => {
+  dropZone.addEventListener(e, ev => {
+    ev.preventDefault();
+    dropZone.classList.add('dragover');
+  });
+});
+['dragleave', 'drop'].forEach(e => {
+  dropZone.addEventListener(e, ev => {
+    ev.preventDefault();
+    dropZone.classList.remove('dragover');
+  });
+});
+dropZone.addEventListener('drop', ev => {
+  ev.preventDefault();
+  if (ev.dataTransfer.files.length > 0) {
+    fichierInput.files = ev.dataTransfer.files;
+    fichierInput.dispatchEvent(new Event('change'));
+  }
 });
 
-// Quand on soumet le formulaire
+fichierInput.addEventListener('change', function(e) {
+  const f = e.target.files[0];
+  if (f) {
+    nomFichierDiv.textContent = `📄 ${f.name}`;
+    nomFichierDiv.classList.add('visible');
+    btnImporter.style.display = 'inline-flex';
+  }
+});
+
 formImport.addEventListener('submit', async function(e) {
-    e.preventDefault();
+  e.preventDefault();
+  const fichier = fichierInput.files[0];
+  if (!fichier) return showToast('⚠️ Choisis un fichier !', '#F59E0B');
 
-    const fichier = fichierInput.files[0];
-    if (!fichier) {
-        alert('⚠️ Choisis d\'abord un fichier !');
-        return;
+  dropZone.style.display = 'none';
+  zoneChargement.style.display = 'flex';
+
+  const formData = new FormData();
+  formData.append('fichier', fichier);
+
+  try {
+    const r = await fetch('/api/import', { method: 'POST', body: formData });
+    const data = await r.json();
+    zoneChargement.style.display = 'none';
+
+    if (data.succes) {
+      document.getElementById('succesTitre').textContent = `✅ ${data.nom} importé !`;
+      if (data.matiere) {
+        document.getElementById('succesMatiere').textContent = `🎯 Matière : ${data.matiere}`;
+      }
+      document.getElementById('apercuContenu').value = data.apercu;
+      zoneResultat.style.display = 'block';
+      zoneResultat.scrollIntoView({ behavior: 'smooth' });
+      showToast('✅ Cours importé !', '#00C853');
+    } else {
+      showToast('⚠️ ' + data.erreur, '#EF4444');
+      dropZone.style.display = 'block';
     }
-
-    // Afficher chargement
-    document.querySelector('.carte-import').style.display = 'none';
-    zoneChargement.style.display = 'block';
-
-    const formData = new FormData();
-    formData.append('fichier', fichier);
-
-    try {
-        const reponse = await fetch('/api/import', {
-            method: 'POST',
-            body: formData
-        });
-
-        const data = await reponse.json();
-
-        zoneChargement.style.display = 'none';
-
-        if (data.succes) {
-            document.getElementById('succesTitre').textContent = `✅ ${data.nom} importé !`;
-            if (data.matiere) {
-                document.getElementById('succesMatiere').textContent = `🎯 Matière détectée : ${data.matiere}`;
-            }
-            document.getElementById('apercuContenu').value = data.apercu;
-            zoneResultat.style.display = 'block';
-        } else {
-            alert(`⚠️ Erreur : ${data.erreur}`);
-            document.querySelector('.carte-import').style.display = 'block';
-        }
-    } catch (error) {
-        zoneChargement.style.display = 'none';
-        document.querySelector('.carte-import').style.display = 'block';
-        alert(`⚠️ Erreur : ${error}`);
-    }
+  } catch (err) {
+    zoneChargement.style.display = 'none';
+    dropZone.style.display = 'block';
+    showToast('⚠️ ' + err, '#EF4444');
+  }
 });
 </script>
+
 {% endblock %}

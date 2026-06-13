@@ -24,6 +24,19 @@ except Exception as e:
 
 app = Flask(__name__, template_folder='templates', static_folder='static')
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
+# ═══════════════════════════════════════════
+# 👤 MIDDLEWARE MULTI-UTILISATEURS
+# ═══════════════════════════════════════════
+@app.before_request
+def detecter_utilisateur():
+    """Détecte le user_id à chaque requête via header ou cookie"""
+    from db.base import set_user
+    # Priorité 1 : header X-User-Id
+    user_id = request.headers.get('X-User-Id')
+    # Priorité 2 : cookie
+    if not user_id:
+        user_id = request.cookies.get('nokirova_user_id')
+    set_user(user_id)
 
 session_data = {
     'cours_actuel': '',

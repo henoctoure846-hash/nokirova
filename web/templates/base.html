@@ -162,6 +162,24 @@ if (userData) {
         // optionnel : tu peux personnaliser ici
     }
 }
+    // ════════════════════════════════════
+// 👤 ENVOI USER_ID À CHAQUE REQUÊTE
+// ════════════════════════════════════
+(function() {
+    const user = JSON.parse(localStorage.getItem('nokirova_user') || 'null');
+    if (user && user.user_id) {
+        // Stocke aussi en cookie pour les requêtes HTML
+        document.cookie = `nokirova_user_id=${user.user_id}; path=/; max-age=31536000`;
+
+        // Intercepte fetch pour ajouter le header
+        const oldFetch = window.fetch;
+        window.fetch = function(url, options = {}) {
+            options.headers = options.headers || {};
+            options.headers['X-User-Id'] = user.user_id;
+            return oldFetch(url, options);
+        };
+    }
+})();
 </script>
 
 </body>

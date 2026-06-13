@@ -1,18 +1,54 @@
-# db/base.py - Connexion et initialisation NOKIROVA 🌸
+# db/base.py - Connexion DB MULTI-UTILISATEURS NOKIROVA 🌸
 
 import sqlite3
+import os
+import threading
 
-DB_FILE = "nokirova_memory.db"
+# Stockage du user_id en cours (par thread)
+_current_user = threading.local()
+
+# Dossier des bases utilisateurs
+DB_FOLDER = "user_databases"
+os.makedirs(DB_FOLDER, exist_ok=True)
+
+DB_DEFAULT = "nokirova_memory.db"
+
+
+def set_user(user_id: str):
+    """Définit le user_id actuel pour ce thread"""
+    if user_id and len(user_id) > 3:
+        _current_user.user_id = user_id
+    else:
+        _current_user.user_id = None
+
+
+def get_user():
+    """Récupère le user_id actuel"""
+    return getattr(_current_user, 'user_id', None)
+
+
+def get_db_file():
+    """Retourne le fichier DB selon le user actuel"""
+    user_id = get_user()
+    if user_id:
+        # Nettoie le user_id (sécurité)
+        safe_id = "".join(c for c in user_id if c.isalnum() or c == '_')[:50]
+        return os.path.join(DB_FOLDER, f"nokirova_{safe_id}.db")
+    return DB_DEFAULT
 
 
 def get_connexion():
-    """Retourne une connexion à la base de données"""
-    return sqlite3.connect(DB_FILE)
+    """Retourne une connexion à la base de l'utilisateur courant"""
+    db_file = get_db_file()
+    # Initialise la DB si elle n'existe pas
+    if not os.path.exists(db_file):
+        _init_db_file(db_file)
+    return sqlite3.connect(db_file)
 
 
-def init_db():
-    """Crée toutes les tables si elles n'existent pas"""
-    conn = get_connexion()
+def _init_db_file(db_file: str):
+    """Crée toutes les tables dans le fichier DB donné"""
+    conn = sqlite3.connect(db_file)
     cur = conn.cursor()
 
     cur.execute("""
@@ -108,7 +144,6 @@ def init_db():
         )
     """)
 
-    # 🆕 TABLE PIN
     cur.execute("""
         CREATE TABLE IF NOT EXISTS securite (
             id INTEGER PRIMARY KEY,
@@ -118,7 +153,6 @@ def init_db():
         )
     """)
 
-    # 🆕 TABLE PLANIFICATEUR (Phase 3.1)
     cur.execute("""
         CREATE TABLE IF NOT EXISTS tasks (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -147,4 +181,9 @@ def init_db():
 
     conn.commit()
     conn.close()
-    print("✅ Base de données NOKIROVA initialisée !")
+    print(f"✅ DB initialisée : {db_file}")
+
+
+def init_db():
+    """Init DB par défaut (compatibilité ancien code)"""
+    _init_db_file(DB_DEFAULT)

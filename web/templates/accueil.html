@@ -1,28 +1,27 @@
 {% extends "base.html" %}
-
 {% block title %}🌸 NOKIROVA - Accueil{% endblock %}
 
 {% block contenu %}
 
-<!-- 🎨 HEADER ACCUEIL -->
+<!-- HEADER -->
 <div class="header-accueil">
     <img src="{{ url_for('logo') }}" alt="Logo" class="header-logo">
     <div class="header-texte">
-        <h1>Bienvenue dans NOKIROVA !</h1>
+        <h1>Bienvenue Hénoc ! 🌸</h1>
         <p>✨ Ton professeur intelligent personnel ✨</p>
     </div>
 </div>
 
-<!-- 💜 BANNIÈRE -->
+<!-- BANNIÈRE DATE -->
 <div class="banniere-date">
     <strong>{{ salutation }} ! • {{ date_actuelle }}</strong>
     <div class="banniere-sous-texte">
-        ⚠️ Aucune tâche prévue aujourd'hui !<br>
-        📅 Clique sur Planificateur pour en ajouter.
+        ⚠️ Aucune tâche prévue aujourd'hui<br>
+        📅 Clique sur Planificateur pour en ajouter !
     </div>
 </div>
 
-<!-- 📊 3 CARTES STATS -->
+<!-- STATS -->
 <div class="cartes-stats">
     <div class="carte-stat carte-niveau">
         <div class="stat-icone">⭐</div>
@@ -41,52 +40,69 @@
     </div>
 </div>
 
-<!-- 🎯 6 CARTES ACCÈS RAPIDE -->
+<!-- CARTES CAPSULES -->
 <div class="cartes-rapides">
+
     <a href="/bibliotheque" class="carte-rapide carte-bibli">
         <div class="carte-rapide-icone">📚</div>
-        <div class="carte-rapide-titre">Bibliothèque</div>
-        <div class="carte-rapide-btn">→ Ouvrir</div>
+        <div class="carte-rapide-contenu">
+            <div class="carte-rapide-titre">Bibliothèque</div>
+            <div class="carte-rapide-desc">Tous tes cours organisés au même endroit</div>
+        </div>
     </a>
+
     <a href="/planificateur" class="carte-rapide carte-plani">
         <div class="carte-rapide-icone">📅</div>
-        <div class="carte-rapide-titre">Planificateur</div>
-        <div class="carte-rapide-btn">→ Ouvrir</div>
+        <div class="carte-rapide-contenu">
+            <div class="carte-rapide-titre">Planificateur</div>
+            <div class="carte-rapide-desc">Organise ton agenda de révisions</div>
+        </div>
     </a>
+
     <a href="/ocr" class="carte-rapide carte-scan">
         <div class="carte-rapide-icone">📸</div>
-        <div class="carte-rapide-titre">Scanner</div>
-        <div class="carte-rapide-btn">→ Ouvrir</div>
+        <div class="carte-rapide-contenu">
+            <div class="carte-rapide-titre">Scanner</div>
+            <div class="carte-rapide-desc">Photo de tes notes → texte intelligent</div>
+        </div>
     </a>
+
     <a href="/qcm" class="carte-rapide carte-qcm">
         <div class="carte-rapide-icone">🎯</div>
-        <div class="carte-rapide-titre">QCM</div>
-        <div class="carte-rapide-btn">→ Ouvrir</div>
+        <div class="carte-rapide-contenu">
+            <div class="carte-rapide-titre">QCM</div>
+            <div class="carte-rapide-desc">Teste tes connaissances avec l'IA</div>
+        </div>
     </a>
+
     <a href="/flashcards" class="carte-rapide carte-flash">
         <div class="carte-rapide-icone">🃏</div>
-        <div class="carte-rapide-titre">Flashcards</div>
-        <div class="carte-rapide-btn">→ Ouvrir</div>
+        <div class="carte-rapide-contenu">
+            <div class="carte-rapide-titre">Flashcards</div>
+            <div class="carte-rapide-desc">Mémorise tout facilement</div>
+        </div>
     </a>
+
     <a href="/pomodoro" class="carte-rapide carte-pomo">
         <div class="carte-rapide-icone">⏱️</div>
-        <div class="carte-rapide-titre">Pomodoro</div>
-        <div class="carte-rapide-btn">→ Ouvrir</div>
+        <div class="carte-rapide-contenu">
+            <div class="carte-rapide-titre">Pomodoro</div>
+            <div class="carte-rapide-desc">Focus 25 min, pause 5 min, productivité 💪</div>
+        </div>
     </a>
+
 </div>
 
-<!-- 🎯 OBJECTIF DU JOUR -->
+<!-- OBJECTIF -->
 <div class="objectif">
     <div class="objectif-titre">🎯 OBJECTIF DU JOUR</div>
     <div class="objectif-texte">
         📚 Importe un cours et fais au moins 5 QCM !<br>
-        Tu vas y arriver ! 💪
+        Tu vas y arriver Hénoc 💪
     </div>
 </div>
 
-<!-- 🚀 BOUTON COMMENCER -->
-<a href="/import" class="btn-commencer" style="display:block; text-decoration:none;">
-    🚀 COMMENCER MAINTENANT
-</a>
+<!-- BOUTON COMMENCER -->
+<a href="/import" class="btn-commencer">🚀 Commencer maintenant</a>
 
 {% endblock %}

@@ -1,488 +1,614 @@
 {% extends "base.html" %}
 
-{% block title %}QCM Interactif - NOKIROVA{% endblock %}
+{% block title %}🎯 QCM Interactif - NOKIROVA{% endblock %}
 
 {% block contenu %}
-<div class="page-container">
+<div class="qcm-page">
 
-  <!-- ══════════════════════════════════ -->
-  <!-- 🎯 EN-TÊTE PAGE                   -->
-  <!-- ══════════════════════════════════ -->
-  <div class="page-header" style="background: linear-gradient(135deg, #FFC9DE, #FFE5EF); border-left: 5px solid #FF6B9D;">
-    <div class="page-header-icon" style="background: linear-gradient(135deg, #FF6B9D, #FFC9DE);">
-      🎯
-    </div>
-    <div>
-      <h1 class="page-title" style="color: #C2185B;">QCM Interactif</h1>
-      <p class="page-subtitle" style="color: #E91E8C;">
-        Génère des questions à choix multiples depuis ton cours
-      </p>
+  <!-- HEADER MODERNE ROSE -->
+  <div class="qcm-header">
+    <div class="qcm-header-bg">🎯</div>
+    <div class="qcm-header-icone">🎯</div>
+    <div class="qcm-header-texte">
+      <h1>QCM Interactif</h1>
+      <p>✨ Teste tes connaissances avec l'IA</p>
     </div>
   </div>
 
-  <!-- ══════════════════════════════════ -->
-  <!-- ⚠️ ALERTE SI PAS DE COURS         -->
-  <!-- ══════════════════════════════════ -->
-  <div id="alerte-cours" class="alerte-warning" style="display:none;">
-    <span>⚠️</span>
-    <div>
+  <!-- ALERTE PAS DE COURS -->
+  <div id="alerte-cours" class="qcm-alerte" style="display:none;">
+    <div class="qcm-alerte-icone">⚠️</div>
+    <div class="qcm-alerte-contenu">
       <strong>Aucun cours chargé !</strong>
-      <p>Tu dois d'abord importer un cours pour générer des QCM.</p>
-      <a href="/import" class="btn-alerte">📥 Importer un cours</a>
+      <p>Importe un cours pour générer des QCM personnalisés.</p>
+      <a href="/import" class="qcm-alerte-btn">📥 Importer un cours</a>
     </div>
   </div>
 
-  <!-- ══════════════════════════════════ -->
-  <!-- ✅ COURS CHARGÉ (statut)           -->
-  <!-- ══════════════════════════════════ -->
-  <div id="statut-cours" class="statut-cours-card" style="display:none;">
-    <span style="font-size:1.5rem;">📚</span>
-    <div>
-      <strong>Cours chargé :</strong>
-      <span id="nom-cours-affiche" style="color:#C2185B; font-weight:700;"></span>
+  <!-- STATUT COURS -->
+  <div id="statut-cours" class="qcm-statut" style="display:none;">
+    <div class="qcm-statut-icone">📚</div>
+    <div class="qcm-statut-texte">
+      <span class="qcm-statut-label">Cours chargé</span>
+      <span id="nom-cours-affiche" class="qcm-statut-nom"></span>
     </div>
-    <span class="badge-ok">✅ Prêt</span>
+    <div class="qcm-statut-badge">✅ Prêt</div>
   </div>
 
-  <!-- ══════════════════════════════════ -->
-  <!-- 🎛️ PANNEAU DE CONTRÔLE            -->
-  <!-- ══════════════════════════════════ -->
-  <div class="control-panel" style="border-top: 4px solid #FF6B9D;">
+  <!-- PANNEAU CONTRÔLE -->
+  <div class="qcm-panel">
+    <h2 class="qcm-panel-titre">
+      <span class="qcm-panel-icon">⚙️</span>
+      Paramètres du QCM
+    </h2>
 
-    <h2 class="control-title" style="color:#C2185B;">⚙️ Paramètres du QCM</h2>
-
-    <div class="slider-container">
-      <label class="slider-label">
-        📊 Nombre de questions :
-        <span id="valeur-slider" class="slider-value" style="background:#FF6B9D;">5</span>
-      </label>
-      <input
-        type="range"
-        id="slider-qcm"
-        min="3"
-        max="20"
-        value="5"
-        class="slider-qcm"
-        oninput="majSlider(this.value)"
-      />
-      <div class="slider-info">
-        <span>3 (rapide ⚡)</span>
-        <span>10 (moyen 📚)</span>
-        <span>20 (complet 💎)</span>
+    <div class="qcm-slider-zone">
+      <div class="qcm-slider-label">
+        <span>📊 Nombre de questions</span>
+        <span id="valeur-slider" class="qcm-slider-value">5</span>
+      </div>
+      <input type="range" id="slider-qcm" min="3" max="20" value="5"
+             class="qcm-slider" oninput="majSlider(this.value)"/>
+      <div class="qcm-slider-marks">
+        <span>3 ⚡</span>
+        <span>10 📚</span>
+        <span>20 💎</span>
       </div>
     </div>
 
-    <button
-      id="btn-generer"
-      onclick="genererQCM()"
-      class="btn-primary btn-rose"
-    >
-      🎯 Générer les QCM
+    <button id="btn-generer" onclick="genererQCM()" class="qcm-btn-generer">
+      <span class="qcm-btn-icone">🎯</span>
+      <span class="qcm-btn-texte">Générer les QCM</span>
     </button>
-
   </div>
 
-  <!-- ══════════════════════════════════ -->
-  <!-- ⏳ LOADING                        -->
-  <!-- ══════════════════════════════════ -->
-  <div id="loading-qcm" class="loading-card" style="display:none;">
-    <div class="spinner" style="border-top-color:#FF6B9D;"></div>
-    <div>
-      <p style="font-weight:700; color:#C2185B;">🎯 Génération en cours...</p>
-      <p style="color:#9CA3AF; font-size:0.85rem;">L'IA prépare tes QCM 🤖✨</p>
+  <!-- LOADING -->
+  <div id="loading-qcm" class="qcm-loading" style="display:none;">
+    <div class="qcm-spinner"></div>
+    <div class="qcm-loading-texte">
+      <p class="qcm-loading-titre">🎯 Génération en cours...</p>
+      <p class="qcm-loading-sous">L'IA prépare tes questions ✨</p>
     </div>
   </div>
 
-  <!-- ══════════════════════════════════ -->
-  <!-- 📋 RÉSULTAT QCM                   -->
-  <!-- ══════════════════════════════════ -->
+  <!-- RÉSULTAT -->
   <div id="zone-resultat" style="display:none;">
 
-    <!-- Barre d'actions -->
-    <div class="actions-bar" style="border-left: 4px solid #FF6B9D;">
-      <span style="font-weight:700; color:#C2185B;">✅ QCM générés !</span>
-      <div class="actions-buttons">
-        <button onclick="copierQCM()" class="btn-action btn-copy">
-          📋 Copier
+    <div class="qcm-actions">
+      <div class="qcm-actions-titre">
+        <span>✅</span> QCM générés avec succès !
+      </div>
+      <div class="qcm-actions-btns">
+        <button onclick="copierQCM()" class="qcm-action-btn qcm-copy">
+          <span>📋</span> Copier
         </button>
-        <button onclick="telechargerQCMPDF()" class="btn-action btn-download">
-          📄 Télécharger PDF
+        <button onclick="telechargerQCMPDF()" class="qcm-action-btn qcm-pdf">
+          <span>📄</span> PDF
         </button>
-        <button onclick="partagerQCM()" class="btn-action btn-partage">
-          🤝 Partager
+        <button onclick="partagerQCM()" class="qcm-action-btn qcm-partage">
+          <span>🤝</span> Partager
         </button>
-        <button onclick="genererQCM()" class="btn-action btn-regen" style="border-color:#FF6B9D; color:#C2185B;">
-          🔄 Régénérer
+        <button onclick="genererQCM()" class="qcm-action-btn qcm-regen">
+          <span>🔄</span> Régénérer
         </button>
       </div>
     </div>
 
-    <!-- Affichage QCM formatés -->
     <div id="qcm-display" class="qcm-display"></div>
-
-    <!-- Texte brut caché -->
     <textarea id="qcm-brut" style="display:none;"></textarea>
-
   </div>
 
 </div>
 
-<!-- Toast notification -->
 <div id="toastGlobal" class="toast-notif"></div>
 
 <style>
-  .page-container {
-    padding: 2rem;
+  /* ═══════════════════════════════════════════
+     🎯 PAGE QCM REDESIGN PRO
+     ═══════════════════════════════════════════ */
+  .qcm-page {
     max-width: 1100px;
     margin: 0 auto;
+    animation: fadeInUp 0.5s ease;
+  }
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
   }
 
-  .page-header {
+  /* HEADER */
+  .qcm-header {
+    position: relative;
+    background: linear-gradient(135deg, #FF6B9D, #C2185B);
+    border-radius: 28px;
+    padding: 28px 30px;
+    margin-bottom: 20px;
     display: flex;
     align-items: center;
-    gap: 1.2rem;
-    border-radius: 20px;
-    padding: 1.5rem 2rem;
-    margin-bottom: 1.5rem;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+    gap: 20px;
+    color: white;
+    box-shadow: 0 10px 30px rgba(255,107,157,0.3);
+    overflow: hidden;
   }
-  .page-header-icon {
-    width: 60px; height: 60px;
-    border-radius: 16px;
+  .qcm-header-bg {
+    position: absolute;
+    top: -30px; right: -20px;
+    font-size: 200px;
+    opacity: 0.15;
+    transform: rotate(15deg);
+    pointer-events: none;
+  }
+  .qcm-header-icone {
+    width: 70px; height: 70px;
+    background: white;
+    border-radius: 22px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.8rem;
+    font-size: 36px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+    z-index: 1;
+  }
+  .qcm-header-texte { z-index: 1; }
+  .qcm-header-texte h1 {
+    font-size: 28px;
+    font-weight: 900;
+    margin: 0;
+    letter-spacing: -0.5px;
+  }
+  .qcm-header-texte p {
+    font-size: 14px;
+    opacity: 0.92;
+    margin-top: 4px;
+    font-weight: 500;
+  }
+
+  /* ALERTE */
+  .qcm-alerte {
+    display: flex;
+    gap: 16px;
+    background: linear-gradient(135deg, #FEF3C7, #FDE68A);
+    border-radius: 20px;
+    padding: 20px;
+    margin-bottom: 20px;
+    border-left: 5px solid #F59E0B;
+    animation: shake 0.5s ease;
+  }
+  @keyframes shake {
+    0%,100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+  }
+  .qcm-alerte-icone {
+    font-size: 32px;
+    flex-shrink: 0;
+  }
+  .qcm-alerte-contenu { flex: 1; }
+  .qcm-alerte-contenu strong {
+    color: #92400E;
+    font-size: 16px;
+  }
+  .qcm-alerte-contenu p {
+    color: #B45309;
+    font-size: 14px;
+    margin: 6px 0 12px;
+  }
+  .qcm-alerte-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: linear-gradient(135deg, #F59E0B, #D97706);
+    color: white;
+    font-weight: 700;
+    padding: 8px 18px;
+    border-radius: 50px;
+    text-decoration: none;
+    font-size: 13px;
+    box-shadow: 0 4px 12px rgba(245,158,11,0.35);
+    transition: all 0.3s;
+  }
+  .qcm-alerte-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(245,158,11,0.5);
+  }
+
+  /* STATUT */
+  .qcm-statut {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    background: white;
+    border-radius: 20px;
+    padding: 16px 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    border-left: 5px solid #FF6B9D;
+  }
+  .qcm-statut-icone {
+    width: 50px; height: 50px;
+    background: linear-gradient(135deg, #FFC9DE, #FF6B9D);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
     color: white;
     flex-shrink: 0;
   }
-  .page-title {
-    font-size: 1.6rem;
-    font-weight: 800;
-    margin: 0 0 0.2rem;
-  }
-  .page-subtitle {
-    margin: 0;
-    font-size: 0.95rem;
-  }
-
-  .alerte-warning {
-    display: flex;
-    align-items: flex-start;
-    gap: 1rem;
-    background: #FFF3CD;
-    border: 2px solid #FFD93D;
-    border-radius: 16px;
-    padding: 1.2rem 1.5rem;
-    margin-bottom: 1.5rem;
-    font-size: 0.95rem;
-    color: #374151;
-  }
-  .alerte-warning span { font-size: 1.5rem; }
-  .alerte-warning p { margin: 0.2rem 0 0.5rem; color: #6B7280; font-size:0.9rem;}
-  .btn-alerte {
-    display: inline-block;
-    background: #FFD93D;
-    color: #374151;
+  .qcm-statut-texte { flex: 1; display: flex; flex-direction: column; gap: 2px; }
+  .qcm-statut-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #9CA3AF;
     font-weight: 700;
-    padding: 0.4rem 1rem;
-    border-radius: 20px;
-    text-decoration: none;
-    font-size: 0.85rem;
-    transition: 0.2s;
   }
-  .btn-alerte:hover { background: #F59E0B; color: white; }
-
-  .statut-cours-card {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    background: #FFE5EF;
-    border: 2px solid #FFC9DE;
-    border-radius: 16px;
-    padding: 1rem 1.5rem;
-    margin-bottom: 1.5rem;
-    font-size: 0.95rem;
+  .qcm-statut-nom {
+    color: #1A1D2E;
+    font-weight: 700;
+    font-size: 14px;
   }
-  .badge-ok {
-    margin-left: auto;
-    background: #00C853;
+  .qcm-statut-badge {
+    background: linear-gradient(135deg, #00C853, #2E7D32);
     color: white;
-    font-size: 0.8rem;
+    padding: 6px 14px;
+    border-radius: 50px;
     font-weight: 700;
-    padding: 0.3rem 0.8rem;
-    border-radius: 20px;
+    font-size: 12px;
+    box-shadow: 0 3px 10px rgba(0,200,83,0.3);
   }
 
-  .control-panel {
+  /* PANEL */
+  .qcm-panel {
     background: white;
-    border-radius: 20px;
-    padding: 2rem;
-    margin-bottom: 1.5rem;
-    box-shadow: 0 4px 20px rgba(255,107,157,0.1);
+    border-radius: 24px;
+    padding: 28px;
+    margin-bottom: 20px;
+    box-shadow: 0 6px 25px rgba(0,0,0,0.06);
+    border-top: 5px solid #FF6B9D;
   }
-  .control-title {
-    font-size: 1.1rem;
-    font-weight: 700;
-    margin-bottom: 1.5rem;
-  }
-
-  .slider-container { margin-bottom: 1.5rem; }
-  .slider-label {
+  .qcm-panel-titre {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    font-weight: 600;
-    color: #374151;
-    margin-bottom: 0.8rem;
-    font-size: 0.95rem;
+    gap: 10px;
+    font-size: 18px;
+    font-weight: 800;
+    color: #1A1D2E;
+    margin-bottom: 20px;
   }
-  .slider-value {
+  .qcm-panel-icon {
+    width: 36px; height: 36px;
+    background: linear-gradient(135deg, #FF6B9D, #C2185B);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     color: white;
+    font-size: 18px;
+  }
+
+  .qcm-slider-zone {
+    background: #FFF5F9;
+    border-radius: 18px;
+    padding: 20px;
+    margin-bottom: 20px;
+  }
+  .qcm-slider-label {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 14px;
+  }
+  .qcm-slider-label span:first-child {
     font-weight: 700;
-    padding: 0.2rem 0.7rem;
-    border-radius: 20px;
-    font-size: 1rem;
-    min-width: 35px;
+    color: #1A1D2E;
+    font-size: 14px;
+  }
+  .qcm-slider-value {
+    background: linear-gradient(135deg, #FF6B9D, #C2185B);
+    color: white;
+    font-weight: 900;
+    padding: 6px 16px;
+    border-radius: 50px;
+    font-size: 18px;
+    box-shadow: 0 3px 10px rgba(255,107,157,0.4);
+    min-width: 50px;
     text-align: center;
   }
-  .slider-qcm {
+  .qcm-slider {
     width: 100%;
-    height: 8px;
+    height: 10px;
     border-radius: 10px;
     background: #FFE5EF;
     outline: none;
     cursor: pointer;
-    appearance: none;
     -webkit-appearance: none;
   }
-  .slider-qcm::-webkit-slider-thumb {
-    appearance: none;
+  .qcm-slider::-webkit-slider-thumb {
     -webkit-appearance: none;
-    width: 24px;
-    height: 24px;
+    width: 28px; height: 28px;
     border-radius: 50%;
-    background: #FF6B9D;
+    background: white;
+    border: 4px solid #FF6B9D;
     cursor: pointer;
-    box-shadow: 0 2px 8px rgba(255,107,157,0.4);
-    transition: transform 0.2s;
+    box-shadow: 0 4px 12px rgba(255,107,157,0.4);
+    transition: all 0.2s;
   }
-  .slider-qcm::-webkit-slider-thumb:hover { transform: scale(1.2); }
-  .slider-info {
+  .qcm-slider::-webkit-slider-thumb:hover { transform: scale(1.2); }
+  .qcm-slider-marks {
     display: flex;
     justify-content: space-between;
-    font-size: 0.78rem;
+    margin-top: 10px;
+    font-size: 11px;
     color: #9CA3AF;
-    margin-top: 0.4rem;
+    font-weight: 600;
   }
 
-  .btn-primary {
+  /* BOUTON GÉNÉRER */
+  .qcm-btn-generer {
     width: 100%;
-    padding: 1rem;
-    border: none;
-    border-radius: 16px;
-    font-size: 1.1rem;
-    font-weight: 700;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    letter-spacing: 0.5px;
-  }
-  .btn-rose {
     background: linear-gradient(135deg, #FF6B9D, #C2185B);
     color: white;
-    box-shadow: 0 4px 15px rgba(255,107,157,0.4);
+    border: none;
+    padding: 16px;
+    border-radius: 50px;
+    font-size: 16px;
+    font-weight: 800;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    box-shadow: 0 8px 25px rgba(255,107,157,0.4);
+    transition: all 0.3s;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
   }
-  .btn-rose:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(255,107,157,0.5);
+  .qcm-btn-generer:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 35px rgba(255,107,157,0.55);
   }
-  .btn-rose:disabled {
+  .qcm-btn-generer:disabled {
     background: #D1D5DB;
     box-shadow: none;
     transform: none;
     cursor: not-allowed;
   }
-
-  .loading-card {
+  .qcm-btn-icone {
+    width: 32px; height: 32px;
+    background: white;
+    border-radius: 50%;
     display: flex;
     align-items: center;
-    gap: 1.5rem;
-    background: #FFE5EF;
-    border-radius: 20px;
-    padding: 2rem;
-    margin-bottom: 1.5rem;
-    border: 2px solid #FFC9DE;
+    justify-content: center;
+    font-size: 16px;
   }
-  .spinner {
-    width: 50px;
-    height: 50px;
-    border: 5px solid #FFC9DE;
+
+  /* LOADING */
+  .qcm-loading {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    background: white;
+    border-radius: 24px;
+    padding: 28px;
+    margin-bottom: 20px;
+    box-shadow: 0 6px 25px rgba(0,0,0,0.06);
+    border-left: 5px solid #FF6B9D;
+    animation: pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%,100% { box-shadow: 0 6px 25px rgba(0,0,0,0.06); }
+    50% { box-shadow: 0 6px 30px rgba(255,107,157,0.25); }
+  }
+  .qcm-spinner {
+    width: 60px; height: 60px;
+    border: 5px solid #FFE5EF;
+    border-top-color: #FF6B9D;
     border-radius: 50%;
     animation: spin 1s linear infinite;
     flex-shrink: 0;
   }
   @keyframes spin { to { transform: rotate(360deg); } }
+  .qcm-loading-titre {
+    font-size: 16px;
+    font-weight: 800;
+    color: #C2185B;
+    margin: 0;
+  }
+  .qcm-loading-sous {
+    font-size: 13px;
+    color: #9CA3AF;
+    margin-top: 4px;
+  }
 
-  .actions-bar {
+  /* ACTIONS */
+  .qcm-actions {
+    background: white;
+    border-radius: 20px;
+    padding: 18px 22px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    border-left: 5px solid #FF6B9D;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 14px;
+  }
+  .qcm-actions-titre {
+    font-weight: 800;
+    color: #C2185B;
+    font-size: 15px;
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    background: #FFE5EF;
-    border-radius: 16px;
-    padding: 1rem 1.5rem;
-    margin-bottom: 1.5rem;
+    gap: 8px;
+  }
+  .qcm-actions-btns {
+    display: flex;
+    gap: 8px;
     flex-wrap: wrap;
-    gap: 0.8rem;
   }
-  .actions-buttons { display: flex; gap: 0.6rem; flex-wrap: wrap; }
-  .btn-action {
-    padding: 0.5rem 1rem;
-    border-radius: 20px;
-    font-weight: 600;
-    font-size: 0.85rem;
+  .qcm-action-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border-radius: 50px;
+    font-weight: 700;
+    font-size: 13px;
     cursor: pointer;
-    transition: all 0.2s;
-    border: 2px solid transparent;
-  }
-  .btn-copy {
-    background: #EDE9FE;
-    color: #7B61FF;
-    border-color: #7B61FF;
-  }
-  .btn-copy:hover { background: #7B61FF; color: white; }
-
-  /* 🆕 Bouton PDF */
-  .btn-download {
-    background: linear-gradient(135deg, #2962FF, #7EC8FF);
-    color: white;
-    border-color: transparent;
-  }
-  .btn-download:hover {
-    background: linear-gradient(135deg, #1a4fd6, #5ab0f0);
+    border: none;
+    transition: all 0.3s;
     color: white;
   }
+  .qcm-action-btn:hover { transform: translateY(-2px); }
+  .qcm-copy { background: linear-gradient(135deg, #7B61FF, #5B21B6); box-shadow: 0 4px 12px rgba(123,97,255,0.3); }
+  .qcm-pdf { background: linear-gradient(135deg, #2962FF, #1E40AF); box-shadow: 0 4px 12px rgba(41,98,255,0.3); }
+  .qcm-partage { background: linear-gradient(135deg, #00C853, #2E7D32); box-shadow: 0 4px 12px rgba(0,200,83,0.3); }
+  .qcm-regen { background: linear-gradient(135deg, #F59E0B, #B45309); box-shadow: 0 4px 12px rgba(245,158,11,0.3); }
 
-  /* 🆕 Bouton Partage */
-  .btn-partage {
-    background: linear-gradient(135deg, #00C853, #7ED321);
-    color: white;
-    border-color: transparent;
-  }
-  .btn-partage:hover {
-    background: linear-gradient(135deg, #00a844, #6ab51d);
-    color: white;
-  }
-
-  .btn-regen {
-    background: #FFE5EF;
-  }
-  .btn-regen:hover { background: #FF6B9D; color: white !important; }
-
+  /* CARTES QCM */
   .qcm-display {
     display: flex;
     flex-direction: column;
-    gap: 1.2rem;
+    gap: 16px;
   }
-
   .qcm-card {
     background: white;
-    border-radius: 20px;
-    padding: 1.5rem;
-    box-shadow: 0 4px 20px rgba(255,107,157,0.08);
-    border-left: 5px solid #FF6B9D;
-    transition: transform 0.2s;
+    border-radius: 22px;
+    padding: 22px;
+    box-shadow: 0 4px 18px rgba(0,0,0,0.06);
+    border-top: 4px solid #FF6B9D;
+    transition: all 0.3s;
+    animation: slideIn 0.5s ease;
   }
-  .qcm-card:hover { transform: translateX(4px); }
-
+  .qcm-card:nth-child(2) { animation-delay: 0.1s; }
+  .qcm-card:nth-child(3) { animation-delay: 0.2s; }
+  .qcm-card:nth-child(4) { animation-delay: 0.3s; }
+  .qcm-card:nth-child(5) { animation-delay: 0.4s; }
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .qcm-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(255,107,157,0.15);
+  }
   .qcm-numero {
     display: inline-block;
     background: linear-gradient(135deg, #FF6B9D, #C2185B);
     color: white;
-    font-weight: 700;
-    font-size: 0.8rem;
-    padding: 0.3rem 0.9rem;
-    border-radius: 20px;
-    margin-bottom: 0.8rem;
+    font-weight: 800;
+    font-size: 12px;
+    padding: 5px 14px;
+    border-radius: 50px;
+    margin-bottom: 12px;
+    box-shadow: 0 3px 10px rgba(255,107,157,0.3);
   }
-
   .qcm-question {
     font-weight: 700;
-    color: #374151;
-    font-size: 1rem;
-    margin-bottom: 1rem;
+    color: #1A1D2E;
+    font-size: 16px;
+    margin-bottom: 16px;
     line-height: 1.5;
   }
-
   .qcm-options {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 0.5rem;
-    margin-bottom: 1rem;
+    gap: 10px;
+    margin-bottom: 16px;
   }
-
   .qcm-option {
-    background: #FFF3F7;
-    border: 2px solid #FFC9DE;
-    border-radius: 10px;
-    padding: 0.6rem 0.9rem;
-    font-size: 0.9rem;
-    color: #374151;
-    transition: 0.2s;
+    background: #FFF5F9;
+    border: 2px solid #FFE5EF;
+    border-radius: 14px;
+    padding: 12px 14px;
+    font-size: 14px;
+    color: #1A1D2E;
+    transition: all 0.3s;
+    cursor: pointer;
   }
   .qcm-option:hover {
     background: #FFE5EF;
     border-color: #FF6B9D;
+    transform: translateX(3px);
   }
-  .qcm-option strong { color: #C2185B; }
-
+  .qcm-option strong {
+    color: #C2185B;
+    margin-right: 6px;
+  }
   .qcm-reponse {
-    background: #D1FAE5;
+    background: linear-gradient(135deg, #D1FAE5, #A7F3D0);
     border: 2px solid #00C853;
-    border-radius: 10px;
-    padding: 0.7rem 1rem;
-    font-size: 0.9rem;
+    border-radius: 14px;
+    padding: 12px 16px;
+    font-size: 14px;
     color: #065F46;
-    margin-bottom: 0.5rem;
+    margin-bottom: 10px;
+    font-weight: 600;
   }
-  .qcm-reponse strong { color: #00C853; }
-
+  .qcm-reponse strong { color: #047857; }
   .qcm-explication {
-    background: #EFF6FF;
-    border-left: 3px solid #2962FF;
-    border-radius: 0 10px 10px 0;
-    padding: 0.7rem 1rem;
-    font-size: 0.88rem;
+    background: linear-gradient(135deg, #EFF6FF, #DBEAFE);
+    border-left: 4px solid #2962FF;
+    border-radius: 0 14px 14px 0;
+    padding: 12px 16px;
+    font-size: 13px;
     color: #1E40AF;
     font-style: italic;
   }
 
-  /* 🆕 Toast */
+  /* TOAST */
   .toast-notif {
     position: fixed;
     bottom: 30px;
     right: 30px;
-    background: #374151;
+    background: #1A1D2E;
     color: white;
     padding: 14px 22px;
     border-radius: 14px;
-    font-weight: bold;
+    font-weight: 700;
     font-size: 14px;
     z-index: 9999;
     opacity: 0;
     transform: translateY(20px);
     transition: all 0.4s ease;
-    box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.25);
     pointer-events: none;
   }
-  .toast-notif.show {
-    opacity: 1;
-    transform: translateY(0);
+  .toast-notif.show { opacity: 1; transform: translateY(0); }
+
+  /* MODE SOMBRE */
+  html[data-mode="sombre"] .qcm-statut,
+  html[data-mode="sombre"] .qcm-panel,
+  html[data-mode="sombre"] .qcm-loading,
+  html[data-mode="sombre"] .qcm-actions,
+  html[data-mode="sombre"] .qcm-card {
+    background: #1A1D2E !important;
+    color: #F1F5F9 !important;
+  }
+  html[data-mode="sombre"] .qcm-statut-nom,
+  html[data-mode="sombre"] .qcm-panel-titre,
+  html[data-mode="sombre"] .qcm-question {
+    color: #F1F5F9 !important;
+  }
+  html[data-mode="sombre"] .qcm-slider-zone { background: #2A2D3E !important; }
+  html[data-mode="sombre"] .qcm-option {
+    background: #2A2D3E !important;
+    border-color: #3A3D4E !important;
+    color: #F1F5F9 !important;
   }
 
-  @media (max-width: 600px) {
+  /* RESPONSIVE */
+  @media (max-width: 768px) {
+    .qcm-header { flex-direction: column; text-align: center; padding: 24px; }
+    .qcm-header-texte h1 { font-size: 22px; }
+    .qcm-actions { flex-direction: column; align-items: stretch; }
+    .qcm-actions-btns { justify-content: center; }
     .qcm-options { grid-template-columns: 1fr; }
-    .actions-bar { flex-direction: column; align-items: flex-start; }
-    .page-container { padding: 1rem; }
+    .qcm-statut { flex-wrap: wrap; }
+    .qcm-statut-badge { margin-left: auto; }
   }
 </style>
 
@@ -490,38 +616,30 @@
 let qcmBrut = '';
 let nomCours = '';
 
-// 🔔 Toast
-function showToast(message, couleur = '#374151') {
+function showToast(msg, couleur = '#1A1D2E') {
   const toast = document.getElementById('toastGlobal');
   toast.style.background = couleur;
-  toast.textContent = message;
+  toast.textContent = msg;
   toast.classList.add('show');
   setTimeout(() => toast.classList.remove('show'), 3000);
 }
 
-document.addEventListener('DOMContentLoaded', function () {
-  verifierCours();
-});
+document.addEventListener('DOMContentLoaded', verifierCours);
 
 function verifierCours() {
-  fetch('/api/statut-cours')
-    .then(r => r.json())
-    .then(data => {
-      if (data.cours_charge) {
-        nomCours = data.nom_cours;
-        document.getElementById('nom-cours-affiche').textContent = nomCours;
-        document.getElementById('statut-cours').style.display = 'flex';
-        document.getElementById('alerte-cours').style.display = 'none';
-        document.getElementById('btn-generer').disabled = false;
-      } else {
-        document.getElementById('alerte-cours').style.display = 'flex';
-        document.getElementById('statut-cours').style.display = 'none';
-        document.getElementById('btn-generer').disabled = true;
-      }
-    })
-    .catch(() => {
+  fetch('/api/statut-cours').then(r => r.json()).then(data => {
+    if (data.cours_charge) {
+      nomCours = data.nom_cours;
+      document.getElementById('nom-cours-affiche').textContent = nomCours;
+      document.getElementById('statut-cours').style.display = 'flex';
+      document.getElementById('alerte-cours').style.display = 'none';
       document.getElementById('btn-generer').disabled = false;
-    });
+    } else {
+      document.getElementById('alerte-cours').style.display = 'flex';
+      document.getElementById('statut-cours').style.display = 'none';
+      document.getElementById('btn-generer').disabled = true;
+    }
+  });
 }
 
 function majSlider(val) {
@@ -530,7 +648,6 @@ function majSlider(val) {
 
 function genererQCM() {
   const nombre = document.getElementById('slider-qcm').value;
-
   document.getElementById('zone-resultat').style.display = 'none';
   document.getElementById('loading-qcm').style.display = 'flex';
   document.getElementById('btn-generer').disabled = true;
@@ -544,30 +661,26 @@ function genererQCM() {
   .then(data => {
     document.getElementById('loading-qcm').style.display = 'none';
     document.getElementById('btn-generer').disabled = false;
-
     if (data.succes) {
       qcmBrut = data.qcm;
       document.getElementById('qcm-brut').value = qcmBrut;
       afficherQCM(data.qcm_parse || [], data.qcm);
       document.getElementById('zone-resultat').style.display = 'block';
-      document.getElementById('zone-resultat').scrollIntoView({
-        behavior: 'smooth', block: 'start'
-      });
+      document.getElementById('zone-resultat').scrollIntoView({ behavior: 'smooth' });
     } else {
-      showToast('❌ Erreur : ' + (data.erreur || 'Inconnue'), '#EF4444');
+      showToast('❌ ' + (data.erreur || 'Erreur'), '#EF4444');
     }
   })
   .catch(err => {
     document.getElementById('loading-qcm').style.display = 'none';
     document.getElementById('btn-generer').disabled = false;
-    showToast('❌ Erreur réseau : ' + err.message, '#EF4444');
+    showToast('❌ ' + err.message, '#EF4444');
   });
 }
 
 function afficherQCM(qcmsParse, qcmBrutTexte) {
   const container = document.getElementById('qcm-display');
   container.innerHTML = '';
-
   if (qcmsParse && qcmsParse.length > 0) {
     qcmsParse.forEach((qcm, i) => {
       const card = document.createElement('div');
@@ -595,72 +708,36 @@ function afficherQCM(qcmsParse, qcmBrutTexte) {
     });
   } else {
     const pre = document.createElement('pre');
-    pre.style.cssText = `
-      background: white;
-      border-radius: 16px;
-      padding: 1.5rem;
-      white-space: pre-wrap;
-      font-family: inherit;
-      font-size: 0.92rem;
-      color: #374151;
-      line-height: 1.7;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.06);
-      border-left: 5px solid #FF6B9D;
-    `;
+    pre.style.cssText = 'background:white;border-radius:22px;padding:22px;white-space:pre-wrap;font-family:inherit;font-size:14px;color:#1A1D2E;line-height:1.7;box-shadow:0 4px 18px rgba(0,0,0,0.06);border-top:4px solid #FF6B9D;';
     pre.textContent = qcmBrutTexte;
     container.appendChild(pre);
   }
 }
 
 function copierQCM() {
-  const texte = document.getElementById('qcm-brut').value;
-  navigator.clipboard.writeText(texte).then(() => {
-    showToast('✅ QCM copié !', '#00C853');
-  });
+  navigator.clipboard.writeText(document.getElementById('qcm-brut').value)
+    .then(() => showToast('✅ QCM copié !', '#00C853'));
 }
 
-// 🆕 PDF NOKIROVA rose/sakura
 function telechargerQCMPDF() {
-  if (!qcmBrut) {
-    showToast('⚠️ Génère d\'abord des QCM !', '#F59E0B');
-    return;
-  }
-  window.telechargerPDF(
-    '🎯 QCM Interactif',
-    qcmBrut,
-    {
-      couleur: [194, 24, 91],   // Rose NOKIROVA
-      matiere: nomCours || 'Cours',
-      emoji: '🎯'
-    }
-  );
-  showToast('📄 PDF généré avec succès !', '#C2185B');
+  if (!qcmBrut) return showToast('⚠️ Génère d\'abord !', '#F59E0B');
+  window.telechargerPDF('🎯 QCM Interactif', qcmBrut, {
+    couleur: [194, 24, 91], matiere: nomCours || 'Cours', emoji: '🎯'
+  });
+  showToast('📄 PDF généré !', '#C2185B');
 }
 
-// 🆕 Partage
 async function partagerQCM() {
-  if (!qcmBrut) {
-    showToast('⚠️ Génère d\'abord des QCM !', '#F59E0B');
-    return;
-  }
-
-  // Mobile Android → Web Share API
+  if (!qcmBrut) return showToast('⚠️ Génère d\'abord !', '#F59E0B');
   if (navigator.share) {
     try {
-      await navigator.share({
-        title: '🎯 QCM NOKIROVA',
-        text: qcmBrut,
-      });
+      await navigator.share({ title: '🎯 QCM NOKIROVA', text: qcmBrut });
       showToast('✅ Partagé !', '#00C853');
-    } catch (e) {
-      // Annulé → pas grave
-    }
+    } catch (e) {}
     return;
   }
-
-  // Desktop → copie presse-papier
   navigator.clipboard.writeText(qcmBrut);
-  showToast('📋 Copié ! Colle-le où tu veux 🌸', '#7B61FF');
+  showToast('📋 Copié !', '#7B61FF');
 }
 
 function escapeHtml(text) {

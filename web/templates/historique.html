@@ -1,18 +1,23 @@
 {% extends "base.html" %}
-{% block title %}Historique - NOKIROVA{% endblock %}
-{% block contenu %}
-<div class="page-container">
+{% block title %}📜 Historique - NOKIROVA{% endblock %}
 
-  <div class="page-header" style="background: linear-gradient(135deg, #D8B4FE, #E9D5FF); border-left: 5px solid #A855F7;">
-    <div class="page-header-icon" style="background: linear-gradient(135deg, #A855F7, #7B61FF);">📜</div>
-    <div>
-      <h1 class="page-title" style="color: #6B21A8;">Historique</h1>
-      <p class="page-subtitle" style="color: #7E22CE;">Retrouve toutes tes générations IA passées</p>
+{% block contenu %}
+
+<div class="histo-page">
+
+  <!-- HEADER VIOLET -->
+  <div class="histo-header">
+    <div class="histo-header-bg">📜</div>
+    <div class="histo-header-icone">📜</div>
+    <div class="histo-header-texte">
+      <h1>Historique</h1>
+      <p>✨ Retrouve toutes tes générations IA passées</p>
     </div>
   </div>
 
-  <div class="filtres-bar">
-    <select id="filtre-type" onchange="filtrer()">
+  <!-- FILTRES -->
+  <div class="histo-filtres">
+    <select id="filtre-type" onchange="filtrer()" class="histo-select">
       <option value="">🌟 Tous les types</option>
       <option value="qcm">🎯 QCM</option>
       <option value="questions">❓ Questions</option>
@@ -21,56 +26,280 @@
       <option value="explication">💡 Explication</option>
       <option value="question_libre">💬 Chat IA</option>
     </select>
-    <span id="nb-items" class="badge-nb">0 entrées</span>
-    <button onclick="viderTout()" class="btn-clear">🗑️ Tout vider</button>
+    <span id="nb-items" class="histo-badge">0 entrées</span>
+    <button onclick="viderTout()" class="histo-btn-clear">
+      <span>🗑️</span> Tout vider
+    </button>
   </div>
 
+  <!-- LISTE -->
   <div id="liste-historique"></div>
 
-  <div id="empty-state" class="empty-state" style="display:none;">
-    <div style="font-size:4rem;">📭</div>
+  <!-- EMPTY -->
+  <div id="empty-state" class="histo-empty" style="display:none;">
+    <div class="histo-empty-icone">📭</div>
     <h2>Aucun historique</h2>
     <p>Commence à utiliser l'IA pour voir tes générations ici !</p>
   </div>
+
 </div>
 
+<div id="toastGlobal" class="toast-notif"></div>
+
 <style>
-  .page-container { padding:2rem; max-width:1100px; margin:0 auto;}
-  .page-header { display:flex; align-items:center; gap:1.2rem; border-radius:20px; padding:1.5rem 2rem; margin-bottom:1.5rem; box-shadow:0 4px 20px rgba(0,0,0,0.05);}
-  .page-header-icon { width:60px; height:60px; border-radius:16px; display:flex; align-items:center; justify-content:center; font-size:1.8rem; color:white;}
-  .page-title { font-size:1.6rem; font-weight:800; margin:0;}
-  .page-subtitle { margin:0.2rem 0 0; font-size:0.95rem;}
+/* ═══════════════════════════════════════════
+   📜 HISTORIQUE REDESIGN PRO
+   ═══════════════════════════════════════════ */
+.histo-page { max-width: 1100px; margin: 0 auto; animation: fadeInUp 0.5s ease; }
+@keyframes fadeInUp { from { opacity:0; transform:translateY(20px);} to { opacity:1; transform:translateY(0);} }
 
-  .filtres-bar { display:flex; gap:0.8rem; margin-bottom:1.5rem; flex-wrap:wrap; align-items:center; background:white; padding:1rem; border-radius:16px; box-shadow:0 2px 12px rgba(0,0,0,0.05);}
-  .filtres-bar select { padding:0.7rem 1rem; border:2px solid #D8B4FE; border-radius:12px; font-size:0.9rem; outline:none;}
-  .badge-nb { background:#A855F7; color:white; font-weight:700; padding:0.4rem 1rem; border-radius:20px; font-size:0.85rem;}
-  .btn-clear { background:#FEE2E2; color:#EF4444; border:2px solid #EF4444; padding:0.6rem 1.2rem; border-radius:12px; font-weight:600; cursor:pointer; margin-left:auto;}
-  .btn-clear:hover { background:#EF4444; color:white;}
+.histo-header {
+  position: relative;
+  background: linear-gradient(135deg, #A855F7, #7E22CE);
+  border-radius: 28px;
+  padding: 28px 30px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  color: white;
+  box-shadow: 0 10px 30px rgba(168,85,247,0.3);
+  overflow: hidden;
+}
+.histo-header-bg {
+  position: absolute; top: -30px; right: -20px;
+  font-size: 200px; opacity: 0.15;
+  transform: rotate(15deg); pointer-events: none;
+}
+.histo-header-icone {
+  width: 70px; height: 70px;
+  background: white;
+  border-radius: 22px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 36px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+  z-index: 1;
+}
+.histo-header-texte { z-index: 1; }
+.histo-header-texte h1 { font-size: 26px; font-weight: 900; margin: 0; letter-spacing: -0.5px; }
+.histo-header-texte p { font-size: 14px; opacity: 0.92; margin-top: 4px; }
 
-  .histo-card { background:white; border-radius:16px; padding:1.3rem; margin-bottom:1rem; box-shadow:0 4px 15px rgba(0,0,0,0.06); border-left:5px solid #A855F7;}
-  .histo-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:0.8rem; flex-wrap:wrap; gap:0.5rem;}
-  .histo-type { background:linear-gradient(135deg, #A855F7, #7B61FF); color:white; font-weight:700; font-size:0.75rem; padding:0.3rem 0.9rem; border-radius:20px; text-transform:uppercase;}
-  .histo-date { color:#9CA3AF; font-size:0.85rem;}
-  .histo-question { font-weight:700; color:#374151; margin-bottom:0.5rem; font-size:0.95rem;}
-  .histo-reponse { color:#6B7280; font-size:0.9rem; line-height:1.5; max-height:80px; overflow:hidden; position:relative;}
-  .histo-reponse.expanded { max-height:none;}
-  .histo-actions { margin-top:0.8rem; display:flex; gap:0.5rem; flex-wrap:wrap;}
-  .btn-mini { padding:0.4rem 0.9rem; border-radius:10px; font-size:0.8rem; font-weight:600; cursor:pointer; border:2px solid transparent;}
-  .btn-voir { background:#EDE9FE; color:#7B61FF; border-color:#7B61FF;}
-  .btn-voir:hover { background:#7B61FF; color:white;}
-  .btn-sup { background:#FEE2E2; color:#EF4444; border-color:#EF4444;}
-  .btn-sup:hover { background:#EF4444; color:white;}
+/* FILTRES */
+.histo-filtres {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  align-items: center;
+  background: white;
+  padding: 14px 18px;
+  border-radius: 20px;
+  box-shadow: 0 4px 18px rgba(0,0,0,0.06);
+  border-top: 4px solid #A855F7;
+}
+.histo-select {
+  padding: 12px 18px;
+  border: 2px solid #F3E8FF;
+  border-radius: 14px;
+  font-size: 14px;
+  font-weight: 600;
+  background: #FAFBFF;
+  color: #1A1D2E;
+  cursor: pointer;
+  outline: none;
+}
+.histo-select:focus { border-color: #A855F7; }
+.histo-badge {
+  background: linear-gradient(135deg, #A855F7, #7E22CE);
+  color: white;
+  font-weight: 800;
+  padding: 8px 16px;
+  border-radius: 50px;
+  font-size: 13px;
+  box-shadow: 0 3px 10px rgba(168,85,247,0.3);
+}
+.histo-btn-clear {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: linear-gradient(135deg, #EF4444, #B91C1C);
+  color: white;
+  padding: 10px 20px;
+  border-radius: 50px;
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+  border: none;
+  margin-left: auto;
+  box-shadow: 0 4px 12px rgba(239,68,68,0.3);
+  transition: all 0.3s;
+}
+.histo-btn-clear:hover { transform: translateY(-2px); }
 
-  .empty-state { text-align:center; padding:4rem 2rem; background:white; border-radius:20px; box-shadow:0 4px 20px rgba(0,0,0,0.05);}
-  .empty-state h2 { color:#374151; margin:1rem 0 0.5rem;}
-  .empty-state p { color:#9CA3AF;}
+/* CARTES HISTORIQUE */
+.histo-card {
+  background: white;
+  border-radius: 20px;
+  padding: 20px;
+  margin-bottom: 14px;
+  box-shadow: 0 4px 18px rgba(0,0,0,0.06);
+  border-left: 5px solid #A855F7;
+  transition: all 0.3s;
+  animation: slideIn 0.4s ease;
+}
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(15px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.histo-card:hover {
+  transform: translateX(4px);
+  box-shadow: 0 8px 25px rgba(168,85,247,0.15);
+}
+.histo-header-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.histo-type {
+  color: white;
+  font-weight: 800;
+  font-size: 11px;
+  padding: 6px 14px;
+  border-radius: 50px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.histo-date {
+  color: #9CA3AF;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.histo-question {
+  font-weight: 700;
+  color: #1A1D2E;
+  margin-bottom: 8px;
+  font-size: 14px;
+  line-height: 1.5;
+}
+.histo-reponse {
+  color: #6B7280;
+  font-size: 13px;
+  line-height: 1.6;
+  max-height: 80px;
+  overflow: hidden;
+  position: relative;
+  background: #FAFBFF;
+  padding: 12px;
+  border-radius: 12px;
+  border-left: 3px solid #E5E7EB;
+}
+.histo-reponse.expanded { max-height: none; }
+.histo-actions {
+  margin-top: 12px;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.btn-mini {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 7px 14px;
+  border-radius: 50px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  border: none;
+  transition: all 0.3s;
+  color: white;
+}
+.btn-mini:hover { transform: translateY(-2px); }
+.btn-voir { background: linear-gradient(135deg, #7B61FF, #5B21B6); box-shadow: 0 3px 10px rgba(123,97,255,0.3); }
+.btn-copier { background: linear-gradient(135deg, #2962FF, #1E40AF); box-shadow: 0 3px 10px rgba(41,98,255,0.3); }
+.btn-sup { background: linear-gradient(135deg, #EF4444, #B91C1C); box-shadow: 0 3px 10px rgba(239,68,68,0.3); }
 
-  .icone-type-qcm { background:linear-gradient(135deg, #FF6B9D, #C2185B);}
-  .icone-type-questions { background:linear-gradient(135deg, #2962FF, #1E40AF);}
-  .icone-type-examen { background:linear-gradient(135deg, #F59E0B, #B45309);}
-  .icone-type-resume { background:linear-gradient(135deg, #2962FF, #7EC8FF);}
-  .icone-type-explication { background:linear-gradient(135deg, #FFD93D, #F59E0B);}
-  .icone-type-question_libre { background:linear-gradient(135deg, #7B61FF, #A855F7);}
+/* COULEURS PAR TYPE */
+.icone-type-qcm { background: linear-gradient(135deg, #FF6B9D, #C2185B); }
+.icone-type-questions { background: linear-gradient(135deg, #2962FF, #1E40AF); }
+.icone-type-examen { background: linear-gradient(135deg, #F59E0B, #B45309); }
+.icone-type-resume { background: linear-gradient(135deg, #2962FF, #7EC8FF); }
+.icone-type-explication { background: linear-gradient(135deg, #FFD93D, #F59E0B); }
+.icone-type-question_libre { background: linear-gradient(135deg, #7B61FF, #A855F7); }
+
+/* EMPTY */
+.histo-empty {
+  text-align: center;
+  padding: 60px 30px;
+  background: white;
+  border-radius: 28px;
+  box-shadow: 0 6px 25px rgba(0,0,0,0.06);
+  border-top: 5px solid #A855F7;
+}
+.histo-empty-icone {
+  font-size: 80px;
+  margin-bottom: 16px;
+  animation: bounce 2s ease-in-out infinite;
+}
+@keyframes bounce {
+  0%,100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+.histo-empty h2 {
+  color: #1A1D2E;
+  font-size: 22px;
+  font-weight: 800;
+  margin-bottom: 10px;
+}
+.histo-empty p {
+  color: #9CA3AF;
+  font-size: 15px;
+}
+
+/* TOAST */
+.toast-notif {
+  position: fixed; bottom: 30px; right: 30px;
+  background: #1A1D2E; color: white;
+  padding: 14px 22px; border-radius: 14px;
+  font-weight: 700; font-size: 14px;
+  z-index: 9999; opacity: 0; transform: translateY(20px);
+  transition: all 0.4s ease;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.25);
+  pointer-events: none;
+}
+.toast-notif.show { opacity: 1; transform: translateY(0); }
+
+/* MODE SOMBRE */
+html[data-mode="sombre"] .histo-filtres,
+html[data-mode="sombre"] .histo-card,
+html[data-mode="sombre"] .histo-empty {
+  background: #1A1D2E !important;
+  color: #F1F5F9 !important;
+}
+html[data-mode="sombre"] .histo-select {
+  background: #2A2D3E !important;
+  border-color: #3A3D4E !important;
+  color: #F1F5F9 !important;
+}
+html[data-mode="sombre"] .histo-question,
+html[data-mode="sombre"] .histo-empty h2 { color: #F1F5F9 !important; }
+html[data-mode="sombre"] .histo-reponse {
+  background: #2A2D3E !important;
+  color: #D1D5DB !important;
+  border-color: #3A3D4E !important;
+}
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+  .histo-header { flex-direction: column; text-align: center; padding: 22px; }
+  .histo-header-texte h1 { font-size: 20px; }
+  .histo-btn-clear { margin-left: 0; }
+  .histo-header-card { flex-direction: column; align-items: flex-start; }
+}
 </style>
 
 <script>
@@ -80,10 +309,18 @@ const emojis = {
   explication:'💡', question_libre:'💬'
 };
 
+function showToast(msg, couleur = '#1A1D2E') {
+  const toast = document.getElementById('toastGlobal');
+  toast.style.background = couleur;
+  toast.textContent = msg;
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 3000);
+}
+
 document.addEventListener('DOMContentLoaded', charger);
 
 function charger() {
-  fetch('/api/historique/liste').then(r=>r.json()).then(d=>{
+  fetch('/api/historique/liste').then(r => r.json()).then(d => {
     tousItems = d.items || [];
     afficher(tousItems);
   });
@@ -103,16 +340,22 @@ function afficher(items) {
     card.className = 'histo-card';
     const emoji = emojis[it.type] || '📌';
     card.innerHTML = `
-      <div class="histo-header">
+      <div class="histo-header-card">
         <span class="histo-type icone-type-${esc(it.type)}">${emoji} ${esc(it.type)}</span>
         <span class="histo-date">📅 ${esc(it.date)}</span>
       </div>
       <div class="histo-question">❓ ${esc(it.question.substring(0, 150))}${it.question.length>150?'...':''}</div>
       <div class="histo-reponse" id="rep-${it.id}">${esc(it.reponse)}</div>
       <div class="histo-actions">
-        <button class="btn-mini btn-voir" onclick="toggleVoir(${it.id})">👁️ Voir plus</button>
-        <button class="btn-mini btn-voir" onclick="copier(${it.id})">📋 Copier</button>
-        <button class="btn-mini btn-sup" onclick="supprimer(${it.id})">🗑️ Supprimer</button>
+        <button class="btn-mini btn-voir" onclick="toggleVoir(${it.id})">
+          <span>👁️</span> Voir plus
+        </button>
+        <button class="btn-mini btn-copier" onclick="copier(${it.id})">
+          <span>📋</span> Copier
+        </button>
+        <button class="btn-mini btn-sup" onclick="supprimer(${it.id})">
+          <span>🗑️</span> Suppr
+        </button>
       </div>
     `;
     c.appendChild(card);
@@ -122,32 +365,42 @@ function afficher(items) {
 function filtrer() {
   const t = document.getElementById('filtre-type').value;
   if (!t) afficher(tousItems);
-  else afficher(tousItems.filter(i=>i.type === t));
+  else afficher(tousItems.filter(i => i.type === t));
 }
 
 function toggleVoir(id) {
-  document.getElementById('rep-'+id).classList.toggle('expanded');
+  document.getElementById('rep-' + id).classList.toggle('expanded');
 }
 
 function copier(id) {
-  const item = tousItems.find(i=>i.id === id);
-  if (item) navigator.clipboard.writeText(item.reponse).then(()=>alert('✅ Copié !'));
+  const item = tousItems.find(i => i.id === id);
+  if (item) {
+    navigator.clipboard.writeText(item.reponse);
+    showToast('✅ Copié !', '#00C853');
+  }
 }
 
 function supprimer(id) {
   if (!confirm('🗑️ Supprimer cette entrée ?')) return;
-  fetch('/api/historique/supprimer/'+id, {method:'DELETE'}).then(r=>r.json()).then(d=>{
-    if (d.succes) charger();
+  fetch('/api/historique/supprimer/' + id, { method: 'DELETE' }).then(r => r.json()).then(d => {
+    if (d.succes) {
+      showToast('🗑️ Supprimé', '#EF4444');
+      charger();
+    }
   });
 }
 
 function viderTout() {
-  if (!confirm('⚠️ VIDER TOUT L\'HISTORIQUE ? (irréversible)')) return;
-  fetch('/api/historique/vider', {method:'DELETE'}).then(r=>r.json()).then(d=>{
-    if (d.succes) charger();
+  if (!confirm('⚠️ VIDER TOUT ? (irréversible)')) return;
+  fetch('/api/historique/vider', { method: 'DELETE' }).then(r => r.json()).then(d => {
+    if (d.succes) {
+      showToast('✅ Historique vidé', '#00C853');
+      charger();
+    }
   });
 }
 
 function esc(t) { const d = document.createElement('div'); d.textContent = t; return d.innerHTML; }
 </script>
+
 {% endblock %}

@@ -1,80 +1,339 @@
 {% extends "base.html" %}
-{% block title %}Bibliothèque - NOKIROVA{% endblock %}
-{% block contenu %}
-<div class="page-container">
+{% block title %}📚 Bibliothèque - NOKIROVA{% endblock %}
 
-  <div class="page-header" style="background: linear-gradient(135deg, #FFF3B0, #FFE66D); border-left: 5px solid #FFD93D;">
-    <div class="page-header-icon" style="background: linear-gradient(135deg, #F59E0B, #FFD93D);">📚</div>
-    <div>
-      <h1 class="page-title" style="color: #B45309;">Bibliothèque</h1>
-      <p class="page-subtitle" style="color: #92400E;">Tous tes cours importés en un coup d'œil 📖</p>
+{% block contenu %}
+
+<div class="bibli-page">
+
+  <!-- HEADER JAUNE -->
+  <div class="bibli-header">
+    <div class="bibli-header-bg">📚</div>
+    <div class="bibli-header-icone">📚</div>
+    <div class="bibli-header-texte">
+      <h1>Ma Bibliothèque</h1>
+      <p>✨ Tous tes cours organisés au même endroit</p>
     </div>
   </div>
 
-  <div class="filtres-bar">
-    <input type="text" id="recherche-locale" placeholder="🔍 Filtrer par nom..." oninput="filtrer()" />
-    <select id="filtre-matiere" onchange="filtrer()">
+  <!-- FILTRES -->
+  <div class="bibli-filtres">
+    <div class="filtre-recherche">
+      <span class="filtre-icone">🔍</span>
+      <input type="text" id="recherche-locale" placeholder="Rechercher un cours..." oninput="filtrer()" />
+    </div>
+    <select id="filtre-matiere" onchange="filtrer()" class="filtre-select">
       <option value="">📚 Toutes les matières</option>
     </select>
-    <span id="nb-cours" class="badge-nb">0 cours</span>
+    <span id="nb-cours" class="filtre-badge">0 cours</span>
   </div>
 
-  <div id="liste-cours" class="liste-cours"></div>
+  <!-- LISTE -->
+  <div id="liste-cours" class="bibli-grille"></div>
 
-  <div id="empty-state" class="empty-state" style="display:none;">
-    <div style="font-size:4rem;">📂</div>
+  <!-- EMPTY -->
+  <div id="empty-state" class="bibli-empty" style="display:none;">
+    <div class="bibli-empty-icone">📂</div>
     <h2>Aucun cours importé</h2>
-    <p>Commence par importer ton premier cours pour le voir apparaître ici !</p>
-    <a href="/import" class="btn-empty">📥 Importer un cours</a>
+    <p>Commence par importer ton premier cours !</p>
+    <a href="/import" class="bibli-empty-btn">📥 Importer un cours</a>
   </div>
+
 </div>
 
+<div id="toastGlobal" class="toast-notif"></div>
+
 <style>
-  .page-container { padding:2rem; max-width:1200px; margin:0 auto;}
-  .page-header { display:flex; align-items:center; gap:1.2rem; border-radius:20px; padding:1.5rem 2rem; margin-bottom:1.5rem; box-shadow:0 4px 20px rgba(0,0,0,0.05);}
-  .page-header-icon { width:60px; height:60px; border-radius:16px; display:flex; align-items:center; justify-content:center; font-size:1.8rem; color:white;}
-  .page-title { font-size:1.6rem; font-weight:800; margin:0;}
-  .page-subtitle { margin:0.2rem 0 0; font-size:0.95rem;}
+/* ═══════════════════════════════════════════
+   📚 BIBLIOTHÈQUE REDESIGN PRO
+   ═══════════════════════════════════════════ */
+.bibli-page { max-width: 1200px; margin: 0 auto; animation: fadeInUp 0.5s ease; }
+@keyframes fadeInUp { from { opacity:0; transform:translateY(20px);} to { opacity:1; transform:translateY(0);} }
 
-  .filtres-bar { display:flex; gap:0.8rem; margin-bottom:1.5rem; flex-wrap:wrap; align-items:center; background:white; padding:1rem; border-radius:16px; box-shadow:0 2px 12px rgba(0,0,0,0.05);}
-  .filtres-bar input, .filtres-bar select { padding:0.7rem 1rem; border:2px solid #FFE66D; border-radius:12px; font-size:0.9rem; outline:none; transition:0.2s;}
-  .filtres-bar input { flex:1; min-width:200px;}
-  .filtres-bar input:focus, .filtres-bar select:focus { border-color:#F59E0B;}
-  .badge-nb { background:#FFD93D; color:#92400E; font-weight:700; padding:0.4rem 1rem; border-radius:20px; font-size:0.85rem;}
+/* HEADER */
+.bibli-header {
+  position: relative;
+  background: linear-gradient(135deg, #FFD93D, #F59E0B);
+  border-radius: 28px;
+  padding: 28px 30px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  color: #1A1D2E;
+  box-shadow: 0 10px 30px rgba(245,158,11,0.3);
+  overflow: hidden;
+}
+.bibli-header-bg {
+  position: absolute; top: -30px; right: -20px;
+  font-size: 200px; opacity: 0.15;
+  transform: rotate(15deg); pointer-events: none;
+}
+.bibli-header-icone {
+  width: 70px; height: 70px;
+  background: white;
+  border-radius: 22px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 36px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+  z-index: 1;
+}
+.bibli-header-texte { z-index: 1; }
+.bibli-header-texte h1 { font-size: 26px; font-weight: 900; margin: 0; letter-spacing: -0.5px; }
+.bibli-header-texte p { font-size: 14px; opacity: 0.85; margin-top: 4px; }
 
-  .liste-cours { display:grid; grid-template-columns:repeat(auto-fill, minmax(280px, 1fr)); gap:1rem;}
-  .cours-card { background:white; border-radius:18px; padding:1.3rem; box-shadow:0 4px 15px rgba(0,0,0,0.06); border-left:5px solid #FFD93D; transition:all 0.3s; cursor:pointer;}
-  .cours-card:hover { transform:translateY(-4px); box-shadow:0 8px 25px rgba(255,217,61,0.25);}
-  .cours-matiere { display:inline-block; background:#FFF3B0; color:#92400E; font-weight:700; font-size:0.75rem; padding:0.3rem 0.8rem; border-radius:20px; margin-bottom:0.8rem;}
-  .cours-nom { font-weight:700; color:#1F2937; font-size:1rem; margin-bottom:0.5rem; line-height:1.4; word-break:break-word;}
-  .cours-date { color:#9CA3AF; font-size:0.8rem; margin-bottom:1rem;}
-  .cours-actions { display:flex; gap:0.5rem; flex-wrap:wrap;}
-  .btn-card { padding:0.4rem 0.8rem; border-radius:10px; font-size:0.8rem; font-weight:600; cursor:pointer; border:2px solid transparent; transition:0.2s;}
-  .btn-charger { background:#D1FAE5; color:#00C853; border-color:#00C853;}
-  .btn-charger:hover { background:#00C853; color:white;}
-  .btn-supprimer { background:#FEE2E2; color:#EF4444; border-color:#EF4444;}
-  .btn-supprimer:hover { background:#EF4444; color:white;}
+/* FILTRES */
+.bibli-filtres {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  align-items: center;
+  background: white;
+  padding: 14px 18px;
+  border-radius: 20px;
+  box-shadow: 0 4px 18px rgba(0,0,0,0.06);
+  border-top: 4px solid #FFD93D;
+}
+.filtre-recherche {
+  flex: 1;
+  min-width: 240px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #FFFBEB;
+  border: 2px solid #FEF3C7;
+  border-radius: 14px;
+  padding: 4px 14px;
+  transition: all 0.3s;
+}
+.filtre-recherche:focus-within {
+  border-color: #F59E0B;
+  box-shadow: 0 0 0 4px rgba(245,158,11,0.15);
+}
+.filtre-icone { font-size: 16px; opacity: 0.6; }
+.filtre-recherche input {
+  flex: 1; border: none; background: transparent;
+  padding: 10px 0; font-size: 14px; outline: none;
+  color: #1A1D2E;
+}
+.filtre-select {
+  padding: 12px 18px;
+  border: 2px solid #FEF3C7;
+  border-radius: 14px;
+  font-size: 14px;
+  font-weight: 600;
+  background: #FFFBEB;
+  color: #1A1D2E;
+  cursor: pointer;
+  outline: none;
+}
+.filtre-select:focus { border-color: #F59E0B; }
+.filtre-badge {
+  background: linear-gradient(135deg, #F59E0B, #D97706);
+  color: white;
+  font-weight: 800;
+  padding: 8px 16px;
+  border-radius: 50px;
+  font-size: 13px;
+  box-shadow: 0 3px 10px rgba(245,158,11,0.3);
+}
 
-  .empty-state { text-align:center; padding:4rem 2rem; background:white; border-radius:20px; box-shadow:0 4px 20px rgba(0,0,0,0.05);}
-  .empty-state h2 { color:#374151; margin:1rem 0 0.5rem;}
-  .empty-state p { color:#9CA3AF; margin-bottom:1.5rem;}
-  .btn-empty { background:linear-gradient(135deg, #F59E0B, #FFD93D); color:white; padding:0.8rem 2rem; border-radius:20px; text-decoration:none; font-weight:700; display:inline-block;}
+/* GRILLE */
+.bibli-grille {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+  gap: 16px;
+}
+
+/* CARTES */
+.cours-card {
+  background: white;
+  border-radius: 22px;
+  padding: 22px;
+  box-shadow: 0 4px 18px rgba(0,0,0,0.06);
+  border-top: 4px solid #FFD93D;
+  transition: all 0.3s;
+  position: relative;
+  overflow: hidden;
+  animation: slideIn 0.4s ease;
+}
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(15px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.cours-card::before {
+  content: '📖';
+  position: absolute;
+  bottom: -20px; right: -10px;
+  font-size: 100px;
+  opacity: 0.05;
+  pointer-events: none;
+}
+.cours-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 30px rgba(245,158,11,0.2);
+}
+.cours-matiere {
+  display: inline-block;
+  background: linear-gradient(135deg, #FEF3C7, #FDE68A);
+  color: #92400E;
+  font-weight: 800;
+  font-size: 11px;
+  padding: 6px 14px;
+  border-radius: 50px;
+  margin-bottom: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.cours-nom {
+  font-weight: 800;
+  color: #1A1D2E;
+  font-size: 16px;
+  margin-bottom: 8px;
+  line-height: 1.4;
+  word-break: break-word;
+}
+.cours-date {
+  color: #9CA3AF;
+  font-size: 12px;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.cours-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.btn-card {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 9px 14px;
+  border-radius: 50px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  border: none;
+  transition: all 0.3s;
+  color: white;
+}
+.btn-card:hover { transform: translateY(-2px); }
+.btn-charger { background: linear-gradient(135deg, #00C853, #2E7D32); box-shadow: 0 4px 12px rgba(0,200,83,0.3); }
+.btn-supprimer { background: linear-gradient(135deg, #EF4444, #B91C1C); box-shadow: 0 4px 12px rgba(239,68,68,0.3); }
+
+/* EMPTY */
+.bibli-empty {
+  text-align: center;
+  padding: 60px 30px;
+  background: white;
+  border-radius: 28px;
+  box-shadow: 0 6px 25px rgba(0,0,0,0.06);
+  border-top: 5px solid #FFD93D;
+}
+.bibli-empty-icone {
+  font-size: 80px;
+  margin-bottom: 16px;
+  display: inline-block;
+  animation: bounce 2s ease-in-out infinite;
+}
+@keyframes bounce {
+  0%,100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+.bibli-empty h2 {
+  color: #1A1D2E;
+  font-size: 22px;
+  font-weight: 800;
+  margin-bottom: 10px;
+}
+.bibli-empty p {
+  color: #9CA3AF;
+  font-size: 15px;
+  margin-bottom: 24px;
+}
+.bibli-empty-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: linear-gradient(135deg, #F59E0B, #D97706);
+  color: white;
+  padding: 14px 32px;
+  border-radius: 50px;
+  text-decoration: none;
+  font-weight: 800;
+  font-size: 15px;
+  box-shadow: 0 6px 20px rgba(245,158,11,0.4);
+  transition: all 0.3s;
+}
+.bibli-empty-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 30px rgba(245,158,11,0.55);
+}
+
+/* TOAST */
+.toast-notif {
+  position: fixed; bottom: 30px; right: 30px;
+  background: #1A1D2E; color: white;
+  padding: 14px 22px; border-radius: 14px;
+  font-weight: 700; font-size: 14px;
+  z-index: 9999; opacity: 0; transform: translateY(20px);
+  transition: all 0.4s ease;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.25);
+  pointer-events: none;
+}
+.toast-notif.show { opacity: 1; transform: translateY(0); }
+
+/* MODE SOMBRE */
+html[data-mode="sombre"] .bibli-filtres,
+html[data-mode="sombre"] .cours-card,
+html[data-mode="sombre"] .bibli-empty {
+  background: #1A1D2E !important;
+  color: #F1F5F9 !important;
+}
+html[data-mode="sombre"] .filtre-recherche,
+html[data-mode="sombre"] .filtre-select {
+  background: #2A2D3E !important;
+  border-color: #3A3D4E !important;
+  color: #F1F5F9 !important;
+}
+html[data-mode="sombre"] .cours-nom,
+html[data-mode="sombre"] .bibli-empty h2 { color: #F1F5F9 !important; }
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+  .bibli-header { flex-direction: column; text-align: center; padding: 22px; }
+  .bibli-header-texte h1 { font-size: 20px; }
+  .bibli-grille { grid-template-columns: 1fr; }
+  .filtre-recherche { min-width: 100%; }
+}
 </style>
 
 <script>
 let tousCours = [];
 
+function showToast(msg, couleur = '#1A1D2E') {
+  const toast = document.getElementById('toastGlobal');
+  toast.style.background = couleur;
+  toast.textContent = msg;
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 3000);
+}
+
 document.addEventListener('DOMContentLoaded', charger);
 
 function charger() {
-  fetch('/api/cours/liste').then(r=>r.json()).then(d=>{
+  fetch('/api/cours/liste').then(r => r.json()).then(d => {
     tousCours = d.cours || [];
     document.getElementById('nb-cours').textContent = tousCours.length + ' cours';
 
-    // Remplir le filtre matière
-    const matieres = [...new Set(tousCours.map(c=>c.matiere).filter(m=>m))];
+    const matieres = [...new Set(tousCours.map(c => c.matiere).filter(m => m))];
     const sel = document.getElementById('filtre-matiere');
-    matieres.forEach(m=>{
+    sel.innerHTML = '<option value="">📚 Toutes les matières</option>';
+    matieres.forEach(m => {
       const opt = document.createElement('option');
       opt.value = m; opt.textContent = m;
       sel.appendChild(opt);
@@ -103,8 +362,12 @@ function afficher(cours) {
       <div class="cours-nom">${esc(co.nom)}</div>
       <div class="cours-date">📅 ${esc(co.date_import || '')}</div>
       <div class="cours-actions">
-        <button class="btn-card btn-charger" onclick="charger_cours(${co.id})">📂 Charger</button>
-        <button class="btn-card btn-supprimer" onclick="supprimer_cours(${co.id})">🗑️ Supprimer</button>
+        <button class="btn-card btn-charger" onclick="charger_cours(${co.id})">
+          <span>📂</span> Charger
+        </button>
+        <button class="btn-card btn-supprimer" onclick="supprimer_cours(${co.id})">
+          <span>🗑️</span> Suppr
+        </button>
       </div>
     `;
     c.appendChild(card);
@@ -115,30 +378,33 @@ function filtrer() {
   const q = document.getElementById('recherche-locale').value.toLowerCase();
   const mat = document.getElementById('filtre-matiere').value;
   let res = tousCours;
-  if (q) res = res.filter(c=>c.nom.toLowerCase().includes(q));
-  if (mat) res = res.filter(c=>c.matiere === mat);
+  if (q) res = res.filter(c => c.nom.toLowerCase().includes(q));
+  if (mat) res = res.filter(c => c.matiere === mat);
   afficher(res);
 }
 
 function charger_cours(id) {
-  fetch('/api/cours/charger/'+id, {method:'POST'}).then(r=>r.json()).then(d=>{
+  fetch('/api/cours/charger/' + id, { method: 'POST' }).then(r => r.json()).then(d => {
     if (d.succes) {
-      alert('✅ Cours chargé : ' + d.nom);
-      window.location.href = '/';
+      showToast('✅ Cours chargé : ' + d.nom, '#00C853');
+      setTimeout(() => window.location.href = '/', 1000);
     } else {
-      alert('❌ ' + (d.erreur || 'Erreur'));
+      showToast('❌ ' + (d.erreur || 'Erreur'), '#EF4444');
     }
   });
 }
 
 function supprimer_cours(id) {
-  if (!confirm('🗑️ Supprimer ce cours ? (action irréversible)')) return;
-  fetch('/api/cours/supprimer/'+id, {method:'DELETE'}).then(r=>r.json()).then(d=>{
-    if (d.succes) charger();
-    else alert('❌ ' + d.erreur);
+  if (!confirm('🗑️ Supprimer ce cours ? (irréversible)')) return;
+  fetch('/api/cours/supprimer/' + id, { method: 'DELETE' }).then(r => r.json()).then(d => {
+    if (d.succes) {
+      showToast('🗑️ Cours supprimé', '#EF4444');
+      charger();
+    }
   });
 }
 
 function esc(t) { const d = document.createElement('div'); d.textContent = t; return d.innerHTML; }
 </script>
+
 {% endblock %}

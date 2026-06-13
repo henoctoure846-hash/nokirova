@@ -4,7 +4,7 @@
 
 {% block contenu %}
 
-<!-- 🎨 HEADER ACCUEIL (Logo + Titre) -->
+<!-- 🎨 HEADER ACCUEIL -->
 <div class="header-accueil">
     <img src="{{ url_for('logo') }}" alt="Logo" class="header-logo">
     <div class="header-texte">
@@ -13,7 +13,7 @@
     </div>
 </div>
 
-<!-- 💜 BANNIÈRE VIOLETTE -->
+<!-- 💜 BANNIÈRE -->
 <div class="banniere-date">
     <strong>{{ salutation }} ! • {{ date_actuelle }}</strong>
     <div class="banniere-sous-texte">
@@ -41,7 +41,7 @@
     </div>
 </div>
 
-<!-- 🎯 6 CARTES D'ACCÈS RAPIDE -->
+<!-- 🎯 6 CARTES ACCÈS RAPIDE -->
 <div class="cartes-rapides">
     <a href="/bibliotheque" class="carte-rapide carte-bibli">
         <div class="carte-rapide-icone">📚</div>
@@ -53,9 +53,9 @@
         <div class="carte-rapide-titre">Planificateur</div>
         <div class="carte-rapide-btn">→ Ouvrir</div>
     </a>
-    <a href="/scan_multi" class="carte-rapide carte-scan">
+    <a href="/ocr" class="carte-rapide carte-scan">
         <div class="carte-rapide-icone">📸</div>
-        <div class="carte-rapide-titre">Scan Multi</div>
+        <div class="carte-rapide-titre">Scanner</div>
         <div class="carte-rapide-btn">→ Ouvrir</div>
     </a>
     <a href="/qcm" class="carte-rapide carte-qcm">
@@ -84,7 +84,7 @@
     </div>
 </div>
 
-<!-- 🚀 BOUTON COMMENCER MAINTENANT -->
+<!-- 🚀 BOUTON COMMENCER -->
 <a href="/import" class="btn-commencer" style="display:block; text-decoration:none;">
     🚀 COMMENCER MAINTENANT
 </a>

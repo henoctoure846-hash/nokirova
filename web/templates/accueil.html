@@ -3,12 +3,12 @@
 
 {% block contenu %}
 
-<!-- HEADER -->
+<!-- HEADER PERSONNALISÉ -->
 <div class="header-accueil">
     <img src="{{ url_for('logo') }}" alt="Logo" class="header-logo">
     <div class="header-texte">
-        <h1>Bienvenue Hénoc ! 🌸</h1>
-        <p>✨ Ton professeur intelligent personnel ✨</p>
+        <h1>Bienvenue <span id="user-prenom">cher étudiant</span> ! 🌸</h1>
+        <p>✨ <span id="user-niveau"></span> • Ton professeur intelligent personnel ✨</p>
     </div>
 </div>
 
@@ -98,11 +98,23 @@
     <div class="objectif-titre">🎯 OBJECTIF DU JOUR</div>
     <div class="objectif-texte">
         📚 Importe un cours et fais au moins 5 QCM !<br>
-        Tu vas y arriver Hénoc 💪
+        Tu vas y arriver <span id="objectif-prenom">cher étudiant</span> 💪
     </div>
 </div>
 
 <!-- BOUTON COMMENCER -->
 <a href="/import" class="btn-commencer">🚀 Commencer maintenant</a>
+
+<script>
+// Vérifier si user existe, sinon rediriger
+const user = JSON.parse(localStorage.getItem('nokirova_user') || 'null');
+if (!user) {
+    window.location.href = '/bienvenue';
+} else {
+    document.getElementById('user-prenom').textContent = user.prenom;
+    document.getElementById('user-niveau').textContent = user.niveau;
+    document.getElementById('objectif-prenom').textContent = user.prenom;
+}
+</script>
 
 {% endblock %}

@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title><!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🌸 Bienvenue sur NOKIROVA</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="icon" type="image/png" href="{{ url_for('logo') }}">
+    <style>
+        body {
+            background: linear-gradient(135deg, #7ED321, #5BA819);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .bienvenue-box {
+            background: white;
+            padding: 40px 30px;
+            border-radius: 28px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+            max-width: 450px;
+            width: 100%;
+            text-align: center;
+        }
+        .bienvenue-logo {
+            width: 90px; height: 90px;
+            border-radius: 22px;
+            margin: 0 auto 20px;
+            display: block;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+        }
+        .bienvenue-titre {
+            font-size: 28px;
+            font-weight: 900;
+            color: #1A1D2E;
+            margin-bottom: 8px;
+        }
+        .bienvenue-sous {
+            color: #6B7280;
+            font-size: 15px;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+        .form-bienvenue {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        .form-bienvenue label {
+            text-align: left;
+            font-weight: 700;
+            color: #1A1D2E;
+            font-size: 14px;
+            margin-bottom: -8px;
+        }
+        .form-bienvenue input, .form-bienvenue select {
+            padding: 14px 18px;
+            border: 2px solid #E5E7EB;
+            border-radius: 14px;
+            font-size: 15px;
+            font-family: inherit;
+            transition: all 0.2s;
+            background: white;
+        }
+        .form-bienvenue input:focus, .form-bienvenue select:focus {
+            outline: none;
+            border-color: #7ED321;
+            box-shadow: 0 0 0 4px rgba(126,211,33,0.15);
+        }
+        .btn-bienvenue {
+            background: linear-gradient(135deg, #7ED321, #5BA819);
+            color: white;
+            border: none;
+            padding: 16px;
+            border-radius: 50px;
+            font-weight: 900;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 6px 20px rgba(126,211,33,0.35);
+            margin-top: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .btn-bienvenue:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(126,211,33,0.5);
+        }
+        .invite-text {
+            margin-top: 20px;
+            font-size: 12px;
+            color: #9CA3AF;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+
+<div class="bienvenue-box">
+    <img src="{{ url_for('logo') }}" alt="NOKIROVA" class="bienvenue-logo">
+    <h1 class="bienvenue-titre">🌸 Bienvenue !</h1>
+    <p class="bienvenue-sous">
+        Je suis ton professeur intelligent personnel.<br>
+        Dis-moi qui tu es pour commencer ✨
+    </p>
+
+    <form class="form-bienvenue" onsubmit="enregistrerUtilisateur(event)">
+        <label for="prenom">👤 Ton prénom</label>
+        <input type="text" id="prenom" required placeholder="Ex: Sarah" maxlength="30">
+
+        <label for="universite">🎓 Ton université (optionnel)</label>
+        <input type="text" id="universite" placeholder="Ex: Université de Paris" maxlength="50">
+
+        <label for="niveau">📚 Ton niveau d'étude</label>
+        <select id="niveau">
+            <option value="Lycée">Lycée</option>
+            <option value="Licence 1">Licence 1</option>
+            <option value="Licence 2">Licence 2</option>
+            <option value="Licence 3">Licence 3</option>
+            <option value="Master 1">Master 1</option>
+            <option value="Master 2">Master 2</option>
+            <option value="Doctorat">Doctorat</option>
+            <option value="Autre">Autre</option>
+        </select>
+
+        <button type="submit" class="btn-bienvenue">🚀 Commencer l'aventure</button>
+    </form>
+
+    <p class="invite-text">
+        🔒 Tes infos restent sur ton appareil. Aucun compte requis.
+    </p>
+</div>
+
+<script>
+function enregistrerUtilisateur(e) {
+    e.preventDefault();
+    const prenom = document.getElementById('prenom').value.trim();
+    const universite = document.getElementById('universite').value.trim();
+    const niveau = document.getElementById('niveau').value;
+
+    if (!prenom) return alert('⚠️ Ton prénom est obligatoire !');
+
+    const user = {
+        prenom: prenom,
+        universite: universite || 'Non précisé',
+        niveau: niveau,
+        date_creation: new Date().toISOString(),
+        user_id: 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2,9)
+    };
+
+    localStorage.setItem('nokirova_user', JSON.stringify(user));
+    window.location.href = '/';
+}
+
+// Si déjà connecté → rediriger
+if (localStorage.getItem('nokirova_user')) {
+    window.location.href = '/';
+}
+</script>
+
+</body>
+</html></title>
+</head>
+<body>
+
+</body>
+</html>

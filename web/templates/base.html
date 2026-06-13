@@ -94,6 +94,10 @@
             <div class="statut-nom">{{ nom_cours | default('Aucun cours chargé') }}</div>
         </div>
 
+        <!-- BOUTON DÉCONNEXION -->
+<button onclick="changerUtilisateur()" style="display:block;width:calc(100% - 24px);margin:10px 12px;padding:10px;background:#FF5252;color:white;border:none;border-radius:50px;font-weight:700;cursor:pointer;font-size:12px;">
+    🔄 Changer d'utilisateur
+</button>
         <div class="signature">✨ Created by Hénoc 🌸 2026 ✨</div>
     </aside>
 
@@ -141,6 +145,22 @@ window.addEventListener('load', ()=>{
 
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('/static/service-worker.js').catch(()=>{});
+}
+    function changerUtilisateur() {
+    if (confirm('🔄 Veux-tu vraiment changer d\'utilisateur ?\n\n(Tes données restent sauvegardées)')) {
+        localStorage.removeItem('nokirova_user');
+        sessionStorage.clear();
+        window.location.href = '/bienvenue';
+    }
+}
+
+// Afficher le nom de l'user dans la sidebar
+const userData = JSON.parse(localStorage.getItem('nokirova_user') || 'null');
+if (userData) {
+    const statutNom = document.querySelector('.statut-nom');
+    if (statutNom && '{{ nom_cours }}' === 'Aucun cours chargé') {
+        // optionnel : tu peux personnaliser ici
+    }
 }
 </script>
 

@@ -172,6 +172,10 @@ def accueil():
                            salutation=saluer(), date_actuelle=get_date_fr(),
                            nom_cours=session_data.get('nom_cours'))
 
+@app.route('/bienvenue')
+def page_bienvenue():
+    return render_template('bienvenue.html')
+
 @app.route('/test')
 def test(): return "✅ Flask fonctionne !"
 

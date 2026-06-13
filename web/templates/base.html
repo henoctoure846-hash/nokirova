@@ -17,6 +17,14 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
     {% block extra_css %}{% endblock %}
+
+    <!-- PWA -->
+<link rel="manifest" href="/static/manifest.json">
+<meta name="theme-color" content="#7ED321">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="NOKIROVA">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="apple-touch-icon" href="/logo">
 </head>
 <script>
 function toggleSidebar() {
@@ -296,5 +304,13 @@ window.jouerSon = function(nomSon) {
 
 {% block extra_js %}{% endblock %}
 
+<!-- Service Worker -->
+<script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/static/service-worker.js')
+    .then(() => console.log('✅ PWA prête !'))
+    .catch(e => console.log('⚠️ SW:', e));
+}
+</script>
 </body>
 </html>

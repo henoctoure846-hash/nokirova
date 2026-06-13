@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>🎬 nokirova_handover.txt - NOKIROVA</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #0F1419;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .header {
+      color: white;
+      text-align: center;
+      margin-bottom: 20px;
+      font-size: 24px;
+      font-weight: bold;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    }
+    .matiere {
+      color: white;
+      font-size: 16px;
+      margin-bottom: 30px;
+      opacity: 0.9;
+    }
+    .diaporama {
+      width: 90%;
+      max-width: 900px;
+      background: #1A1B26;
+      border-radius: 20px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      padding: 60px 50px;
+      min-height: 450px;
+      position: relative;
+    }
+    .slide {
+      display: none;
+      animation: fadeIn 0.6s ease-in;
+    }
+    .slide.active { display: block; }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .slide-numero {
+      color: #7ED321;
+      font-size: 14px;
+      font-weight: bold;
+      margin-bottom: 15px;
+    }
+    .slide-titre {
+      color: #FFD93D;
+      font-size: 36px;
+      font-weight: bold;
+      margin-bottom: 25px;
+      line-height: 1.2;
+    }
+    .slide-texte {
+      color: #C0CAF5;
+      font-size: 20px;
+      line-height: 1.6;
+      white-space: pre-wrap;
+    }
+    .controls {
+      display: flex;
+      gap: 15px;
+      margin-top: 30px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    button {
+      background: #7ED321;
+      color: white;
+      border: none;
+      padding: 14px 28px;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(0,0,0,0.3);
+    }
+    .progress-bar {
+      width: 90%;
+      max-width: 900px;
+      height: 6px;
+      background: rgba(255,255,255,0.3);
+      border-radius: 3px;
+      margin-top: 20px;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      background: #7ED321;
+      width: 0%;
+      transition: width 0.3s;
+    }
+    .info {
+      color: white;
+      margin-top: 15px;
+      font-size: 14px;
+      opacity: 0.8;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">🎬  nokirova_handover.txt</div>
+  <div class="matiere">🎯 📊 Développement d'applications éducatives • Powered by NOKIROVA 🌸</div>
+
+  <div class="diaporama">
+    
+            <div class="slide active" data-duree="5" data-audio="slide_1.mp3">
+              <div class="slide-numero">Slide 1 / 8</div>
+              <h2 class="slide-titre">Partie 1</h2>
+              <div class="slide-texte">interface.py (FICHIER COMPLET)
+📌 Copie-colle tout le fichier ici
+📌 Même s’il est long
+📌 Même s’il fait 2000 lignes</div>
+            </div>
+            
+            <div class="slide " data-duree="5" data-audio="slide_2.mp3">
+              <div class="slide-numero">Slide 2 / 8</div>
+              <h2 class="slide-titre">Partie 2</h2>
+              <div class="slide-texte">1️⃣ On vérifie combien de def afficher_qcm_interactif il y a
+2️⃣ On vérifie l’appel du bouton "🎮 MODE INTERACTIF"
+3️⃣ On traque le double affichage
+4️⃣ On corrige proprement
+5️⃣ On teste
+6️⃣ On valide ✅</div>
+            </div>
+            
+            <div class="slide " data-duree="5" data-audio="slide_3.mp3">
+              <div class="slide-numero">Slide 3 / 8</div>
+              <h2 class="slide-titre">Partie 3</h2>
+              <div class="slide-texte">💬 Tu fais un travail INCROYABLE.
+Tu construis une vraie application professionnelle.</div>
+            </div>
+            
+            <div class="slide " data-duree="5" data-audio="slide_4.mp3">
+              <div class="slide-numero">Slide 4 / 8</div>
+              <h2 class="slide-titre">Partie 4</h2>
+              <div class="slide-texte">🌸 PROJET NOKIROVA - REPRISE DE CONVERSATION (HANDOVER PRO) 🌸</div>
+            </div>
+            
+            <div class="slide " data-duree="5" data-audio="slide_5.mp3">
+              <div class="slide-numero">Slide 5 / 8</div>
+              <h2 class="slide-titre">Partie 5</h2>
+              <div class="slide-texte">Salut ! Je continue le développement de mon application NOKIROVA avec toi.
+Voici TOUT ce que tu dois savoir pour reprendre EXACTEMENT où on en était.</div>
+            </div>
+            
+            <div class="slide " data-duree="5" data-audio="slide_6.mp3">
+              <div class="slide-numero">Slide 6 / 8</div>
+              <h2 class="slide-titre">Partie 6</h2>
+              <div class="slide-texte">═══════════════════════════════════════════════
+👤 MON PROFIL UTILISATEUR
+═══════════════════════════════════════════════</div>
+            </div>
+            
+            <div class="slide " data-duree="5" data-audio="slide_7.mp3">
+              <div class="slide-numero">Slide 7 / 8</div>
+              <h2 class="slide-titre">Partie 7</h2>
+              <div class="slide-texte">Je suis étudiant en Sciences Économiques et Gestion à l'université
+J'ai des difficultés d'apprentissage (procrastination, difficulté à lire)
+Je préfère les explications visuelles, simples, étape par étape
+Je travaille mieux par sessions courtes (5-10 min)
+Mon objectif : réussir mes examens sans redoubler
+═══════════════════════════════════════════════
+🔒 RÈGLES STRICTES À RESPECTER (IMPORTANT)
+═══════════════════════════════════════════════</div>
+            </div>
+            
+            <div class="slide " data-duree="5" data-audio="slide_8.mp3">
+              <div class="slide-numero">Slide 8 / 8</div>
+              <h2 class="slide-titre">Partie 8</h2>
+              <div class="slide-texte">🚨 AVANT DE MODIFIER OU AJOUTER QUELQUE CHOSE À UN CODE,
+TU DOIS TOUJOURS ME DEMANDER L'ANCIEN FICHIER D'ABORD.
+Cette règle est ABSOLUE pour toute la conversation.</div>
+            </div>
+            
+
+    <div class="controls">
+      <button onclick="precedent()">⬅️ Précédent</button>
+      <button onclick="togglePlay()" id="btnPlay">▶️ Lecture auto</button>
+      <button onclick="suivant()">Suivant ➡️</button>
+    </div>
+  </div>
+
+  <div class="progress-bar">
+    <div class="progress-fill" id="progress"></div>
+  </div>
+  <div class="info" id="info">Slide 1 sur 8</div>
+
+  <audio id="player" preload="auto"></audio>
+
+  <script>
+    let current = 0;
+    const slides = document.querySelectorAll('.slide');
+    const total = slides.length;
+    const player = document.getElementById('player');
+    const progress = document.getElementById('progress');
+    const info = document.getElementById('info');
+    const btnPlay = document.getElementById('btnPlay');
+    let autoPlay = false;
+    let timer = null;
+
+    function afficher(idx) {
+      slides.forEach(s => s.classList.remove('active'));
+      slides[idx].classList.add('active');
+      progress.style.width = ((idx + 1) / total * 100) + '%';
+      info.textContent = 'Slide ' + (idx + 1) + ' sur ' + total;
+
+      if (autoPlay) {
+        const audio = slides[idx].dataset.audio;
+        player.src = audio;
+        player.play().catch(e => console.log('Audio:', e));
+
+        const duree = parseInt(slides[idx].dataset.duree) * 1000;
+        clearTimeout(timer);
+        timer = setTimeout(() => {
+          if (current < total - 1) {
+            current++;
+            afficher(current);
+          } else {
+            autoPlay = false;
+            btnPlay.textContent = '▶️ Lecture auto';
+          }
+        }, duree + 500);
+      }
+    }
+
+    function suivant() {
+      if (current < total - 1) {
+        current++;
+        afficher(current);
+      }
+    }
+
+    function precedent() {
+      if (current > 0) {
+        current--;
+        afficher(current);
+      }
+    }
+
+    function togglePlay() {
+      autoPlay = !autoPlay;
+      btnPlay.textContent = autoPlay ? '⏸️ Pause' : '▶️ Lecture auto';
+      if (autoPlay) {
+        afficher(current);
+      } else {
+        player.pause();
+        clearTimeout(timer);
+      }
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight') suivant();
+      if (e.key === 'ArrowLeft') precedent();
+      if (e.key === ' ') { e.preventDefault(); togglePlay(); }
+    });
+
+    afficher(0);
+  </script>
+</body>
+</html>

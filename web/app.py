@@ -1318,11 +1318,10 @@ def profil_photo():
 # ═══════════════════════════════════════════
 
 if __name__ == '__main__':
+    port = int(os.environ.get('PORT', 5000))
+    debug = os.environ.get('FLASK_ENV') != 'production'
     print("\n" + "=" * 60)
     print("🌸 NOKIROVA WEB - PHASE 3 COMPLÈTE")
-    print("=" * 60)
-    print("🎧 Audio        : http://localhost:5000/audio")
-    print("📅 Planificateur: http://localhost:5000/planificateur")
-    print("📊 Graphiques   : http://localhost:5000/graphiques")
+    print(f"🚀 Port : {port}")
     print("=" * 60 + "\n")
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    app.run(host='0.0.0.0', port=port, debug=debug)

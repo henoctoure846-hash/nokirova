@@ -1,1 +1,1 @@
-web: gunicorn web.app:app --bind 0.0.0.0:$PORT --timeout 120
+web: python web/app.py

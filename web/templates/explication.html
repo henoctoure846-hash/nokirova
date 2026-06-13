@@ -4,403 +4,573 @@
 
 {% block contenu %}
 
-<div class="titre-page" style="background: linear-gradient(135deg, var(--jaune-soleil), var(--orange-dore));">
-    💡 Explication simple
-</div>
+<div class="expli-page">
 
-{% if not cours_actuel or cours_actuel == 'Aucun cours chargé' %}
-
-<div class="alerte-import">
-    <div class="alerte-icone">📭</div>
-    <h2>Aucun cours chargé !</h2>
-    <p>Pour avoir une explication simple, importe d'abord un cours.</p>
-    <a href="/import" class="btn-aller">📥 Importer un cours</a>
-</div>
-
-{% else %}
-
-<div class="info-cours" style="border-left-color: var(--orange-dore);">
-    <div class="cours-icone">💡</div>
-    <div>
-        <strong style="color: var(--orange-dore);">Cours actuel :</strong> {{ cours_actuel }}
+  <!-- HEADER ORANGE -->
+  <div class="expli-header">
+    <div class="expli-header-bg">💡</div>
+    <div class="expli-header-icone">💡</div>
+    <div class="expli-header-texte">
+      <h1>Explication simple</h1>
+      <p>✨ Comprendre comme à un enfant de 12 ans 🧒</p>
     </div>
-</div>
+  </div>
 
-<div class="encart-info">
-    🎯 NOKIROVA va t'expliquer ce cours comme à un <strong>enfant de 12 ans</strong> avec des exemples concrets et beaucoup d'emojis !
-</div>
+  {% if not cours_actuel or cours_actuel == 'Aucun cours chargé' %}
 
-<button class="btn-generer-orange" id="btnGenerer" onclick="genererExplication()">
-    💡 Expliquer simplement !
-</button>
+  <!-- ALERTE -->
+  <div class="expli-alerte">
+    <div class="expli-alerte-icone">📭</div>
+    <div class="expli-alerte-contenu">
+      <h2>Aucun cours chargé !</h2>
+      <p>Pour avoir une explication simple, importe d'abord un cours.</p>
+      <a href="/import" class="expli-alerte-btn">📥 Importer un cours</a>
+    </div>
+  </div>
 
-<div id="zoneChargement" class="zone-chargement" style="display:none;">
-    <div class="spinner-orange"></div>
-    <p>💡 NOKIROVA réfléchit pour t'expliquer simplement...</p>
-</div>
+  {% else %}
 
-<div id="zoneResultat" class="zone-resultat" style="display:none;">
-    <div class="resultat-header">
-        <h2>✨ Voici l'explication !</h2>
-        <div class="actions-resultat">
-            <button onclick="copierExplication()" class="btn-action">📋 Copier</button>
-            <button onclick="telechargerExplicationPDF()" class="btn-action btn-pdf">
-                📄 Télécharger PDF
-            </button>
-            <button onclick="partagerExplication()" class="btn-action btn-partage">
-                🤝 Partager
-            </button>
-            <button onclick="regenerer()" class="btn-action">🔄 Régénérer</button>
-        </div>
+  <!-- STATUT -->
+  <div class="expli-statut">
+    <div class="expli-statut-icone">💡</div>
+    <div class="expli-statut-texte">
+      <span class="expli-statut-label">Cours chargé</span>
+      <span class="expli-statut-nom">{{ cours_actuel }}</span>
+    </div>
+    <div class="expli-statut-badge">✅ Prêt</div>
+  </div>
+
+  <!-- INFO -->
+  <div class="expli-info">
+    <div class="expli-info-icone">🎯</div>
+    <div class="expli-info-texte">
+      NOKIROVA va t'expliquer ce cours comme à un <strong>enfant de 12 ans</strong> avec :
+      <div class="expli-info-tags">
+        <span class="expli-tag">📖 Mots simples</span>
+        <span class="expli-tag">🎨 Exemples concrets</span>
+        <span class="expli-tag">🌟 Beaucoup d'emojis</span>
+        <span class="expli-tag">💡 Analogies</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- BOUTON GÉNÉRER -->
+  <button class="expli-btn-generer" id="btnGenerer" onclick="genererExplication()">
+    <span class="expli-btn-icone">💡</span>
+    <span class="expli-btn-texte">Expliquer simplement !</span>
+  </button>
+
+  <!-- LOADING -->
+  <div id="zoneChargement" class="expli-loading" style="display:none;">
+    <div class="expli-spinner"></div>
+    <div class="expli-loading-texte">
+      <p class="expli-loading-titre">💡 NOKIROVA réfléchit...</p>
+      <p class="expli-loading-sous">Préparation d'une explication ultra simple ✨</p>
+    </div>
+  </div>
+
+  <!-- RÉSULTAT -->
+  <div id="zoneResultat" class="expli-resultat" style="display:none;">
+    <div class="expli-actions">
+      <div class="expli-actions-titre">
+        <span>✨</span> Voici l'explication !
+      </div>
+      <div class="expli-actions-btns">
+        <button onclick="copierExplication()" class="expli-action-btn expli-copy">
+          <span>📋</span> Copier
+        </button>
+        <button onclick="telechargerExplicationPDF()" class="expli-action-btn expli-pdf">
+          <span>📄</span> PDF
+        </button>
+        <button onclick="partagerExplication()" class="expli-action-btn expli-partage">
+          <span>🤝</span> Partager
+        </button>
+        <button onclick="regenerer()" class="expli-action-btn expli-regen">
+          <span>🔄</span> Régénérer
+        </button>
+      </div>
     </div>
 
-    <div class="contenu-explication" id="contenuExplication"></div>
+    <div class="expli-contenu-wrapper">
+      <div class="expli-contenu" id="contenuExplication"></div>
+    </div>
+  </div>
+
+  {% endif %}
+
 </div>
 
-{% endif %}
+<div id="toastGlobal" class="toast-notif"></div>
 
-{% endblock %}
-
-{% block extra_css %}
 <style>
-.titre-page {
-    padding: 20px;
-    border-radius: 18px;
-    text-align: center;
-    color: white;
-    font-size: 24px;
-    font-weight: bold;
-    margin-bottom: 20px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+/* ═══════════════════════════════════════════
+   💡 EXPLICATION REDESIGN PRO
+   ═══════════════════════════════════════════ */
+.expli-page {
+  max-width: 1100px;
+  margin: 0 auto;
+  animation: fadeInUp 0.5s ease;
+}
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
-.alerte-import {
-    background: white;
-    padding: 50px;
-    border-radius: 20px;
-    text-align: center;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
-    border-left: 5px solid var(--orange-dore);
+/* HEADER ORANGE */
+.expli-header {
+  position: relative;
+  background: linear-gradient(135deg, #F59E0B, #D97706);
+  border-radius: 28px;
+  padding: 28px 30px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  color: white;
+  box-shadow: 0 10px 30px rgba(245,158,11,0.3);
+  overflow: hidden;
+}
+.expli-header-bg {
+  position: absolute;
+  top: -30px; right: -20px;
+  font-size: 200px;
+  opacity: 0.15;
+  transform: rotate(15deg);
+  pointer-events: none;
+}
+.expli-header-icone {
+  width: 70px; height: 70px;
+  background: white;
+  border-radius: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 36px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+  z-index: 1;
+}
+.expli-header-texte { z-index: 1; }
+.expli-header-texte h1 {
+  font-size: 26px;
+  font-weight: 900;
+  margin: 0;
+  letter-spacing: -0.5px;
+}
+.expli-header-texte p {
+  font-size: 14px;
+  opacity: 0.92;
+  margin-top: 4px;
+  font-weight: 500;
 }
 
-.alerte-icone {
-    font-size: 80px;
-    margin-bottom: 15px;
+/* ALERTE */
+.expli-alerte {
+  display: flex;
+  gap: 20px;
+  background: linear-gradient(135deg, #FEF3C7, #FDE68A);
+  border-radius: 24px;
+  padding: 32px;
+  border-left: 6px solid #F59E0B;
+  align-items: center;
+}
+.expli-alerte-icone {
+  font-size: 70px;
+  flex-shrink: 0;
+}
+.expli-alerte-contenu h2 {
+  color: #92400E;
+  font-size: 22px;
+  font-weight: 800;
+  margin-bottom: 8px;
+}
+.expli-alerte-contenu p {
+  color: #B45309;
+  font-size: 15px;
+  margin-bottom: 16px;
+}
+.expli-alerte-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: linear-gradient(135deg, #2962FF, #1E40AF);
+  color: white;
+  font-weight: 800;
+  padding: 12px 24px;
+  border-radius: 50px;
+  text-decoration: none;
+  font-size: 14px;
+  box-shadow: 0 6px 18px rgba(41,98,255,0.4);
+  transition: all 0.3s;
+}
+.expli-alerte-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 25px rgba(41,98,255,0.55);
 }
 
-.alerte-import h2 {
-    color: var(--orange-dore);
-    margin-bottom: 10px;
+/* STATUT */
+.expli-statut {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: white;
+  border-radius: 20px;
+  padding: 18px 22px;
+  margin-bottom: 16px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+  border-left: 5px solid #F59E0B;
+}
+.expli-statut-icone {
+  width: 54px; height: 54px;
+  background: linear-gradient(135deg, #FCD34D, #F59E0B);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+  color: white;
+  flex-shrink: 0;
+}
+.expli-statut-texte { flex: 1; display: flex; flex-direction: column; gap: 3px; }
+.expli-statut-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #9CA3AF;
+  font-weight: 700;
+}
+.expli-statut-nom {
+  color: #1A1D2E;
+  font-weight: 700;
+  font-size: 15px;
+}
+.expli-statut-badge {
+  background: linear-gradient(135deg, #00C853, #2E7D32);
+  color: white;
+  padding: 6px 14px;
+  border-radius: 50px;
+  font-weight: 700;
+  font-size: 12px;
+  box-shadow: 0 3px 10px rgba(0,200,83,0.3);
 }
 
-.alerte-import p {
-    color: var(--gris-doux);
-    margin-bottom: 25px;
+/* INFO BOX */
+.expli-info {
+  display: flex;
+  gap: 16px;
+  background: linear-gradient(135deg, #FEF3C7, #FFE9B5);
+  border-radius: 20px;
+  padding: 20px;
+  margin-bottom: 20px;
+  border: 2px dashed #F59E0B;
+}
+.expli-info-icone {
+  font-size: 36px;
+  flex-shrink: 0;
+}
+.expli-info-texte {
+  flex: 1;
+  color: #92400E;
+  font-size: 14px;
+  line-height: 1.6;
+}
+.expli-info-texte strong { color: #B45309; }
+.expli-info-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+.expli-tag {
+  background: white;
+  color: #B45309;
+  padding: 6px 14px;
+  border-radius: 50px;
+  font-size: 12px;
+  font-weight: 700;
+  box-shadow: 0 2px 8px rgba(245,158,11,0.15);
 }
 
-.btn-aller {
-    display: inline-block;
-    background: linear-gradient(135deg, var(--bleu-royal), var(--bleu-ciel));
-    color: white;
-    padding: 15px 35px;
-    border-radius: 14px;
-    font-weight: bold;
-    text-decoration: none;
-    transition: all 0.3s;
+/* BOUTON */
+.expli-btn-generer {
+  width: 100%;
+  background: linear-gradient(135deg, #F59E0B, #D97706);
+  color: white;
+  border: none;
+  padding: 18px;
+  border-radius: 50px;
+  font-size: 17px;
+  font-weight: 900;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  box-shadow: 0 8px 25px rgba(245,158,11,0.4);
+  transition: all 0.3s;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  margin-bottom: 20px;
+}
+.expli-btn-generer:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 35px rgba(245,158,11,0.55);
+}
+.expli-btn-generer:disabled {
+  background: #D1D5DB;
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+}
+.expli-btn-icone {
+  width: 34px; height: 34px;
+  background: white;
+  color: #F59E0B;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
 }
 
-.btn-aller:hover {
-    transform: translateY(-3px);
+/* LOADING */
+.expli-loading {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  background: white;
+  border-radius: 24px;
+  padding: 32px;
+  margin-bottom: 20px;
+  box-shadow: 0 6px 25px rgba(0,0,0,0.06);
+  border-left: 5px solid #F59E0B;
+  animation: pulseGlow 2s ease-in-out infinite;
+}
+@keyframes pulseGlow {
+  0%,100% { box-shadow: 0 6px 25px rgba(0,0,0,0.06); }
+  50% { box-shadow: 0 6px 30px rgba(245,158,11,0.25); }
+}
+.expli-spinner {
+  width: 60px; height: 60px;
+  border: 5px solid #FEF3C7;
+  border-top-color: #F59E0B;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  flex-shrink: 0;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.expli-loading-titre {
+  font-size: 17px;
+  font-weight: 800;
+  color: #B45309;
+  margin: 0;
+}
+.expli-loading-sous {
+  font-size: 13px;
+  color: #9CA3AF;
+  margin-top: 4px;
 }
 
-.info-cours {
-    background: var(--jaune-pale);
-    padding: 18px;
-    border-radius: 15px;
-    margin-bottom: 15px;
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    border-left: 5px solid var(--orange-dore);
+/* RÉSULTAT */
+.expli-resultat { animation: fadeInUp 0.5s ease; }
+
+.expli-actions {
+  background: white;
+  border-radius: 20px;
+  padding: 18px 22px;
+  margin-bottom: 16px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+  border-left: 5px solid #F59E0B;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+.expli-actions-titre {
+  font-weight: 800;
+  color: #B45309;
+  font-size: 15px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.expli-actions-btns {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.expli-action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 16px;
+  border-radius: 50px;
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+  border: none;
+  transition: all 0.3s;
+  color: white;
+}
+.expli-action-btn:hover { transform: translateY(-2px); }
+.expli-copy { background: linear-gradient(135deg, #7B61FF, #5B21B6); box-shadow: 0 4px 12px rgba(123,97,255,0.3); }
+.expli-pdf { background: linear-gradient(135deg, #2962FF, #1E40AF); box-shadow: 0 4px 12px rgba(41,98,255,0.3); }
+.expli-partage { background: linear-gradient(135deg, #00C853, #2E7D32); box-shadow: 0 4px 12px rgba(0,200,83,0.3); }
+.expli-regen { background: linear-gradient(135deg, #F59E0B, #B45309); box-shadow: 0 4px 12px rgba(245,158,11,0.3); }
+
+/* CONTENU */
+.expli-contenu-wrapper {
+  background: white;
+  border-radius: 24px;
+  padding: 6px;
+  box-shadow: 0 6px 25px rgba(0,0,0,0.06);
+  border-top: 5px solid #F59E0B;
+}
+.expli-contenu {
+  background: linear-gradient(180deg, #FFFBEB, #FEF3C7);
+  padding: 28px;
+  border-radius: 20px;
+  font-size: 16px;
+  line-height: 1.9;
+  color: #1A1D2E;
+  white-space: pre-wrap;
+  min-height: 300px;
+  max-height: 600px;
+  overflow-y: auto;
+  font-family: 'Segoe UI', sans-serif;
+}
+.expli-contenu::-webkit-scrollbar { width: 6px; }
+.expli-contenu::-webkit-scrollbar-thumb {
+  background: #FCD34D;
+  border-radius: 4px;
 }
 
-.cours-icone {
-    font-size: 40px;
-}
-
-.encart-info {
-    background: linear-gradient(135deg, var(--jaune-pale), var(--jaune-clair));
-    padding: 18px;
-    border-radius: 15px;
-    margin-bottom: 20px;
-    text-align: center;
-    color: var(--gris-texte);
-    border: 2px dashed var(--orange-dore);
-}
-
-.btn-generer-orange {
-    width: 100%;
-    background: linear-gradient(135deg, var(--orange-dore), var(--jaune-soleil));
-    color: white;
-    padding: 20px;
-    border-radius: 18px;
-    text-align: center;
-    font-weight: bold;
-    font-size: 18px;
-    cursor: pointer;
-    border: none;
-    box-shadow: 0 4px 18px rgba(245, 158, 11, 0.3);
-    transition: all 0.3s;
-    margin-bottom: 20px;
-}
-
-.btn-generer-orange:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 8px 25px rgba(245, 158, 11, 0.45);
-}
-
-.zone-chargement {
-    background: white;
-    padding: 50px;
-    border-radius: 20px;
-    text-align: center;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
-}
-
-.spinner-orange {
-    border: 5px solid var(--gris-perle);
-    border-top: 5px solid var(--orange-dore);
-    border-radius: 50%;
-    width: 60px;
-    height: 60px;
-    margin: 0 auto 20px;
-    animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-
-.zone-resultat {
-    background: white;
-    padding: 30px;
-    border-radius: 20px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
-}
-
-.resultat-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-    flex-wrap: wrap;
-    gap: 15px;
-}
-
-.resultat-header h2 {
-    color: var(--orange-dore);
-}
-
-.actions-resultat {
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-}
-
-.btn-action {
-    background: var(--gris-perle);
-    color: var(--gris-texte);
-    border: none;
-    padding: 10px 18px;
-    border-radius: 10px;
-    font-weight: bold;
-    font-size: 13px;
-    cursor: pointer;
-    transition: all 0.3s;
-}
-
-.btn-action:hover {
-    background: var(--orange-dore);
-    color: white;
-    transform: translateY(-2px);
-}
-
-/* 🆕 Bouton PDF */
-.btn-pdf {
-    background: linear-gradient(135deg, #2962FF, #7EC8FF);
-    color: white !important;
-}
-
-.btn-pdf:hover {
-    background: linear-gradient(135deg, #1a4fd6, #5ab0f0) !important;
-    transform: translateY(-2px);
-}
-
-/* 🆕 Bouton Partage */
-.btn-partage {
-    background: linear-gradient(135deg, #00C853, #7ED321);
-    color: white !important;
-}
-
-.btn-partage:hover {
-    background: linear-gradient(135deg, #00a844, #6ab51d) !important;
-    transform: translateY(-2px);
-}
-
-.contenu-explication {
-    background: var(--jaune-pale);
-    padding: 25px;
-    border-radius: 14px;
-    font-size: 16px;
-    line-height: 1.8;
-    color: var(--gris-texte);
-    white-space: pre-wrap;
-    border: 2px solid var(--orange-pale);
-    min-height: 300px;
-    max-height: 600px;
-    overflow-y: auto;
-}
-
-.contenu-explication::-webkit-scrollbar {
-    width: 8px;
-}
-
-.contenu-explication::-webkit-scrollbar-thumb {
-    background: var(--orange-pale);
-    border-radius: 4px;
-}
-
-/* 🆕 Toast */
+/* TOAST */
 .toast-notif {
-    position: fixed;
-    bottom: 30px;
-    right: 30px;
-    background: #374151;
-    color: white;
-    padding: 14px 22px;
-    border-radius: 14px;
-    font-weight: bold;
-    font-size: 14px;
-    z-index: 9999;
-    opacity: 0;
-    transform: translateY(20px);
-    transition: all 0.4s ease;
-    box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  background: #1A1D2E;
+  color: white;
+  padding: 14px 22px;
+  border-radius: 14px;
+  font-weight: 700;
+  font-size: 14px;
+  z-index: 9999;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: all 0.4s ease;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.25);
+  pointer-events: none;
+}
+.toast-notif.show { opacity: 1; transform: translateY(0); }
+
+/* MODE SOMBRE */
+html[data-mode="sombre"] .expli-statut,
+html[data-mode="sombre"] .expli-loading,
+html[data-mode="sombre"] .expli-actions,
+html[data-mode="sombre"] .expli-contenu-wrapper {
+  background: #1A1D2E !important;
+  color: #F1F5F9 !important;
+}
+html[data-mode="sombre"] .expli-statut-nom { color: #F1F5F9 !important; }
+html[data-mode="sombre"] .expli-contenu {
+  background: linear-gradient(180deg, #3A2D1E, #2A1F0F) !important;
+  color: #F1F5F9 !important;
 }
 
-.toast-notif.show {
-    opacity: 1;
-    transform: translateY(0);
+/* RESPONSIVE */
+@media (max-width: 768px) {
+  .expli-header { flex-direction: column; text-align: center; padding: 22px; }
+  .expli-header-texte h1 { font-size: 20px; }
+  .expli-alerte { flex-direction: column; text-align: center; padding: 24px; }
+  .expli-info { flex-direction: column; text-align: center; }
+  .expli-actions { flex-direction: column; align-items: stretch; }
+  .expli-actions-btns { justify-content: center; }
+  .expli-statut { flex-wrap: wrap; }
+  .expli-contenu { padding: 20px; font-size: 14px; }
 }
 </style>
-{% endblock %}
 
-{% block extra_js %}
 <script>
 let explicationGeneree = '';
 
-// 🔔 Toast
-function showToast(message, couleur = '#374151') {
-    let toast = document.getElementById('toastGlobal');
-    if (!toast) {
-        toast = document.createElement('div');
-        toast.id = 'toastGlobal';
-        toast.className = 'toast-notif';
-        document.body.appendChild(toast);
-    }
-    toast.style.background = couleur;
-    toast.textContent = message;
-    toast.classList.add('show');
-    setTimeout(() => toast.classList.remove('show'), 3000);
+function showToast(msg, couleur = '#1A1D2E') {
+  const toast = document.getElementById('toastGlobal');
+  toast.style.background = couleur;
+  toast.textContent = msg;
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 3000);
 }
 
 async function genererExplication() {
-    const btn = document.getElementById('btnGenerer');
-    const chargement = document.getElementById('zoneChargement');
-    const resultat = document.getElementById('zoneResultat');
+  const btn = document.getElementById('btnGenerer');
+  const chargement = document.getElementById('zoneChargement');
+  const resultat = document.getElementById('zoneResultat');
 
-    btn.disabled = true;
-    btn.style.display = 'none';
-    chargement.style.display = 'block';
-    resultat.style.display = 'none';
+  btn.disabled = true;
+  btn.style.display = 'none';
+  chargement.style.display = 'flex';
+  resultat.style.display = 'none';
 
-    try {
-        const reponse = await fetch('/api/explication', {method: 'POST'});
-        const data = await reponse.json();
+  try {
+    const r = await fetch('/api/explication', { method: 'POST' });
+    const data = await r.json();
+    chargement.style.display = 'none';
 
-        chargement.style.display = 'none';
-
-        if (data.succes) {
-            explicationGeneree = data.explication;
-            document.getElementById('contenuExplication').textContent = data.explication;
-            resultat.style.display = 'block';
-        } else {
-            showToast(`⚠️ Erreur : ${data.erreur}`, '#EF4444');
-            btn.style.display = 'block';
-            btn.disabled = false;
-        }
-    } catch (error) {
-        chargement.style.display = 'none';
-        btn.style.display = 'block';
-        btn.disabled = false;
-        showToast(`⚠️ Erreur : ${error}`, '#EF4444');
+    if (data.succes) {
+      explicationGeneree = data.explication;
+      document.getElementById('contenuExplication').textContent = data.explication;
+      resultat.style.display = 'block';
+      resultat.scrollIntoView({ behavior: 'smooth' });
+    } else {
+      showToast('⚠️ ' + data.erreur, '#EF4444');
+      btn.style.display = 'flex';
+      btn.disabled = false;
     }
+  } catch (e) {
+    chargement.style.display = 'none';
+    btn.style.display = 'flex';
+    btn.disabled = false;
+    showToast('⚠️ ' + e, '#EF4444');
+  }
 }
 
 function copierExplication() {
-    navigator.clipboard.writeText(explicationGeneree);
-    showToast('✅ Explication copiée !', '#00C853');
+  if (!explicationGeneree) return showToast('⚠️ Génère d\'abord !', '#F59E0B');
+  navigator.clipboard.writeText(explicationGeneree);
+  showToast('✅ Copié !', '#00C853');
 }
 
-// 🆕 PDF NOKIROVA stylé orange
 function telechargerExplicationPDF() {
-    if (!explicationGeneree) {
-        showToast('⚠️ Génère d\'abord une explication !', '#F59E0B');
-        return;
-    }
-    window.telechargerPDF(
-        '💡 Explication simplifiée',
-        explicationGeneree,
-        {
-            couleur: [245, 158, 11],   // Orange Doré NOKIROVA
-            matiere: 'Explication',
-            emoji: '💡'
-        }
-    );
-    showToast('📄 PDF généré avec succès !', '#F59E0B');
+  if (!explicationGeneree) return showToast('⚠️ Génère d\'abord !', '#F59E0B');
+  window.telechargerPDF('💡 Explication simplifiée', explicationGeneree, {
+    couleur: [245, 158, 11],
+    matiere: 'Explication',
+    emoji: '💡'
+  });
+  showToast('📄 PDF généré !', '#F59E0B');
 }
 
-// 🆕 Partage
 async function partagerExplication() {
-    if (!explicationGeneree) {
-        showToast('⚠️ Génère d\'abord une explication !', '#F59E0B');
-        return;
-    }
-
-    // Mobile Android → Web Share API
-    if (navigator.share) {
-        try {
-            await navigator.share({
-                title: '💡 Explication NOKIROVA',
-                text: explicationGeneree,
-            });
-            showToast('✅ Partagé !', '#00C853');
-        } catch (e) {
-            // Annulé → pas grave
-        }
-        return;
-    }
-
-    // Desktop → copie presse-papier
-    navigator.clipboard.writeText(explicationGeneree);
-    showToast('📋 Copié ! Colle-le où tu veux 🌸', '#7B61FF');
+  if (!explicationGeneree) return showToast('⚠️ Génère d\'abord !', '#F59E0B');
+  if (navigator.share) {
+    try {
+      await navigator.share({ title: '💡 Explication NOKIROVA', text: explicationGeneree });
+      showToast('✅ Partagé !', '#00C853');
+    } catch (e) {}
+    return;
+  }
+  navigator.clipboard.writeText(explicationGeneree);
+  showToast('📋 Copié !', '#7B61FF');
 }
 
 function regenerer() {
-    document.getElementById('zoneResultat').style.display = 'none';
-    document.getElementById('btnGenerer').style.display = 'block';
-    document.getElementById('btnGenerer').disabled = false;
+  document.getElementById('zoneResultat').style.display = 'none';
+  const btn = document.getElementById('btnGenerer');
+  btn.style.display = 'flex';
+  btn.disabled = false;
 }
 </script>
+
 {% endblock %}

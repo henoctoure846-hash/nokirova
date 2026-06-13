@@ -361,9 +361,89 @@ html[data-mode="sombre"] .zone-principale { background: #1A1B26; }
     .cartes-rapides { grid-template-columns: repeat(3, 1fr); }
     .cartes-stats { grid-template-columns: 1fr; }
 }
+/* ═══════════════════════════════════════════
+   📱 RESPONSIVE MOBILE COMPLET
+   ═══════════════════════════════════════════ */
+
+/* BOUTON HAMBURGER */
+.hamburger {
+    display: none;
+    position: fixed;
+    top: 15px; left: 15px;
+    z-index: 9999;
+    background: var(--primaire);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    width: 48px; height: 48px;
+    font-size: 22px;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s;
+}
+.hamburger:hover { transform: scale(1.1); }
+
+/* OVERLAY SOMBRE */
+.sidebar-overlay {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 8888;
+    backdrop-filter: blur(3px);
+}
+.sidebar-overlay.actif { display: block; }
+
 @media (max-width: 768px) {
+
+    /* BOUTON HAMBURGER VISIBLE */
+    .hamburger { display: flex; }
+
+    /* APP EN COLONNE */
     .app-container { flex-direction: column; }
-    .sidebar { width: 100%; min-width: 100%; height: auto; position: relative; }
+
+    /* SIDEBAR CACHÉE PAR DÉFAUT */
+    .sidebar {
+        position: fixed;
+        top: 0; left: -300px;
+        width: 280px; min-width: 280px;
+        height: 100vh;
+        z-index: 9000;
+        transition: left 0.3s ease;
+        overflow-y: auto;
+        box-shadow: 5px 0 25px rgba(0,0,0,0.3);
+    }
+
+    /* SIDEBAR OUVERTE */
+    .sidebar.ouverte { left: 0; }
+
+    /* ZONE PRINCIPALE PLEIN ÉCRAN */
+    .zone-principale {
+        width: 100%;
+        padding: 70px 15px 20px 15px;
+        min-height: 100vh;
+    }
+
+    /* CARTES */
     .cartes-rapides { grid-template-columns: repeat(2, 1fr); }
+    .cartes-stats { grid-template-columns: 1fr; }
     .header-accueil { flex-direction: column; text-align: center; }
+    .header-texte h1 { font-size: 22px; }
+
+    /* TABLEAUX RESPONSIVE */
+    .control-panel { flex-direction: column; }
+    .btn-group { flex-wrap: wrap; }
+}
+
+@media (max-width: 480px) {
+    .cartes-rapides { grid-template-columns: repeat(2, 1fr); }
+    .carte-rapide-icone { font-size: 28px; }
+    .carte-rapide-titre { font-size: 12px; }
+}
+
+@media (max-width: 1024px) {
+    .cartes-rapides { grid-template-columns: repeat(3, 1fr); }
+    .cartes-stats { grid-template-columns: 1fr 1fr 1fr; }
 }

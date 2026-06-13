@@ -18,7 +18,39 @@
 
     {% block extra_css %}{% endblock %}
 </head>
+<script>
+function toggleSidebar() {
+    const sidebar = document.querySelector('.sidebar');
+    const overlay = document.getElementById('sidebar-overlay');
+    const btn = document.getElementById('hamburger');
+    sidebar.classList.toggle('ouverte');
+    overlay.classList.toggle('actif');
+    btn.textContent = sidebar.classList.contains('ouverte') ? '✕' : '☰';
+}
+
+function fermerSidebar() {
+    const sidebar = document.querySelector('.sidebar');
+    const overlay = document.getElementById('sidebar-overlay');
+    const btn = document.getElementById('hamburger');
+    sidebar.classList.remove('ouverte');
+    overlay.classList.remove('actif');
+    btn.textContent = '☰';
+}
+
+// Fermer sidebar quand on clique sur un lien
+document.querySelectorAll('.bouton-sidebar').forEach(btn => {
+    btn.addEventListener('click', () => {
+        if (window.innerWidth <= 768) fermerSidebar();
+    });
+});
+</script>
 <body>
+
+<!-- 🍔 BOUTON MENU MOBILE -->
+<button class="hamburger" id="hamburger" onclick="toggleSidebar()">☰</button>
+
+<!-- 🌑 OVERLAY -->
+<div class="sidebar-overlay" id="sidebar-overlay" onclick="fermerSidebar()"></div>
 
 <!-- ═══════════════════════════════════ -->
 <!-- ✨ SPLASH SCREEN                   -->

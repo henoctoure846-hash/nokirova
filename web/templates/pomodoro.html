@@ -1,115 +1,557 @@
 {% extends "base.html" %}
 {% block title %}Pomodoro - NOKIROVA{% endblock %}
 {% block contenu %}
-<div class="page-container">
 
-  <div class="page-header" style="background: linear-gradient(135deg, #FDBA74, #FED7AA); border-left: 5px solid #EF4444;">
-    <div class="page-header-icon" style="background: linear-gradient(135deg, #EF4444, #F59E0B);">⏱️</div>
-    <div>
-      <h1 class="page-title" style="color: #991B1B;">Pomodoro Timer</h1>
-      <p class="page-subtitle" style="color: #B91C1C;">25 min de travail / 5 min de pause 🍅</p>
+<!-- TOAST -->
+<div id="toast" style="
+  position:fixed; top:20px; right:20px; z-index:9999;
+  background:#1A1D2E; color:white; padding:1rem 1.5rem;
+  border-radius:16px; font-weight:600; font-size:0.95rem;
+  box-shadow:0 8px 30px rgba(0,0,0,0.3);
+  transform:translateX(120%); transition:transform 0.4s cubic-bezier(0.175,0.885,0.32,1.275);
+  display:flex; align-items:center; gap:0.8rem; max-width:320px;
+"></div>
+
+<div class="pm-container">
+
+  <!-- ═══ HEADER ═══ -->
+  <div class="pm-header">
+    <div class="pm-header-bg-emoji">🍅</div>
+    <div class="pm-header-icon">⏱️</div>
+    <div class="pm-header-text">
+      <h1 class="pm-header-title">Pomodoro Timer</h1>
+      <p class="pm-header-sub">25 min de travail · 5 min de pause 🍅</p>
+    </div>
+    <div class="pm-header-badge">
+      <span>🔥</span> Focus Mode
     </div>
   </div>
 
-  <!-- TIMER PRINCIPAL -->
-  <div class="timer-card">
-    <div class="mode-badge" id="mode-badge">🍅 TRAVAIL</div>
+  <!-- ═══ TIMER CARD ═══ -->
+  <div class="pm-timer-card">
 
-    <div class="timer-display" id="timer-display">25:00</div>
+    <!-- Mode badge -->
+    <div class="pm-mode-badge" id="mode-badge">🍅 TRAVAIL</div>
 
-    <div class="timer-bar">
-      <div class="timer-bar-fill" id="timer-bar-fill"></div>
+    <!-- Cercle timer SVG -->
+    <div class="pm-circle-wrap">
+      <svg class="pm-circle-svg" viewBox="0 0 200 200">
+        <circle class="pm-circle-bg" cx="100" cy="100" r="88"/>
+        <circle class="pm-circle-fill" id="circle-fill" cx="100" cy="100" r="88"
+                stroke-dasharray="553" stroke-dashoffset="0"/>
+      </svg>
+      <div class="pm-circle-inner">
+        <div class="pm-timer-display" id="timer-display">25:00</div>
+        <div class="pm-timer-label" id="timer-label">En attente...</div>
+      </div>
     </div>
 
-    <div class="timer-controls">
-      <button id="btn-start" onclick="demarrer()" class="btn-timer btn-play">▶️ Démarrer</button>
-      <button id="btn-pause" onclick="pause()" class="btn-timer btn-pause" style="display:none;">⏸️ Pause</button>
-      <button onclick="reset()" class="btn-timer btn-reset">🔄 Reset</button>
+    <!-- Barre progression -->
+    <div class="pm-bar-wrap">
+      <div class="pm-bar-fill" id="timer-bar-fill" style="width:100%"></div>
     </div>
 
-    <div class="duree-options">
-      <button onclick="setDuree(25, 'travail')" class="btn-mode actif" id="mode-travail">🍅 25min Travail</button>
-      <button onclick="setDuree(5, 'pause')" class="btn-mode" id="mode-pause">☕ 5min Pause</button>
-      <button onclick="setDuree(15, 'longue')" class="btn-mode" id="mode-longue">🌴 15min Longue</button>
+    <!-- Mode selector -->
+    <div class="pm-modes">
+      <button onclick="setDuree(25,'travail')" class="pm-btn-mode pm-mode-actif" id="mode-travail">
+        <span>🍅</span> 25min Travail
+      </button>
+      <button onclick="setDuree(5,'pause')" class="pm-btn-mode" id="mode-pause">
+        <span>☕</span> 5min Pause
+      </button>
+      <button onclick="setDuree(15,'longue')" class="pm-btn-mode" id="mode-longue">
+        <span>🌴</span> 15min Longue
+      </button>
     </div>
 
-    <input type="text" id="matiere" placeholder="📚 Matière étudiée (optionnel)" class="input-matiere"/>
+    <!-- Input matière -->
+    <div class="pm-input-wrap">
+      <span class="pm-input-icon">📚</span>
+      <input type="text" id="matiere"
+             placeholder="Matière étudiée (optionnel)"
+             class="pm-input"/>
+    </div>
+
+    <!-- Contrôles -->
+    <div class="pm-controls">
+      <button id="btn-start" onclick="demarrer()" class="pm-btn pm-btn-start">
+        <span class="pm-btn-circle">▶️</span>
+        <span>Démarrer</span>
+      </button>
+      <button id="btn-pause" onclick="pauseTimer()"
+              class="pm-btn pm-btn-pause" style="display:none;">
+        <span class="pm-btn-circle">⏸️</span>
+        <span>Pause</span>
+      </button>
+      <button onclick="resetTimer()" class="pm-btn pm-btn-reset">
+        <span class="pm-btn-circle">🔄</span>
+        <span>Reset</span>
+      </button>
+    </div>
+
+  </div>
+  <!-- fin timer card -->
+
+  <!-- ═══ STATS GRID ═══ -->
+  <div class="pm-stats-grid">
+    <div class="pm-stat-card pm-stat-orange">
+      <div class="pm-stat-emoji">🎯</div>
+      <div class="pm-stat-val" id="sessions-today">0</div>
+      <div class="pm-stat-name">Sessions aujourd'hui</div>
+    </div>
+    <div class="pm-stat-card pm-stat-rouge">
+      <div class="pm-stat-emoji">⏱️</div>
+      <div class="pm-stat-val" id="minutes-today">0</div>
+      <div class="pm-stat-name">Minutes aujourd'hui</div>
+    </div>
+    <div class="pm-stat-card pm-stat-vert">
+      <div class="pm-stat-emoji">🏆</div>
+      <div class="pm-stat-val" id="total-sessions">0</div>
+      <div class="pm-stat-name">Total sessions</div>
+    </div>
+    <div class="pm-stat-card pm-stat-violet">
+      <div class="pm-stat-emoji">⭐</div>
+      <div class="pm-stat-val" id="total-heures">0h</div>
+      <div class="pm-stat-name">Total heures</div>
+    </div>
   </div>
 
-  <!-- STATS -->
-  <div class="stats-grid">
-    <div class="stat-card">
-      <div class="stat-emoji">🎯</div>
-      <div class="stat-val" id="sessions-today">0</div>
-      <div class="stat-name">Sessions aujourd'hui</div>
+  <!-- ═══ HISTORIQUE ═══ -->
+  <div class="pm-histo-card">
+    <div class="pm-histo-header">
+      <div class="pm-histo-icon">📜</div>
+      <div>
+        <h3 class="pm-histo-title">Sessions récentes</h3>
+        <p class="pm-histo-sub">Tes dernières sessions de travail</p>
+      </div>
     </div>
-    <div class="stat-card">
-      <div class="stat-emoji">⏱️</div>
-      <div class="stat-val" id="minutes-today">0</div>
-      <div class="stat-name">Minutes aujourd'hui</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-emoji">🏆</div>
-      <div class="stat-val" id="total-sessions">0</div>
-      <div class="stat-name">Total sessions</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-emoji">⭐</div>
-      <div class="stat-val" id="total-heures">0h</div>
-      <div class="stat-name">Total heures</div>
-    </div>
-  </div>
-
-  <!-- HISTORIQUE RAPIDE -->
-  <div class="histo-card">
-    <h3 style="color:#991B1B;">📜 Sessions récentes</h3>
     <div id="liste-sessions"></div>
   </div>
+
 </div>
 
+<!-- ══════════════════════════════════════════ -->
+<!-- STYLES -->
+<!-- ══════════════════════════════════════════ -->
 <style>
-  .page-container { padding:2rem; max-width:1000px; margin:0 auto;}
-  .page-header { display:flex; align-items:center; gap:1.2rem; border-radius:20px; padding:1.5rem 2rem; margin-bottom:1.5rem; box-shadow:0 4px 20px rgba(0,0,0,0.05);}
-  .page-header-icon { width:60px; height:60px; border-radius:16px; display:flex; align-items:center; justify-content:center; font-size:1.8rem; color:white;}
-  .page-title { font-size:1.6rem; font-weight:800; margin:0;}
-  .page-subtitle { margin:0.2rem 0 0; font-size:0.95rem;}
 
-  .timer-card { background:linear-gradient(135deg, white, #FFF7ED); border-radius:24px; padding:3rem 2rem; text-align:center; box-shadow:0 8px 30px rgba(239,68,68,0.15); margin-bottom:1.5rem;}
-  .mode-badge { display:inline-block; background:linear-gradient(135deg, #EF4444, #F59E0B); color:white; padding:0.5rem 1.5rem; border-radius:20px; font-weight:700; font-size:0.9rem; margin-bottom:1.5rem; letter-spacing:1px;}
+/* ── ANIMATIONS ── */
+@keyframes fadeInUp {
+  from { opacity:0; transform:translateY(30px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+@keyframes pulseRed {
+  0%,100% { box-shadow:0 0 0 0 rgba(239,68,68,0.4); }
+  50%      { box-shadow:0 0 0 16px rgba(239,68,68,0); }
+}
+@keyframes pulseOrange {
+  0%,100% { box-shadow:0 0 0 0 rgba(245,158,11,0.4); }
+  50%      { box-shadow:0 0 0 16px rgba(245,158,11,0); }
+}
+@keyframes floatEmoji {
+  0%,100% { transform:translateY(0px) rotate(0deg); }
+  50%      { transform:translateY(-10px) rotate(5deg); }
+}
+@keyframes tickTock {
+  0%,100% { transform:scale(1); }
+  50%      { transform:scale(1.03); }
+}
+@keyframes shimmer {
+  0%   { background-position:-200% center; }
+  100% { background-position:200% center; }
+}
+@keyframes bounceIn {
+  0%   { transform:scale(0.3); opacity:0; }
+  50%  { transform:scale(1.05); }
+  70%  { transform:scale(0.9); }
+  100% { transform:scale(1); opacity:1; }
+}
+@keyframes spinOnce {
+  from { transform:rotate(0deg); }
+  to   { transform:rotate(360deg); }
+}
 
-  .timer-display { font-size:6rem; font-weight:800; color:#991B1B; letter-spacing:4px; margin-bottom:1rem; font-family:'Courier New', monospace;}
+/* ── CONTAINER ── */
+.pm-container {
+  padding: 1.5rem;
+  max-width: 860px;
+  margin: 0 auto;
+  animation: fadeInUp 0.5s ease;
+}
 
-  .timer-bar { width:100%; height:12px; background:#FED7AA; border-radius:10px; overflow:hidden; margin-bottom:1.5rem;}
-  .timer-bar-fill { height:100%; background:linear-gradient(90deg, #EF4444, #F59E0B); width:100%; transition:width 1s linear; border-radius:10px;}
+/* ── HEADER ── */
+.pm-header {
+  position: relative; overflow: hidden;
+  background: linear-gradient(135deg, #EF4444 0%, #F59E0B 50%, #FFD93D 100%);
+  border-radius: 28px;
+  padding: 2rem;
+  margin-bottom: 1.5rem;
+  display: flex; align-items: center; gap: 1.2rem; flex-wrap: wrap;
+  box-shadow: 0 8px 32px rgba(239,68,68,0.35);
+}
+.pm-header-bg-emoji {
+  position: absolute; right: -10px; top: -20px;
+  font-size: 9rem; opacity: 0.12; pointer-events: none;
+  animation: floatEmoji 4s ease-in-out infinite;
+}
+.pm-header-icon {
+  width: 72px; height: 72px;
+  background: rgba(255,255,255,0.2);
+  border-radius: 20px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 2.2rem; flex-shrink: 0;
+  backdrop-filter: blur(10px);
+  border: 2px solid rgba(255,255,255,0.3);
+}
+.pm-header-text { flex: 1; }
+.pm-header-title {
+  font-size: 1.8rem; font-weight: 900;
+  color: white; margin: 0;
+  text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+}
+.pm-header-sub {
+  color: rgba(255,255,255,0.85);
+  margin: 0.3rem 0 0; font-size: 0.95rem;
+}
+.pm-header-badge {
+  background: rgba(255,255,255,0.2);
+  color: white; padding: 0.5rem 1.2rem;
+  border-radius: 50px; font-weight: 700; font-size: 0.85rem;
+  display: flex; align-items: center; gap: 0.5rem;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.3);
+  white-space: nowrap;
+}
 
-  .timer-controls { display:flex; gap:1rem; justify-content:center; margin-bottom:1.5rem; flex-wrap:wrap;}
-  .btn-timer { padding:0.9rem 2rem; border:none; border-radius:14px; font-weight:700; font-size:1rem; cursor:pointer; transition:all 0.2s;}
-  .btn-play { background:linear-gradient(135deg, #00C853, #7ED321); color:white; box-shadow:0 4px 15px rgba(0,200,83,0.4);}
-  .btn-play:hover { transform:translateY(-2px);}
-  .btn-pause { background:linear-gradient(135deg, #F59E0B, #FB923C); color:white; box-shadow:0 4px 15px rgba(245,158,11,0.4);}
-  .btn-pause:hover { transform:translateY(-2px);}
-  .btn-reset { background:#FEE2E2; color:#EF4444; border:2px solid #EF4444;}
-  .btn-reset:hover { background:#EF4444; color:white;}
+/* ── TIMER CARD ── */
+.pm-timer-card {
+  background: white;
+  border-radius: 28px;
+  padding: 2.5rem 2rem;
+  margin-bottom: 1.5rem;
+  text-align: center;
+  box-shadow: 0 8px 32px rgba(239,68,68,0.12);
+  border-top: 5px solid #EF4444;
+  animation: fadeInUp 0.5s ease 0.1s both;
+}
 
-  .duree-options { display:flex; gap:0.5rem; justify-content:center; flex-wrap:wrap; margin-bottom:1rem;}
-  .btn-mode { padding:0.5rem 1.2rem; border:2px solid #FDBA74; background:white; color:#991B1B; border-radius:20px; font-weight:600; font-size:0.85rem; cursor:pointer; transition:0.2s;}
-  .btn-mode:hover { background:#FED7AA;}
-  .btn-mode.actif { background:linear-gradient(135deg, #EF4444, #F59E0B); color:white; border-color:transparent;}
+/* Mode badge */
+.pm-mode-badge {
+  display: inline-block;
+  background: linear-gradient(135deg, #EF4444, #F59E0B);
+  color: white; padding: 0.5rem 1.8rem;
+  border-radius: 50px; font-weight: 800;
+  font-size: 0.9rem; letter-spacing: 2px;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 4px 16px rgba(239,68,68,0.3);
+}
 
-  .input-matiere { width:100%; max-width:400px; padding:0.7rem 1rem; border:2px solid #FDBA74; border-radius:12px; font-size:0.9rem; outline:none; margin-top:1rem;}
-  .input-matiere:focus { border-color:#EF4444;}
+/* ── CERCLE SVG ── */
+.pm-circle-wrap {
+  position: relative;
+  width: 220px; height: 220px;
+  margin: 0 auto 1.5rem;
+}
+.pm-circle-svg {
+  width: 100%; height: 100%;
+  transform: rotate(-90deg);
+}
+.pm-circle-bg {
+  fill: none; stroke: #FEE2E2; stroke-width: 12;
+}
+.pm-circle-fill {
+  fill: none;
+  stroke: url(#timerGradient);
+  stroke-width: 12;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 1s linear;
+}
+.pm-circle-inner {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+}
+.pm-timer-display {
+  font-size: 3.2rem; font-weight: 900;
+  color: #991B1B;
+  font-family: 'Courier New', monospace;
+  letter-spacing: 3px;
+  line-height: 1;
+}
+.pm-timer-label {
+  font-size: 0.8rem; color: #9CA3AF;
+  font-weight: 600; margin-top: 0.3rem;
+  text-transform: uppercase; letter-spacing: 1px;
+}
 
-  .stats-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(160px, 1fr)); gap:1rem; margin-bottom:1.5rem;}
-  .stat-card { background:white; border-radius:16px; padding:1.2rem; text-align:center; box-shadow:0 4px 15px rgba(0,0,0,0.06); border-top:4px solid #EF4444;}
-  .stat-emoji { font-size:2rem;}
-  .stat-val { font-size:1.8rem; font-weight:800; color:#991B1B; margin:0.3rem 0;}
-  .stat-name { font-size:0.8rem; color:#9CA3AF; font-weight:600; text-transform:uppercase;}
+/* Timer en cours : animation tick */
+.pm-timer-display.ticking {
+  animation: tickTock 1s ease-in-out infinite;
+}
 
-  .histo-card { background:white; border-radius:20px; padding:1.5rem; box-shadow:0 4px 20px rgba(0,0,0,0.05);}
-  .histo-card h3 { font-size:1.1rem; font-weight:700; margin-bottom:1rem;}
-  .session-item { display:flex; justify-content:space-between; padding:0.7rem 1rem; background:#FFF7ED; border-radius:10px; margin-bottom:0.5rem; border-left:3px solid #EF4444; font-size:0.9rem;}
+/* ── BARRE PROGRESSION ── */
+.pm-bar-wrap {
+  width: 100%; height: 10px;
+  background: #FEE2E2; border-radius: 10px;
+  overflow: hidden; margin-bottom: 1.5rem;
+}
+.pm-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #EF4444, #F59E0B, #FFD93D);
+  background-size: 200% auto;
+  border-radius: 10px;
+  transition: width 1s linear;
+  animation: shimmer 2s linear infinite;
+}
+
+/* ── MODE SELECTOR ── */
+.pm-modes {
+  display: flex; gap: 0.6rem;
+  justify-content: center; flex-wrap: wrap;
+  margin-bottom: 1.2rem;
+}
+.pm-btn-mode {
+  display: flex; align-items: center; gap: 0.4rem;
+  padding: 0.55rem 1.2rem;
+  border: 2px solid #FDBA74;
+  background: white; color: #92400E;
+  border-radius: 50px; font-weight: 700;
+  font-size: 0.85rem; cursor: pointer;
+  transition: all 0.2s;
+}
+.pm-btn-mode:hover { background: #FEF3C7; border-color: #F59E0B; }
+.pm-btn-mode.pm-mode-actif {
+  background: linear-gradient(135deg, #EF4444, #F59E0B);
+  color: white; border-color: transparent;
+  box-shadow: 0 4px 12px rgba(239,68,68,0.3);
+}
+
+/* ── INPUT MATIÈRE ── */
+.pm-input-wrap {
+  display: flex; align-items: center; gap: 0.8rem;
+  max-width: 400px; margin: 0 auto 1.5rem;
+  background: #FFF7ED;
+  border: 2px solid #FDBA74;
+  border-radius: 50px; padding: 0.7rem 1.2rem;
+  transition: border-color 0.2s;
+}
+.pm-input-wrap:focus-within { border-color: #EF4444; }
+.pm-input-icon { font-size: 1.2rem; flex-shrink: 0; }
+.pm-input {
+  flex: 1; border: none; background: transparent;
+  font-size: 0.9rem; font-weight: 600; color: #374151;
+  outline: none;
+}
+.pm-input::placeholder { color: #9CA3AF; font-weight: 400; }
+
+/* ── CONTRÔLES ── */
+.pm-controls {
+  display: flex; gap: 1rem;
+  justify-content: center; flex-wrap: wrap;
+}
+.pm-btn {
+  display: flex; align-items: center; gap: 0.7rem;
+  padding: 0.9rem 1.8rem;
+  border: none; border-radius: 50px;
+  font-weight: 800; font-size: 1rem;
+  cursor: pointer; transition: all 0.3s;
+  position: relative; overflow: hidden;
+}
+.pm-btn::before {
+  content: '';
+  position: absolute; top:0; left:-100%;
+  width: 100%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  transition: left 0.5s;
+}
+.pm-btn:hover::before { left: 100%; }
+.pm-btn-circle {
+  width: 34px; height: 34px;
+  background: rgba(255,255,255,0.25);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1rem; flex-shrink: 0;
+}
+.pm-btn-start {
+  background: linear-gradient(135deg, #00C853, #7ED321);
+  color: white;
+  box-shadow: 0 6px 20px rgba(0,200,83,0.4);
+  animation: pulseOrange 2s infinite;
+}
+.pm-btn-start:hover { transform: translateY(-3px); box-shadow: 0 10px 28px rgba(0,200,83,0.5); }
+.pm-btn-pause {
+  background: linear-gradient(135deg, #F59E0B, #FFD93D);
+  color: white;
+  box-shadow: 0 6px 20px rgba(245,158,11,0.4);
+}
+.pm-btn-pause:hover { transform: translateY(-3px); }
+.pm-btn-reset {
+  background: linear-gradient(135deg, #FEE2E2, #FECACA);
+  color: #EF4444;
+  border: 2px solid #FCA5A5;
+}
+.pm-btn-reset:hover {
+  background: linear-gradient(135deg, #EF4444, #DC2626);
+  color: white; border-color: transparent;
+  transform: translateY(-3px);
+}
+
+/* ── STATS GRID ── */
+.pm-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1rem; margin-bottom: 1.5rem;
+}
+.pm-stat-card {
+  background: white; border-radius: 20px;
+  padding: 1.4rem 1rem; text-align: center;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.07);
+  transition: all 0.3s;
+  animation: bounceIn 0.5s ease both;
+}
+.pm-stat-card:hover { transform: translateY(-4px); }
+.pm-stat-orange { border-top: 5px solid #F59E0B; }
+.pm-stat-rouge  { border-top: 5px solid #EF4444; }
+.pm-stat-vert   { border-top: 5px solid #00C853; }
+.pm-stat-violet { border-top: 5px solid #7B61FF; }
+.pm-stat-emoji { font-size: 2.2rem; margin-bottom: 0.5rem; }
+.pm-stat-val {
+  font-size: 2rem; font-weight: 900;
+  color: #1A1D2E; margin: 0.2rem 0;
+}
+.pm-stat-name {
+  font-size: 0.75rem; color: #9CA3AF;
+  font-weight: 700; text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* ── HISTORIQUE ── */
+.pm-histo-card {
+  background: white; border-radius: 24px;
+  padding: 1.8rem;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.07);
+  border-top: 5px solid #F59E0B;
+  animation: fadeInUp 0.5s ease 0.3s both;
+}
+.pm-histo-header {
+  display: flex; align-items: center; gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+.pm-histo-icon {
+  width: 50px; height: 50px;
+  background: linear-gradient(135deg, #F59E0B, #FFD93D);
+  border-radius: 14px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.5rem; flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(245,158,11,0.3);
+}
+.pm-histo-title {
+  font-size: 1.1rem; font-weight: 800;
+  color: #1A1D2E; margin: 0;
+}
+.pm-histo-sub {
+  font-size: 0.85rem; color: #6B7280; margin: 0.2rem 0 0;
+}
+
+/* Session items */
+.pm-session-item {
+  display: flex; align-items: center; gap: 1rem;
+  padding: 0.9rem 1.2rem;
+  background: linear-gradient(135deg, #FFF7ED, #FEF3C7);
+  border-radius: 14px; margin-bottom: 0.6rem;
+  border-left: 4px solid #EF4444;
+  transition: all 0.2s;
+  animation: fadeInUp 0.4s ease both;
+}
+.pm-session-item:hover { transform: translateX(4px); }
+.pm-session-emoji {
+  width: 38px; height: 38px;
+  background: linear-gradient(135deg, #EF4444, #F59E0B);
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.1rem; flex-shrink: 0;
+}
+.pm-session-info { flex: 1; }
+.pm-session-matiere { font-weight: 700; color: #1A1D2E; font-size: 0.9rem; }
+.pm-session-duree { font-size: 0.8rem; color: #6B7280; margin-top: 0.1rem; }
+.pm-session-date {
+  font-size: 0.8rem; color: #9CA3AF; font-weight: 600;
+}
+
+.pm-empty {
+  text-align: center; padding: 2.5rem;
+  color: #9CA3AF;
+}
+.pm-empty-icon { font-size: 3rem; margin-bottom: 0.8rem; }
+.pm-empty-text { font-size: 1rem; font-weight: 600; }
+
+/* ══════════════════════════════════ */
+/* MODE SOMBRE */
+/* ══════════════════════════════════ */
+[data-theme="dark"] .pm-timer-card,
+[data-theme="dark"] .pm-histo-card {
+  background: #1E2235;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.3);
+}
+[data-theme="dark"] .pm-stat-card { background: #1E2235; }
+[data-theme="dark"] .pm-stat-val { color: #F1F5F9; }
+[data-theme="dark"] .pm-stat-name { color: #64748B; }
+[data-theme="dark"] .pm-histo-title { color: #F1F5F9; }
+[data-theme="dark"] .pm-histo-sub { color: #94A3B8; }
+[data-theme="dark"] .pm-session-item {
+  background: linear-gradient(135deg, #252A40, #2D3748);
+  border-left-color: #F59E0B;
+}
+[data-theme="dark"] .pm-session-matiere { color: #F1F5F9; }
+[data-theme="dark"] .pm-session-duree { color: #94A3B8; }
+[data-theme="dark"] .pm-input-wrap {
+  background: #252A40; border-color: #4B5563;
+}
+[data-theme="dark"] .pm-input { color: #F1F5F9; }
+[data-theme="dark"] .pm-bar-wrap { background: #374151; }
+[data-theme="dark"] .pm-circle-bg { stroke: #374151; }
+[data-theme="dark"] .pm-timer-display { color: #FCA5A5; }
+[data-theme="dark"] .pm-timer-label { color: #64748B; }
+[data-theme="dark"] .pm-btn-mode {
+  background: #252A40; color: #D1D5DB; border-color: #4B5563;
+}
+[data-theme="dark"] .pm-btn-reset {
+  background: linear-gradient(135deg, #2D1B1B, #3B1F1F);
+  border-color: #7F1D1D; color: #FCA5A5;
+}
+
+/* ══════════════════════════════════ */
+/* RESPONSIVE */
+/* ══════════════════════════════════ */
+@media (max-width: 640px) {
+  .pm-container { padding: 1rem; }
+  .pm-header { padding: 1.2rem; }
+  .pm-header-title { font-size: 1.4rem; }
+  .pm-header-badge { display: none; }
+  .pm-timer-card { padding: 1.5rem 1rem; }
+  .pm-circle-wrap { width: 180px; height: 180px; }
+  .pm-timer-display { font-size: 2.6rem; }
+  .pm-controls { gap: 0.6rem; }
+  .pm-btn { padding: 0.8rem 1.2rem; font-size: 0.9rem; }
+  .pm-stats-grid { grid-template-columns: repeat(2, 1fr); }
+}
 </style>
 
+<!-- SVG gradient def (invisible) -->
+<svg width="0" height="0" style="position:absolute;">
+  <defs>
+    <linearGradient id="timerGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%"   stop-color="#EF4444"/>
+      <stop offset="50%"  stop-color="#F59E0B"/>
+      <stop offset="100%" stop-color="#FFD93D"/>
+    </linearGradient>
+  </defs>
+</svg>
+
+<!-- ══════════════════════════════════════════ -->
+<!-- JAVASCRIPT -->
+<!-- ══════════════════════════════════════════ -->
 <script>
 let dureeInitiale = 25 * 60;
 let secondesRestantes = dureeInitiale;
@@ -117,40 +559,89 @@ let intervalId = null;
 let modeActuel = 'travail';
 let enCours = false;
 
-document.addEventListener('DOMContentLoaded', ()=>{
+/* Circonférence cercle SVG */
+const CIRCONFERENCE = 2 * Math.PI * 88; // r=88
+
+document.addEventListener('DOMContentLoaded', () => {
   affichageTimer();
   chargerStats();
   chargerSessions();
+  /* Init cercle */
+  document.getElementById('circle-fill').style.strokeDasharray = CIRCONFERENCE;
+  document.getElementById('circle-fill').style.strokeDashoffset = 0;
 });
 
+/* ── TOAST ── */
+function toast(msg, type = 'info') {
+  const colors = {
+    succes : 'linear-gradient(135deg,#00C853,#7ED321)',
+    erreur : 'linear-gradient(135deg,#EF4444,#DC2626)',
+    info   : 'linear-gradient(135deg,#2962FF,#7B61FF)',
+    warning: 'linear-gradient(135deg,#F59E0B,#FFD93D)',
+  };
+  const t = document.getElementById('toast');
+  t.innerHTML = msg;
+  t.style.background = colors[type] || colors.info;
+  t.style.transform = 'translateX(0)';
+  setTimeout(() => { t.style.transform = 'translateX(120%)'; }, 3200);
+}
+
+/* ── SET DURÉE ── */
 function setDuree(min, mode) {
-  if (enCours) { alert('⚠️ Arrête d\'abord le timer en cours !'); return; }
+  if (enCours) {
+    toast('⚠️ Arrête d\'abord le timer en cours !', 'warning');
+    return;
+  }
   dureeInitiale = min * 60;
   secondesRestantes = dureeInitiale;
   modeActuel = mode;
-  document.querySelectorAll('.btn-mode').forEach(b=>b.classList.remove('actif'));
-  document.getElementById('mode-' + mode).classList.add('actif');
-  const labels = {travail:'🍅 TRAVAIL', pause:'☕ PAUSE', longue:'🌴 PAUSE LONGUE'};
+
+  document.querySelectorAll('.pm-btn-mode').forEach(b => b.classList.remove('pm-mode-actif'));
+  document.getElementById('mode-' + mode).classList.add('pm-mode-actif');
+
+  const labels = {
+    travail: '🍅 TRAVAIL',
+    pause  : '☕ PAUSE',
+    longue : '🌴 PAUSE LONGUE'
+  };
   document.getElementById('mode-badge').textContent = labels[mode];
   affichageTimer();
+  toast('⏱️ Timer réglé sur ' + min + ' minutes', 'info');
 }
 
+/* ── AFFICHAGE TIMER ── */
 function affichageTimer() {
   const m = Math.floor(secondesRestantes / 60);
   const s = secondesRestantes % 60;
   document.getElementById('timer-display').textContent =
-    String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+    String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+
+  /* Barre */
   const pct = (secondesRestantes / dureeInitiale) * 100;
   document.getElementById('timer-bar-fill').style.width = pct + '%';
+
+  /* Cercle SVG */
+  const offset = CIRCONFERENCE * (1 - secondesRestantes / dureeInitiale);
+  document.getElementById('circle-fill').style.strokeDashoffset = offset;
+
+  /* Label */
+  const label = enCours ? '🍅 En cours...' : (secondesRestantes === dureeInitiale ? 'En attente...' : '⏸️ En pause');
+  document.getElementById('timer-label').textContent = label;
 }
 
+/* ── DÉMARRER ── */
 function demarrer() {
   if (intervalId) return;
   enCours = true;
-  document.getElementById('btn-start').style.display = 'none';
-  document.getElementById('btn-pause').style.display = 'inline-block';
 
-  intervalId = setInterval(()=>{
+  document.getElementById('btn-start').style.display = 'none';
+  document.getElementById('btn-pause').style.display = 'flex';
+  document.getElementById('timer-display').classList.add('ticking');
+  document.getElementById('timer-label').textContent = '🍅 En cours...';
+
+  toast('▶️ Timer démarré ! Focus !', 'succes');
+
+  intervalId = setInterval(() => {
     secondesRestantes--;
     affichageTimer();
     if (secondesRestantes <= 0) {
@@ -162,82 +653,129 @@ function demarrer() {
   }, 1000);
 }
 
-function pause() {
+/* ── PAUSE ── */
+function pauseTimer() {
   if (intervalId) {
     clearInterval(intervalId);
     intervalId = null;
     enCours = false;
-    document.getElementById('btn-start').style.display = 'inline-block';
-    document.getElementById('btn-start').textContent = '▶️ Reprendre';
+    document.getElementById('timer-display').classList.remove('ticking');
+    document.getElementById('btn-start').style.display = 'flex';
+    document.getElementById('btn-start').innerHTML =
+      '<span class="pm-btn-circle">▶️</span><span>Reprendre</span>';
     document.getElementById('btn-pause').style.display = 'none';
+    toast('⏸️ Timer en pause', 'warning');
   }
 }
 
-function reset() {
+/* ── RESET ── */
+function resetTimer() {
   if (intervalId) { clearInterval(intervalId); intervalId = null; }
   enCours = false;
   secondesRestantes = dureeInitiale;
+  document.getElementById('timer-display').classList.remove('ticking');
   affichageTimer();
-  document.getElementById('btn-start').style.display = 'inline-block';
-  document.getElementById('btn-start').textContent = '▶️ Démarrer';
+  document.getElementById('btn-start').style.display = 'flex';
+  document.getElementById('btn-start').innerHTML =
+    '<span class="pm-btn-circle">▶️</span><span>Démarrer</span>';
   document.getElementById('btn-pause').style.display = 'none';
+  toast('🔄 Timer remis à zéro', 'info');
 }
 
+/* ── TERMINER ── */
 function terminer() {
-  // Son simple
+  document.getElementById('timer-display').classList.remove('ticking');
+
+  /* Son */
   try {
-    const audio = new Audio('data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=');
-    audio.play();
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    [523, 659, 784].forEach((freq, i) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.frequency.value = freq;
+      osc.type = 'sine';
+      gain.gain.setValueAtTime(0.3, ctx.currentTime + i * 0.2);
+      gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + i * 0.2 + 0.4);
+      osc.start(ctx.currentTime + i * 0.2);
+      osc.stop(ctx.currentTime + i * 0.2 + 0.4);
+    });
   } catch(e) {}
 
   const matiere = document.getElementById('matiere').value.trim() || 'Général';
   const dureeMin = Math.floor(dureeInitiale / 60);
 
   fetch('/api/pomodoro/session', {
-    method:'POST', headers:{'Content-Type':'application/json'},
-    body: JSON.stringify({duree: dureeMin, type: modeActuel, matiere: matiere})
-  }).then(()=>{
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ duree: dureeMin, type: modeActuel, matiere: matiere })
+  }).then(() => {
     chargerStats();
     chargerSessions();
   });
 
-  alert('🎉 Session terminée !\n' +
-        (modeActuel === 'travail' ? '✅ Bravo ! Prends une pause ☕' : '🍅 Allez, on repart au boulot !'));
-  reset();
+  if (modeActuel === 'travail') {
+    toast('🎉 Session terminée ! Bravo ! Prends une pause ☕', 'succes');
+  } else {
+    toast('🍅 Pause terminée ! Retour au travail 💪', 'info');
+  }
+
+  resetTimer();
 }
 
+/* ── CHARGER STATS ── */
 function chargerStats() {
-  fetch('/api/pomodoro/stats').then(r=>r.json()).then(d=>{
+  fetch('/api/pomodoro/stats').then(r => r.json()).then(d => {
     if (d.succes) {
       document.getElementById('sessions-today').textContent = d.stats.sessions_today || 0;
-      document.getElementById('minutes-today').textContent = d.stats.minutes_today || 0;
+      document.getElementById('minutes-today').textContent  = d.stats.minutes_today  || 0;
       document.getElementById('total-sessions').textContent = d.stats.total_sessions || 0;
-      document.getElementById('total-heures').textContent = (d.stats.total_heures || 0) + 'h';
+      document.getElementById('total-heures').textContent   = (d.stats.total_heures  || 0) + 'h';
     }
-  });
+  }).catch(() => {});
 }
 
+/* ── CHARGER SESSIONS ── */
 function chargerSessions() {
-  fetch('/api/pomodoro/sessions').then(r=>r.json()).then(d=>{
+  fetch('/api/pomodoro/sessions').then(r => r.json()).then(d => {
     const c = document.getElementById('liste-sessions');
     c.innerHTML = '';
     const sess = d.sessions || [];
+
     if (sess.length === 0) {
-      c.innerHTML = '<p style="color:#9CA3AF; text-align:center;">Aucune session pour l\'instant 🍅</p>';
+      c.innerHTML = `
+        <div class="pm-empty">
+          <div class="pm-empty-icon">🍅</div>
+          <p class="pm-empty-text">Aucune session pour l'instant</p>
+          <p style="color:#9CA3AF; font-size:0.85rem;">Lance ton premier Pomodoro !</p>
+        </div>`;
       return;
     }
-    sess.slice(0, 10).forEach(s => {
+
+    sess.slice(0, 10).forEach((s, i) => {
       const div = document.createElement('div');
-      div.className = 'session-item';
+      div.className = 'pm-session-item';
+      div.style.animationDelay = (i * 0.07) + 's';
+      const typeEmoji = s.type === 'travail' ? '🍅' : s.type === 'pause' ? '☕' : '🌴';
       div.innerHTML = `
-        <span>🍅 ${esc(s.matiere)} • ${s.duree} min</span>
-        <span style="color:#9CA3AF;">📅 ${esc(s.date)}</span>
+        <div class="pm-session-emoji">${typeEmoji}</div>
+        <div class="pm-session-info">
+          <div class="pm-session-matiere">${esc(s.matiere)}</div>
+          <div class="pm-session-duree">⏱️ ${s.duree} minutes · ${s.type}</div>
+        </div>
+        <div class="pm-session-date">📅 ${esc(s.date)}</div>
       `;
       c.appendChild(div);
     });
-  });
+  }).catch(() => {});
 }
 
-function esc(t) { const d = document.createElement('div'); d.textContent = t || ''; return d.innerHTML; }
+/* ── ESCAPE ── */
+function esc(t) {
+  const d = document.createElement('div');
+  d.textContent = t || '';
+  return d.innerHTML;
+}
 </script>
+
 {% endblock %}

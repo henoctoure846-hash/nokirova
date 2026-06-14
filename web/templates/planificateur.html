@@ -1,269 +1,731 @@
 {% extends "base.html" %}
 {% block title %}Planificateur - NOKIROVA{% endblock %}
 {% block contenu %}
-<div class="page-container">
 
-  <div class="page-header" style="background: linear-gradient(135deg, #FDBA74, #FED7AA); border-left: 5px solid #F59E0B;">
-    <div class="page-header-icon" style="background: linear-gradient(135deg, #F59E0B, #FB923C);">📅</div>
-    <div>
-      <h1 class="page-title" style="color: #92400E;">Planificateur</h1>
-      <p class="page-subtitle" style="color: #B45309;">Organise ton temps et ne rate plus rien 🎯</p>
+<!-- TOAST -->
+<div id="toast" style="
+  position:fixed; top:20px; right:20px; z-index:9999;
+  background:#1A1D2E; color:white; padding:1rem 1.5rem;
+  border-radius:16px; font-weight:600; font-size:0.95rem;
+  box-shadow:0 8px 30px rgba(0,0,0,0.3);
+  transform:translateX(120%); transition:transform 0.4s cubic-bezier(0.175,0.885,0.32,1.275);
+  display:flex; align-items:center; gap:0.8rem; max-width:320px;
+"></div>
+
+<div class="pl-container">
+
+  <!-- ═══ HEADER ═══ -->
+  <div class="pl-header">
+    <div class="pl-header-bg-emoji">📅</div>
+    <div class="pl-header-icon">📅</div>
+    <div class="pl-header-text">
+      <h1 class="pl-header-title">Planificateur</h1>
+      <p class="pl-header-sub">Organise ton temps et ne rate plus rien 🎯</p>
+    </div>
+    <div class="pl-header-badge">
+      <span>🎯</span> Smart Planning
     </div>
   </div>
 
-  <!-- STATS BARRE -->
-  <div class="stats-bar">
-    <div class="stat-mini"><strong id="s-aujourd">0</strong><span>aujourd'hui</span></div>
-    <div class="stat-mini"><strong id="s-faites" style="color:#00C853;">0</strong><span>faites</span></div>
-    <div class="stat-mini"><strong id="s-retard" style="color:#EF4444;">0</strong><span>en retard</span></div>
-    <div class="stat-mini"><strong id="s-temps" style="color:#7B61FF;">0h</strong><span>cette semaine</span></div>
+  <!-- ═══ STATS BAR ═══ -->
+  <div class="pl-stats-grid">
+    <div class="pl-stat-card pl-stat-orange">
+      <span class="pl-stat-emoji">📅</span>
+      <strong id="s-aujourd" class="pl-stat-val">0</strong>
+      <span class="pl-stat-label">Aujourd'hui</span>
+    </div>
+    <div class="pl-stat-card pl-stat-vert">
+      <span class="pl-stat-emoji">✅</span>
+      <strong id="s-faites" class="pl-stat-val">0</strong>
+      <span class="pl-stat-label">Faites</span>
+    </div>
+    <div class="pl-stat-card pl-stat-rouge">
+      <span class="pl-stat-emoji">⚠️</span>
+      <strong id="s-retard" class="pl-stat-val">0</strong>
+      <span class="pl-stat-label">En retard</span>
+    </div>
+    <div class="pl-stat-card pl-stat-violet">
+      <span class="pl-stat-emoji">⏱️</span>
+      <strong id="s-temps" class="pl-stat-val">0h</strong>
+      <span class="pl-stat-label">Cette semaine</span>
+    </div>
   </div>
 
-  <!-- FORMULAIRE AJOUT -->
-  <div class="form-card">
-    <h2 style="color:#92400E;">➕ Ajouter une tâche</h2>
-
-    <div class="form-row">
-      <input type="text" id="titre" placeholder="📝 Titre (ex: Réviser chapitre 2)" class="inp"/>
-      <input type="text" id="matiere" placeholder="📚 Matière" class="inp" style="max-width:180px;"/>
+  <!-- ═══ FORMULAIRE ═══ -->
+  <div class="pl-form-card">
+    <div class="pl-form-header">
+      <div class="pl-form-icon"
+           style="background:linear-gradient(135deg,#F59E0B,#FB923C);">
+        ➕
+      </div>
+      <div>
+        <h2 class="pl-form-title">Ajouter une tâche</h2>
+        <p class="pl-form-sub">Planifie ta prochaine session de travail</p>
+      </div>
     </div>
 
-    <div class="form-row">
-      <input type="date" id="date" class="inp" style="max-width:180px;"/>
-      <input type="time" id="heure" value="09:00" class="inp" style="max-width:140px;"/>
-      <input type="number" id="duree" value="30" min="5" max="600" class="inp" style="max-width:130px;" placeholder="Durée (min)"/>
+    <!-- Ligne 1 -->
+    <div class="pl-form-row">
+      <div class="pl-input-wrap pl-input-flex">
+        <span class="pl-input-icon">📝</span>
+        <input type="text" id="titre"
+               placeholder="Titre (ex: Réviser chapitre 2)"
+               class="pl-input"/>
+      </div>
+      <div class="pl-input-wrap" style="max-width:180px;">
+        <span class="pl-input-icon">📚</span>
+        <input type="text" id="matiere"
+               placeholder="Matière"
+               class="pl-input"/>
+      </div>
     </div>
 
-    <div class="form-row">
-      <select id="type" class="inp">
-        <option value="reviser">📖 Réviser</option>
-        <option value="exercices">✍️ Exercices</option>
-        <option value="qcm">🎯 QCM / Test</option>
-        <option value="examen">📚 Examen</option>
-        <option value="flashcards">🃏 Flashcards</option>
-      </select>
-      <select id="priorite" class="inp">
-        <option value="normal">🟡 Normal</option>
-        <option value="urgent">🔴 Urgent</option>
-        <option value="bonus">🟢 Bonus</option>
-      </select>
-      <select id="recurrence" class="inp">
-        <option value="aucune">🔁 Sans répétition</option>
-        <option value="quotidienne">📆 Tous les jours</option>
-        <option value="hebdomadaire">📅 Chaque semaine</option>
-        <option value="mensuelle">🗓️ Chaque mois</option>
-      </select>
+    <!-- Ligne 2 -->
+    <div class="pl-form-row">
+      <div class="pl-input-wrap" style="max-width:180px;">
+        <span class="pl-input-icon">📅</span>
+        <input type="date" id="date" class="pl-input"/>
+      </div>
+      <div class="pl-input-wrap" style="max-width:140px;">
+        <span class="pl-input-icon">🕐</span>
+        <input type="time" id="heure" value="09:00" class="pl-input"/>
+      </div>
+      <div class="pl-input-wrap" style="max-width:150px;">
+        <span class="pl-input-icon">⏱️</span>
+        <input type="number" id="duree" value="30" min="5" max="600"
+               class="pl-input" placeholder="min"/>
+      </div>
     </div>
 
-    <button onclick="ajouter()" class="btn-add">➕ Ajouter la tâche</button>
+    <!-- Ligne 3 - Selects -->
+    <div class="pl-selects-row">
+      <div class="pl-select-wrap">
+        <label class="pl-select-label">📖 Type</label>
+        <select id="type" class="pl-select">
+          <option value="reviser">📖 Réviser</option>
+          <option value="exercices">✍️ Exercices</option>
+          <option value="qcm">🎯 QCM</option>
+          <option value="examen">📚 Examen</option>
+          <option value="flashcards">🃏 Flashcards</option>
+        </select>
+      </div>
+      <div class="pl-select-wrap">
+        <label class="pl-select-label">🚦 Priorité</label>
+        <select id="priorite" class="pl-select">
+          <option value="normal">🟡 Normal</option>
+          <option value="urgent">🔴 Urgent</option>
+          <option value="bonus">🟢 Bonus</option>
+        </select>
+      </div>
+      <div class="pl-select-wrap">
+        <label class="pl-select-label">🔁 Récurrence</label>
+        <select id="recurrence" class="pl-select">
+          <option value="aucune">🔁 Sans répétition</option>
+          <option value="quotidienne">📆 Tous les jours</option>
+          <option value="hebdomadaire">📅 Chaque semaine</option>
+          <option value="mensuelle">🗓️ Chaque mois</option>
+        </select>
+      </div>
+    </div>
+
+    <button onclick="ajouter()" class="pl-btn-add">
+      <span class="pl-btn-circle">➕</span>
+      <span>Ajouter la tâche</span>
+    </button>
   </div>
 
-  <!-- BARRE FILTRE PÉRIODE -->
-  <div class="periode-bar">
-    <button onclick="changerPeriode('jour')" id="btn-jour" class="btn-periode actif">📅 Aujourd'hui</button>
-    <button onclick="changerPeriode('semaine')" id="btn-semaine" class="btn-periode">📆 Cette semaine</button>
-    <button onclick="changerPeriode('mois')" id="btn-mois" class="btn-periode">🗓️ Ce mois</button>
+  <!-- ═══ PÉRIODE ═══ -->
+  <div class="pl-periode-bar">
+    <button onclick="changerPeriode('jour')"
+            id="btn-jour" class="pl-btn-periode pl-periode-actif">
+      📅 Aujourd'hui
+    </button>
+    <button onclick="changerPeriode('semaine')"
+            id="btn-semaine" class="pl-btn-periode">
+      📆 Cette semaine
+    </button>
+    <button onclick="changerPeriode('mois')"
+            id="btn-mois" class="pl-btn-periode">
+      🗓️ Ce mois
+    </button>
   </div>
 
-  <!-- LISTE TÂCHES -->
+  <!-- ═══ LISTE TÂCHES ═══ -->
   <div id="liste-taches"></div>
 
-  <div id="empty-state" class="empty-state" style="display:none;">
-    <div style="font-size:4rem;">🎉</div>
-    <h2>Rien de prévu !</h2>
-    <p>Profite-en pour te reposer ou planifie une nouvelle tâche ✨</p>
+  <!-- EMPTY -->
+  <div id="empty-state" class="pl-empty" style="display:none;">
+    <div class="pl-empty-icon">🎉</div>
+    <h2 class="pl-empty-title">Rien de prévu !</h2>
+    <p class="pl-empty-sub">Profite-en ou planifie une nouvelle tâche ✨</p>
   </div>
+
 </div>
 
 <style>
-  .page-container { padding:2rem; max-width:1100px; margin:0 auto;}
-  .page-header { display:flex; align-items:center; gap:1.2rem; border-radius:20px; padding:1.5rem 2rem; margin-bottom:1.5rem; box-shadow:0 4px 20px rgba(0,0,0,0.05);}
-  .page-header-icon { width:60px; height:60px; border-radius:16px; display:flex; align-items:center; justify-content:center; font-size:1.8rem; color:white;}
-  .page-title { font-size:1.6rem; font-weight:800; margin:0;}
-  .page-subtitle { margin:0.2rem 0 0; font-size:0.95rem;}
 
-  .stats-bar { display:grid; grid-template-columns:repeat(auto-fit, minmax(140px, 1fr)); gap:1rem; margin-bottom:1.5rem;}
-  .stat-mini { background:white; border-radius:14px; padding:1rem; text-align:center; box-shadow:0 4px 15px rgba(0,0,0,0.05); border-top:3px solid #F59E0B;}
-  .stat-mini strong { display:block; font-size:1.8rem; color:#92400E; margin-bottom:0.3rem;}
-  .stat-mini span { font-size:0.8rem; color:#9CA3AF; text-transform:uppercase; font-weight:600;}
+/* ── ANIMATIONS ── */
+@keyframes fadeInUp {
+  from { opacity:0; transform:translateY(30px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+@keyframes floatCalendar {
+  0%,100% { transform:translateY(0px) rotate(-2deg); }
+  50%      { transform:translateY(-10px) rotate(2deg); }
+}
+@keyframes bounceIn {
+  0%   { transform:scale(0.3); opacity:0; }
+  50%  { transform:scale(1.05); }
+  70%  { transform:scale(0.9); }
+  100% { transform:scale(1); opacity:1; }
+}
+@keyframes slideInLeft {
+  from { opacity:0; transform:translateX(-20px); }
+  to   { opacity:1; transform:translateX(0); }
+}
+@keyframes pulseOrange {
+  0%,100% { box-shadow:0 0 0 0 rgba(245,158,11,0.4); }
+  50%      { box-shadow:0 0 0 12px rgba(245,158,11,0); }
+}
+@keyframes checkDone {
+  0%   { transform:scale(0); }
+  60%  { transform:scale(1.3); }
+  100% { transform:scale(1); }
+}
 
-  .form-card { background:white; border-radius:20px; padding:1.8rem; margin-bottom:1.5rem; box-shadow:0 4px 20px rgba(245,158,11,0.1); border-top:4px solid #F59E0B;}
-  .form-card h2 { font-size:1.1rem; font-weight:700; margin-bottom:1rem;}
-  .form-row { display:flex; gap:0.6rem; margin-bottom:0.8rem; flex-wrap:wrap;}
-  .inp { flex:1; min-width:140px; padding:0.7rem 1rem; border:2px solid #FDBA74; border-radius:10px; font-size:0.9rem; outline:none;}
-  .inp:focus { border-color:#F59E0B;}
-  .btn-add { width:100%; padding:0.8rem; background:linear-gradient(135deg, #F59E0B, #B45309); color:white; border:none; border-radius:12px; font-weight:700; font-size:1rem; cursor:pointer; box-shadow:0 4px 15px rgba(245,158,11,0.4); margin-top:0.5rem;}
-  .btn-add:hover { transform:translateY(-2px);}
+/* ── CONTAINER ── */
+.pl-container {
+  padding:1.5rem;
+  max-width:1000px;
+  margin:0 auto;
+  animation:fadeInUp 0.5s ease;
+}
 
-  .periode-bar { display:flex; gap:0.5rem; margin-bottom:1.5rem; flex-wrap:wrap;}
-  .btn-periode { background:white; color:#92400E; border:2px solid #FDBA74; padding:0.6rem 1.5rem; border-radius:14px; font-weight:600; cursor:pointer; transition:0.2s;}
-  .btn-periode:hover { background:#FED7AA;}
-  .btn-periode.actif { background:linear-gradient(135deg, #F59E0B, #B45309); color:white; border-color:transparent;}
+/* ── HEADER ── */
+.pl-header {
+  position:relative; overflow:hidden;
+  background:linear-gradient(135deg,#F59E0B 0%,#FB923C 50%,#EF4444 100%);
+  border-radius:28px; padding:2rem;
+  margin-bottom:1.5rem;
+  display:flex; align-items:center; gap:1.2rem; flex-wrap:wrap;
+  box-shadow:0 8px 32px rgba(245,158,11,0.35);
+}
+.pl-header-bg-emoji {
+  position:absolute; right:-10px; top:-20px;
+  font-size:9rem; opacity:0.12; pointer-events:none;
+  animation:floatCalendar 4s ease-in-out infinite;
+}
+.pl-header-icon {
+  width:72px; height:72px;
+  background:rgba(255,255,255,0.2);
+  border-radius:20px;
+  display:flex; align-items:center; justify-content:center;
+  font-size:2.2rem; flex-shrink:0;
+  backdrop-filter:blur(10px);
+  border:2px solid rgba(255,255,255,0.3);
+}
+.pl-header-text { flex:1; }
+.pl-header-title {
+  font-size:1.8rem; font-weight:900;
+  color:white; margin:0;
+  text-shadow:0 2px 10px rgba(0,0,0,0.2);
+}
+.pl-header-sub {
+  color:rgba(255,255,255,0.85);
+  margin:0.3rem 0 0; font-size:0.95rem;
+}
+.pl-header-badge {
+  background:rgba(255,255,255,0.2);
+  color:white; padding:0.5rem 1.2rem;
+  border-radius:50px; font-weight:700; font-size:0.85rem;
+  display:flex; align-items:center; gap:0.5rem;
+  backdrop-filter:blur(10px);
+  border:1px solid rgba(255,255,255,0.3);
+  white-space:nowrap;
+}
 
-  .tache-card { background:white; border-radius:14px; padding:1rem 1.3rem; margin-bottom:0.8rem; box-shadow:0 3px 12px rgba(0,0,0,0.06); display:flex; align-items:center; gap:1rem; transition:0.2s; flex-wrap:wrap; border-left:5px solid #F59E0B;}
-  .tache-card:hover { transform:translateX(4px);}
-  .tache-card.faite { opacity:0.5; border-left-color:#00C853;}
-  .tache-card.faite .tache-titre { text-decoration:line-through;}
-  .tache-card.retard { border-left-color:#EF4444; background:#FEF2F2;}
+/* ── STATS GRID ── */
+.pl-stats-grid {
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
+  gap:1rem; margin-bottom:1.5rem;
+}
+.pl-stat-card {
+  background:white; border-radius:20px;
+  padding:1.3rem 1rem; text-align:center;
+  box-shadow:0 4px 20px rgba(0,0,0,0.07);
+  display:flex; flex-direction:column; align-items:center; gap:0.3rem;
+  transition:all 0.3s; animation:bounceIn 0.5s ease both;
+}
+.pl-stat-card:hover { transform:translateY(-4px); }
+.pl-stat-orange { border-top:5px solid #F59E0B; }
+.pl-stat-vert   { border-top:5px solid #00C853; }
+.pl-stat-rouge  { border-top:5px solid #EF4444; }
+.pl-stat-violet { border-top:5px solid #7B61FF; }
+.pl-stat-emoji { font-size:1.8rem; }
+.pl-stat-val {
+  font-size:1.8rem; font-weight:900; color:#1A1D2E;
+}
+.pl-stat-label {
+  font-size:0.72rem; color:#9CA3AF;
+  font-weight:700; text-transform:uppercase; letter-spacing:1px;
+}
 
-  .tache-check { width:24px; height:24px; border-radius:50%; border:2px solid #9CA3AF; cursor:pointer; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:14px; transition:0.2s;}
-  .tache-check:hover { border-color:#00C853;}
-  .tache-check.ok { background:#00C853; border-color:#00C853; color:white;}
+/* ── FORM CARD ── */
+.pl-form-card {
+  background:white; border-radius:24px;
+  padding:1.8rem; margin-bottom:1.5rem;
+  box-shadow:0 4px 24px rgba(245,158,11,0.12);
+  border-top:5px solid #F59E0B;
+  animation:fadeInUp 0.5s ease 0.1s both;
+}
+.pl-form-header {
+  display:flex; align-items:center; gap:1rem;
+  margin-bottom:1.5rem;
+}
+.pl-form-icon {
+  width:54px; height:54px; border-radius:16px;
+  display:flex; align-items:center; justify-content:center;
+  font-size:1.6rem; flex-shrink:0;
+  box-shadow:0 4px 16px rgba(0,0,0,0.15);
+}
+.pl-form-title {
+  font-size:1.1rem; font-weight:800; color:#1A1D2E; margin:0;
+}
+.pl-form-sub { font-size:0.85rem; color:#6B7280; margin:0.2rem 0 0; }
 
-  .tache-info { flex:1; min-width:200px;}
-  .tache-titre { font-weight:700; color:#1F2937; font-size:1rem; margin-bottom:0.3rem;}
-  .tache-meta { display:flex; gap:0.8rem; font-size:0.85rem; color:#6B7280; flex-wrap:wrap;}
-  .meta-tag { background:#FED7AA; color:#92400E; padding:0.15rem 0.6rem; border-radius:12px; font-size:0.75rem; font-weight:600;}
+.pl-form-row {
+  display:flex; gap:0.8rem; margin-bottom:0.8rem; flex-wrap:wrap;
+}
+.pl-input-wrap {
+  display:flex; align-items:center; gap:0.6rem;
+  background:#FFF7ED; border:2px solid #FDBA74;
+  border-radius:50px; padding:0.65rem 1.1rem;
+  transition:border-color 0.2s;
+}
+.pl-input-wrap:focus-within { border-color:#F59E0B; }
+.pl-input-flex { flex:1; min-width:200px; }
+.pl-input-icon { font-size:1.1rem; flex-shrink:0; }
+.pl-input {
+  flex:1; border:none; background:transparent;
+  font-size:0.9rem; font-weight:600; color:#374151;
+  outline:none; min-width:60px;
+}
+.pl-input::placeholder { color:#9CA3AF; font-weight:400; }
+input[type="date"].pl-input,
+input[type="time"].pl-input,
+input[type="number"].pl-input { min-width:80px; }
 
-  .tache-actions { display:flex; gap:0.4rem;}
-  .btn-mini-act { padding:0.4rem 0.8rem; border-radius:10px; font-size:0.78rem; font-weight:600; cursor:pointer; border:2px solid transparent;}
-  .btn-sup { background:#FEE2E2; color:#EF4444; border-color:#EF4444;}
-  .btn-sup:hover { background:#EF4444; color:white;}
+/* Selects */
+.pl-selects-row {
+  display:flex; gap:0.8rem; margin-bottom:1.2rem; flex-wrap:wrap;
+}
+.pl-select-wrap { flex:1; min-width:140px; }
+.pl-select-label {
+  display:block; font-size:0.78rem; font-weight:700;
+  color:#92400E; margin-bottom:0.4rem;
+  text-transform:uppercase; letter-spacing:0.5px;
+}
+.pl-select {
+  width:100%; padding:0.7rem 1rem;
+  border:2px solid #FDBA74; border-radius:14px;
+  font-size:0.88rem; font-weight:700;
+  color:#92400E; background:#FFF7ED;
+  outline:none; cursor:pointer;
+  transition:border-color 0.2s;
+}
+.pl-select:focus { border-color:#F59E0B; }
 
-  .empty-state { text-align:center; padding:4rem 2rem; background:white; border-radius:20px; box-shadow:0 4px 20px rgba(0,0,0,0.05);}
-  .empty-state h2 { color:#374151; margin:1rem 0 0.5rem;}
-  .empty-state p { color:#9CA3AF;}
+/* BTN ADD */
+.pl-btn-add {
+  width:100%;
+  display:flex; align-items:center; justify-content:center; gap:1rem;
+  padding:1.1rem;
+  background:linear-gradient(135deg,#F59E0B,#B45309);
+  color:white; border:none; border-radius:50px;
+  font-weight:800; font-size:1.05rem; cursor:pointer;
+  box-shadow:0 6px 20px rgba(245,158,11,0.4);
+  transition:all 0.3s; position:relative; overflow:hidden;
+  animation:pulseOrange 2s infinite;
+}
+.pl-btn-add::before {
+  content:'';
+  position:absolute; top:0; left:-100%;
+  width:100%; height:100%;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,0.2),transparent);
+  transition:left 0.5s;
+}
+.pl-btn-add:hover::before { left:100%; }
+.pl-btn-add:hover {
+  transform:translateY(-3px);
+  box-shadow:0 10px 28px rgba(245,158,11,0.5);
+}
+.pl-btn-circle {
+  width:36px; height:36px;
+  background:rgba(255,255,255,0.25);
+  border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  font-size:1.1rem; flex-shrink:0;
+}
 
-  .jour-separateur { background:linear-gradient(135deg, #F59E0B, #FB923C); color:white; padding:0.5rem 1rem; border-radius:10px; font-weight:700; margin:1.2rem 0 0.5rem; font-size:0.9rem;}
+/* ── PÉRIODE ── */
+.pl-periode-bar {
+  display:flex; gap:0.6rem; margin-bottom:1.5rem; flex-wrap:wrap;
+}
+.pl-btn-periode {
+  padding:0.65rem 1.4rem;
+  background:white; color:#92400E;
+  border:2px solid #FDBA74; border-radius:50px;
+  font-weight:700; font-size:0.88rem;
+  cursor:pointer; transition:all 0.2s;
+}
+.pl-btn-periode:hover { background:#FEF3C7; border-color:#F59E0B; }
+.pl-btn-periode.pl-periode-actif {
+  background:linear-gradient(135deg,#F59E0B,#FB923C) !important;
+  color:white !important; border-color:transparent !important;
+  box-shadow:0 4px 12px rgba(245,158,11,0.3);
+}
+
+/* ── TÂCHE CARD ── */
+.pl-tache-card {
+  background:white; border-radius:18px;
+  padding:1.1rem 1.4rem; margin-bottom:0.8rem;
+  box-shadow:0 3px 16px rgba(0,0,0,0.07);
+  display:flex; align-items:center; gap:1rem;
+  transition:all 0.3s; flex-wrap:wrap;
+  border-left:5px solid #F59E0B;
+  animation:slideInLeft 0.4s ease both;
+}
+.pl-tache-card:hover { transform:translateX(6px); }
+.pl-tache-card.faite {
+  opacity:0.55; border-left-color:#00C853;
+  background:#F0FDF4;
+}
+.pl-tache-card.faite .pl-tache-titre { text-decoration:line-through; color:#6B7280; }
+.pl-tache-card.retard {
+  border-left-color:#EF4444; background:#FEF2F2;
+}
+
+/* Check */
+.pl-tache-check {
+  width:32px; height:32px; border-radius:50%;
+  border:2px solid #FDBA74; cursor:pointer;
+  flex-shrink:0; display:flex; align-items:center;
+  justify-content:center; font-size:1rem;
+  transition:all 0.3s; background:white;
+}
+.pl-tache-check:hover { border-color:#00C853; background:#DCFCE7; }
+.pl-tache-check.ok {
+  background:linear-gradient(135deg,#00C853,#7ED321);
+  border-color:transparent; color:white;
+  animation:checkDone 0.4s cubic-bezier(0.175,0.885,0.32,1.275);
+}
+
+/* Info */
+.pl-tache-info { flex:1; min-width:200px; }
+.pl-tache-titre {
+  font-weight:800; color:#1A1D2E; font-size:0.98rem; margin-bottom:0.4rem;
+}
+.pl-tache-meta {
+  display:flex; gap:0.5rem; flex-wrap:wrap; align-items:center;
+}
+.pl-meta-pill {
+  padding:0.2rem 0.7rem; border-radius:50px;
+  font-size:0.72rem; font-weight:700;
+}
+.pl-meta-heure { background:#FEF3C7; color:#92400E; }
+.pl-meta-matiere { background:#DBEAFE; color:#1E40AF; }
+.pl-meta-urgent { background:#FEE2E2; color:#EF4444; }
+.pl-meta-normal { background:#FEF3C7; color:#92400E; }
+.pl-meta-bonus { background:#DCFCE7; color:#14532D; }
+
+/* Actions */
+.pl-tache-actions { display:flex; gap:0.4rem; }
+.pl-btn-sup {
+  width:34px; height:34px;
+  background:#FEE2E2; color:#EF4444;
+  border:2px solid #FCA5A5; border-radius:50%;
+  cursor:pointer; font-size:0.9rem;
+  display:flex; align-items:center; justify-content:center;
+  transition:all 0.2s;
+}
+.pl-btn-sup:hover { background:#EF4444; color:white; border-color:#EF4444; transform:scale(1.1); }
+
+/* Séparateur jour */
+.pl-jour-sep {
+  display:flex; align-items:center; gap:0.8rem;
+  margin:1.2rem 0 0.5rem;
+}
+.pl-jour-sep-label {
+  background:linear-gradient(135deg,#F59E0B,#FB923C);
+  color:white; padding:0.4rem 1rem;
+  border-radius:50px; font-weight:800;
+  font-size:0.85rem; white-space:nowrap;
+  box-shadow:0 4px 12px rgba(245,158,11,0.3);
+}
+.pl-jour-sep-line {
+  flex:1; height:2px;
+  background:linear-gradient(to right,#FDBA74,transparent);
+  border-radius:2px;
+}
+
+/* ── EMPTY ── */
+.pl-empty {
+  text-align:center; padding:4rem 2rem;
+  background:white; border-radius:24px;
+  box-shadow:0 4px 24px rgba(0,0,0,0.06);
+  animation:fadeInUp 0.5s ease;
+}
+.pl-empty-icon { font-size:5rem; margin-bottom:1rem; }
+.pl-empty-title { color:#374151; font-size:1.3rem; font-weight:800; margin:0; }
+.pl-empty-sub { color:#9CA3AF; margin:0.5rem 0 0; }
+
+/* ══════════════════════════════════ */
+/* MODE SOMBRE */
+/* ══════════════════════════════════ */
+[data-theme="dark"] .pl-form-card { background:#1E2235; }
+[data-theme="dark"] .pl-form-title { color:#F1F5F9; }
+[data-theme="dark"] .pl-form-sub { color:#94A3B8; }
+[data-theme="dark"] .pl-input-wrap {
+  background:#252A40; border-color:#4B5563;
+}
+[data-theme="dark"] .pl-input { color:#F1F5F9; }
+[data-theme="dark"] .pl-select {
+  background:#252A40; border-color:#4B5563; color:#FDE68A;
+}
+[data-theme="dark"] .pl-select-label { color:#FDE68A; }
+[data-theme="dark"] .pl-stat-card { background:#1E2235; }
+[data-theme="dark"] .pl-stat-val { color:#F1F5F9; }
+[data-theme="dark"] .pl-tache-card { background:#1E2235; }
+[data-theme="dark"] .pl-tache-card.faite { background:#0F2A1A; }
+[data-theme="dark"] .pl-tache-card.retard { background:#2A0F0F; }
+[data-theme="dark"] .pl-tache-titre { color:#F1F5F9; }
+[data-theme="dark"] .pl-btn-periode {
+  background:#1E2235; border-color:#4B5563; color:#FDE68A;
+}
+[data-theme="dark"] .pl-empty { background:#1E2235; }
+[data-theme="dark"] .pl-empty-title { color:#F1F5F9; }
+[data-theme="dark"] .pl-tache-check { background:#252A40; border-color:#4B5563; }
+
+/* ══════════════════════════════════ */
+/* RESPONSIVE */
+/* ══════════════════════════════════ */
+@media (max-width:640px) {
+  .pl-container { padding:1rem; }
+  .pl-header { padding:1.2rem; }
+  .pl-header-title { font-size:1.4rem; }
+  .pl-header-badge { display:none; }
+  .pl-form-card { padding:1.2rem; }
+  .pl-stats-grid { grid-template-columns:repeat(2,1fr); }
+  .pl-selects-row { flex-direction:column; }
+  .pl-select-wrap { min-width:unset; }
+  .pl-form-row { flex-direction:column; }
+  .pl-input-wrap { max-width:unset !important; }
+}
 </style>
 
 <script>
 let periodeActuelle = 'jour';
 
-const EMOJIS_TYPE = {reviser:'📖', exercices:'✍️', qcm:'🎯', examen:'📚', flashcards:'🃏'};
-const EMOJIS_PRIO = {urgent:'🔴', normal:'🟡', bonus:'🟢'};
+const EMOJIS_TYPE = {
+  reviser:'📖', exercices:'✍️',
+  qcm:'🎯', examen:'📚', flashcards:'🃏'
+};
 
-document.addEventListener('DOMContentLoaded', ()=>{
-  // Date par défaut = aujourd'hui
+document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('date').valueAsDate = new Date();
   chargerStats();
   chargerTaches();
 });
 
-function chargerStats() {
-  fetch('/api/planificateur/stats').then(r=>r.json()).then(d=>{
-    if (d.succes) {
-      document.getElementById('s-aujourd').textContent = d.stats.aujourd_total || 0;
-      document.getElementById('s-faites').textContent = d.stats.faites || 0;
-      document.getElementById('s-retard').textContent = d.stats.en_retard || 0;
-      document.getElementById('s-temps').textContent = (d.stats.temps_semaine_h || 0) + 'h';
-    }
-  });
+/* ── TOAST ── */
+function toast(msg, type = 'info') {
+  const colors = {
+    succes : 'linear-gradient(135deg,#00C853,#7ED321)',
+    erreur : 'linear-gradient(135deg,#EF4444,#DC2626)',
+    info   : 'linear-gradient(135deg,#2962FF,#7B61FF)',
+    warning: 'linear-gradient(135deg,#F59E0B,#FFD93D)',
+  };
+  const t = document.getElementById('toast');
+  t.innerHTML = msg;
+  t.style.background = colors[type] || colors.info;
+  t.style.transform = 'translateX(0)';
+  setTimeout(() => { t.style.transform = 'translateX(120%)'; }, 3200);
 }
 
+/* ── STATS ── */
+function chargerStats() {
+  fetch('/api/planificateur/stats').then(r => r.json()).then(d => {
+    if (d.succes) {
+      document.getElementById('s-aujourd').textContent = d.stats.aujourd_total || 0;
+      document.getElementById('s-faites').textContent  = d.stats.faites        || 0;
+      document.getElementById('s-retard').textContent  = d.stats.en_retard     || 0;
+      document.getElementById('s-temps').textContent   = (d.stats.temps_semaine_h || 0) + 'h';
+    }
+  }).catch(() => {});
+}
+
+/* ── PÉRIODE ── */
 function changerPeriode(p) {
   periodeActuelle = p;
-  document.querySelectorAll('.btn-periode').forEach(b=>b.classList.remove('actif'));
-  document.getElementById('btn-' + p).classList.add('actif');
+  document.querySelectorAll('.pl-btn-periode')
+    .forEach(b => b.classList.remove('pl-periode-actif'));
+  document.getElementById('btn-' + p).classList.add('pl-periode-actif');
   chargerTaches();
 }
 
+/* ── CHARGER TÂCHES ── */
 function chargerTaches() {
-  fetch('/api/planificateur/taches?periode=' + periodeActuelle).then(r=>r.json()).then(d=>{
-    afficher(d.taches || []);
-  });
+  fetch('/api/planificateur/taches?periode=' + periodeActuelle)
+  .then(r => r.json())
+  .then(d => afficher(d.taches || []))
+  .catch(() => {});
 }
 
+/* ── AFFICHER ── */
 function afficher(taches) {
-  const c = document.getElementById('liste-taches');
+  const c     = document.getElementById('liste-taches');
   const empty = document.getElementById('empty-state');
   c.innerHTML = '';
 
-  if (!taches || taches.length === 0) { empty.style.display = 'block'; return; }
+  if (!taches || taches.length === 0) {
+    empty.style.display = 'block';
+    return;
+  }
   empty.style.display = 'none';
 
-  const aujourdISO = new Date().toISOString().substring(0,10);
-  let dernierJour = '';
+  const aujourdISO = new Date().toISOString().substring(0, 10);
+  let dernierJour  = '';
 
-  taches.forEach(t => {
-    // Séparateur jour (si vue semaine/mois)
+  taches.forEach((t, i) => {
+    /* Séparateur jour */
     if (periodeActuelle !== 'jour' && t.date_tache !== dernierJour) {
       dernierJour = t.date_tache;
       const sep = document.createElement('div');
-      sep.className = 'jour-separateur';
-      sep.textContent = '📅 ' + formatDate(t.date_tache);
+      sep.className = 'pl-jour-sep';
+      sep.innerHTML = `
+        <span class="pl-jour-sep-label">📅 ${formatDate(t.date_tache)}</span>
+        <div class="pl-jour-sep-line"></div>
+      `;
       c.appendChild(sep);
     }
 
     const card = document.createElement('div');
-    let classes = 'tache-card';
+    let classes = 'pl-tache-card';
     if (t.statut === 'faite') classes += ' faite';
     else if (t.date_tache < aujourdISO) classes += ' retard';
     card.className = classes;
+    card.style.animationDelay = (i * 0.06) + 's';
+
+    const prioCls = {urgent:'pl-meta-urgent', normal:'pl-meta-normal', bonus:'pl-meta-bonus'};
+    const prioTxt = {urgent:'🔴 Urgent', normal:'🟡 Normal', bonus:'🟢 Bonus'};
 
     card.innerHTML = `
-      <div class="tache-check ${t.statut === 'faite' ? 'ok' : ''}" onclick="toggleFait(${t.id}, '${t.statut}')">
+      <div class="pl-tache-check ${t.statut === 'faite' ? 'ok' : ''}"
+           onclick="toggleFait(${t.id}, '${t.statut}')">
         ${t.statut === 'faite' ? '✓' : ''}
       </div>
-      <div class="tache-info">
-        <div class="tache-titre">${EMOJIS_TYPE[t.type_tache] || '📌'} ${esc(t.titre)}</div>
-        <div class="tache-meta">
-          <span>🕐 ${esc(t.heure_debut)} (${t.duree_minutes}min)</span>
-          <span class="meta-tag">📚 ${esc(t.matiere)}</span>
-          <span>${EMOJIS_PRIO[t.priorite] || '🟡'} ${esc(t.priorite)}</span>
+      <div class="pl-tache-info">
+        <div class="pl-tache-titre">
+          ${EMOJIS_TYPE[t.type_tache] || '📌'} ${esc(t.titre)}
+        </div>
+        <div class="pl-tache-meta">
+          <span class="pl-meta-pill pl-meta-heure">
+            🕐 ${esc(t.heure_debut)} (${t.duree_minutes}min)
+          </span>
+          <span class="pl-meta-pill pl-meta-matiere">
+            📚 ${esc(t.matiere)}
+          </span>
+          <span class="pl-meta-pill ${prioCls[t.priorite] || 'pl-meta-normal'}">
+            ${prioTxt[t.priorite] || '🟡 Normal'}
+          </span>
         </div>
       </div>
-      <div class="tache-actions">
-        <button class="btn-mini-act btn-sup" onclick="supprimer(${t.id})">🗑️</button>
+      <div class="pl-tache-actions">
+        <button class="pl-btn-sup" onclick="supprimer(${t.id})" title="Supprimer">🗑️</button>
       </div>
     `;
     c.appendChild(card);
   });
 }
 
+/* ── AJOUTER ── */
 function ajouter() {
   const data = {
-    titre: document.getElementById('titre').value.trim(),
-    matiere: document.getElementById('matiere').value.trim() || 'Général',
-    date_tache: document.getElementById('date').value,
-    heure_debut: document.getElementById('heure').value,
-    duree_minutes: parseInt(document.getElementById('duree').value) || 30,
-    type_tache: document.getElementById('type').value,
-    priorite: document.getElementById('priorite').value,
-    recurrence: document.getElementById('recurrence').value,
+    titre          : document.getElementById('titre').value.trim(),
+    matiere        : document.getElementById('matiere').value.trim() || 'Général',
+    date_tache     : document.getElementById('date').value,
+    heure_debut    : document.getElementById('heure').value,
+    duree_minutes  : parseInt(document.getElementById('duree').value) || 30,
+    type_tache     : document.getElementById('type').value,
+    priorite       : document.getElementById('priorite').value,
+    recurrence     : document.getElementById('recurrence').value,
   };
 
-  if (!data.titre || !data.date_tache) {
-    alert('⚠️ Titre et date obligatoires !');
-    return;
-  }
+  if (!data.titre)      { toast('⚠️ Le titre est obligatoire !', 'warning'); return; }
+  if (!data.date_tache) { toast('⚠️ La date est obligatoire !', 'warning'); return; }
 
   fetch('/api/planificateur/ajouter', {
-    method:'POST', headers:{'Content-Type':'application/json'},
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data)
-  }).then(r=>r.json()).then(d=>{
+  })
+  .then(r => r.json())
+  .then(d => {
     if (d.succes) {
       document.getElementById('titre').value = '';
+      toast('✅ Tâche ajoutée !', 'succes');
       chargerStats();
       chargerTaches();
     } else {
-      alert('❌ ' + d.erreur);
+      toast('❌ ' + (d.erreur || 'Erreur'), 'erreur');
     }
-  });
+  })
+  .catch(() => toast('❌ Erreur réseau', 'erreur'));
 }
 
+/* ── TOGGLE FAIT ── */
 function toggleFait(id, statut) {
   const nouveau = statut === 'faite' ? 'a_faire' : 'faite';
   fetch('/api/planificateur/statut/' + id, {
-    method:'POST', headers:{'Content-Type':'application/json'},
-    body: JSON.stringify({statut: nouveau})
-  }).then(()=>{ chargerStats(); chargerTaches(); });
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ statut: nouveau })
+  })
+  .then(() => {
+    toast(nouveau === 'faite' ? '✅ Tâche terminée !' : '↩️ Tâche réouverte', 'succes');
+    chargerStats();
+    chargerTaches();
+  })
+  .catch(() => toast('❌ Erreur réseau', 'erreur'));
 }
 
+/* ── SUPPRIMER ── */
 function supprimer(id) {
   if (!confirm('🗑️ Supprimer cette tâche ?')) return;
-  fetch('/api/planificateur/supprimer/' + id, {method:'DELETE'}).then(()=>{
-    chargerStats(); chargerTaches();
-  });
+  fetch('/api/planificateur/supprimer/' + id, { method: 'DELETE' })
+  .then(() => {
+    toast('🗑️ Tâche supprimée', 'warning');
+    chargerStats();
+    chargerTaches();
+  })
+  .catch(() => toast('❌ Erreur réseau', 'erreur'));
 }
 
+/* ── FORMAT DATE ── */
 function formatDate(iso) {
-  const d = new Date(iso);
-  const jours = ['Dim','Lun','Mar','Mer','Jeu','Ven','Sam'];
+  const d    = new Date(iso);
+  const jours= ['Dim','Lun','Mar','Mer','Jeu','Ven','Sam'];
   const mois = ['Jan','Fév','Mar','Avr','Mai','Juin','Juil','Août','Sep','Oct','Nov','Déc'];
   return jours[d.getDay()] + ' ' + d.getDate() + ' ' + mois[d.getMonth()];
 }
 
-function esc(t) { const d = document.createElement('div'); d.textContent = t || ''; return d.innerHTML; }
+/* ── ESCAPE ── */
+function esc(t) {
+  const d = document.createElement('div');
+  d.textContent = t || '';
+  return d.innerHTML;
+}
 </script>
+
 {% endblock %}

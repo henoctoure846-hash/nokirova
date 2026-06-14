@@ -1,148 +1,658 @@
 {% extends "base.html" %}
 {% block title %}Scanner Image - NOKIROVA{% endblock %}
 {% block contenu %}
-<div class="page-container">
 
-  <div class="page-header" style="background: linear-gradient(135deg, #9FD93B, #BBF7D0); border-left: 5px solid #00C853;">
-    <div class="page-header-icon" style="background: linear-gradient(135deg, #00C853, #7ED321);">📸</div>
-    <div>
-      <h1 class="page-title" style="color: #14532D;">Scanner Image</h1>
-      <p class="page-subtitle" style="color: #166534;">Photo de cours → texte extrait par l'IA 🤖</p>
+<!-- TOAST -->
+<div id="toast" style="
+  position:fixed; top:20px; right:20px; z-index:9999;
+  background:#1A1D2E; color:white; padding:1rem 1.5rem;
+  border-radius:16px; font-weight:600; font-size:0.95rem;
+  box-shadow:0 8px 30px rgba(0,0,0,0.3);
+  transform:translateX(120%); transition:transform 0.4s cubic-bezier(0.175,0.885,0.32,1.275);
+  display:flex; align-items:center; gap:0.8rem; max-width:320px;
+"></div>
+
+<div class="ocr-container">
+
+  <!-- ═══ HEADER ═══ -->
+  <div class="ocr-header">
+    <div class="ocr-header-bg-emoji">📸</div>
+    <div class="ocr-header-icon">📸</div>
+    <div class="ocr-header-text">
+      <h1 class="ocr-header-title">Scanner Image</h1>
+      <p class="ocr-header-sub">Photo de cours → texte extrait par l'IA 🤖</p>
+    </div>
+    <div class="ocr-header-badge">
+      <span>🤖</span> OCR IA
     </div>
   </div>
 
-  <!-- ZONE UPLOAD -->
-  <div class="upload-zone" id="upload-zone" onclick="document.getElementById('fichier').click()">
-    <input type="file" id="fichier" accept="image/*" style="display:none;" onchange="apercu(event)"/>
-    <div id="upload-default">
-      <div style="font-size:5rem;">📸</div>
-      <h2>Glisse ton image ici</h2>
-      <p>ou clique pour choisir un fichier</p>
-      <p style="font-size:0.85rem; color:#9CA3AF; margin-top:0.5rem;">Formats : JPG, PNG, WEBP</p>
-    </div>
-    <div id="apercu-zone" style="display:none;">
-      <img id="img-preview" style="max-width:100%; max-height:400px; border-radius:14px; box-shadow:0 4px 20px rgba(0,0,0,0.15);"/>
-      <p id="nom-fichier" style="margin-top:1rem; color:#14532D; font-weight:700;"></p>
-    </div>
-  </div>
+  <!-- ═══ UPLOAD ZONE ═══ -->
+  <div class="ocr-upload-zone" id="upload-zone"
+       onclick="document.getElementById('fichier').click()"
+       ondragover="dragOver(event)"
+       ondragleave="dragLeave(event)"
+       ondrop="dropFichier(event)">
+    <input type="file" id="fichier" accept="image/*"
+           style="display:none;" onchange="apercu(event)"/>
 
-  <!-- OPTIONS -->
-  <div class="options-card">
-    <label class="opt-label">
-      🌍 Langue de l'image :
-    </label>
-    <select id="langue" class="select-vert">
-      <option value="fra">🇫🇷 Français</option>
-      <option value="eng">🇬🇧 Anglais</option>
-      <option value="spa">🇪🇸 Espagnol</option>
-      <option value="deu">🇩🇪 Allemand</option>
-      <option value="ara">🇸🇦 Arabe</option>
-      <option value="por">🇵🇹 Portugais</option>
-    </select>
-
-    <label class="opt-label" style="margin-top:1rem;">
-      <input type="checkbox" id="expliquer" style="margin-right:0.5rem;"/>
-      💡 Expliquer aussi le texte avec l'IA
-    </label>
-
-    <button id="btn-scan" onclick="scanner()" class="btn-vert" disabled>📸 Scanner l'image</button>
-  </div>
-
-  <!-- LOADING -->
-  <div id="loading" class="loading-card" style="display:none;">
-    <div class="spinner"></div>
-    <p style="color:#14532D; font-weight:700;">📸 Lecture de l'image en cours...</p>
-  </div>
-
-  <!-- RÉSULTAT -->
-  <div id="resultat" style="display:none;">
-    <div class="result-card">
-      <h3 style="color:#14532D;">📄 Texte extrait</h3>
-      <pre id="texte-extrait" class="texte-extrait"></pre>
-      <div class="actions">
-        <button onclick="copier()" class="btn-action">📋 Copier</button>
-        <button onclick="telecharger()" class="btn-action">💾 Télécharger</button>
+    <div id="upload-default" class="ocr-upload-default">
+      <div class="ocr-upload-emoji">📸</div>
+      <h2 class="ocr-upload-title">Glisse ton image ici</h2>
+      <p class="ocr-upload-sub">ou clique pour choisir un fichier</p>
+      <div class="ocr-upload-formats">
+        <span>JPG</span>
+        <span>PNG</span>
+        <span>WEBP</span>
       </div>
     </div>
 
-    <div id="zone-explication" class="result-card" style="display:none;">
-      <h3 style="color:#5B21B6;">💡 Explication de l'IA</h3>
-      <div id="explication" class="explication"></div>
+    <div id="apercu-zone" class="ocr-apercu" style="display:none;">
+      <img id="img-preview" class="ocr-preview-img"/>
+      <div class="ocr-preview-info">
+        <span class="ocr-preview-icon">📎</span>
+        <span id="nom-fichier" class="ocr-preview-nom"></span>
+        <button onclick="reinitialiser(event)" class="ocr-preview-clear">✖</button>
+      </div>
     </div>
   </div>
+
+  <!-- ═══ OPTIONS ═══ -->
+  <div class="ocr-card">
+    <div class="ocr-card-header">
+      <div class="ocr-card-icon"
+           style="background:linear-gradient(135deg,#00C853,#7ED321);">
+        ⚙️
+      </div>
+      <div>
+        <h2 class="ocr-card-title">Options de scan</h2>
+        <p class="ocr-card-sub">Configure la langue et les options</p>
+      </div>
+    </div>
+
+    <!-- Langue -->
+    <div class="ocr-field">
+      <label class="ocr-field-label">🌍 Langue de l'image</label>
+      <div class="ocr-langue-grid">
+        <button class="ocr-btn-langue ocr-langue-actif" data-lang="fra"
+                onclick="choisirLangue('fra',this)">🇫🇷 Français</button>
+        <button class="ocr-btn-langue" data-lang="eng"
+                onclick="choisirLangue('eng',this)">🇬🇧 Anglais</button>
+        <button class="ocr-btn-langue" data-lang="spa"
+                onclick="choisirLangue('spa',this)">🇪🇸 Espagnol</button>
+        <button class="ocr-btn-langue" data-lang="deu"
+                onclick="choisirLangue('deu',this)">🇩🇪 Allemand</button>
+        <button class="ocr-btn-langue" data-lang="ara"
+                onclick="choisirLangue('ara',this)">🇸🇦 Arabe</button>
+        <button class="ocr-btn-langue" data-lang="por"
+                onclick="choisirLangue('por',this)">🇵🇹 Portugais</button>
+      </div>
+    </div>
+
+    <!-- Option IA -->
+    <div class="ocr-checkbox-wrap"
+         onclick="toggleExpliquer()">
+      <div class="ocr-checkbox" id="checkbox-expliquer">
+        <span id="check-icon"></span>
+      </div>
+      <div>
+        <span class="ocr-checkbox-label">💡 Expliquer aussi le texte avec l'IA</span>
+        <span class="ocr-checkbox-sub">L'IA analysera et expliquera le contenu</span>
+      </div>
+    </div>
+
+    <button id="btn-scan" onclick="scanner()" class="ocr-btn-scan" disabled>
+      <span class="ocr-btn-circle">📸</span>
+      <span>Scanner l'image</span>
+    </button>
+  </div>
+
+  <!-- ═══ LOADING ═══ -->
+  <div id="loading" class="ocr-loading" style="display:none;">
+    <div class="ocr-scan-anim">
+      <div class="ocr-scan-line"></div>
+    </div>
+    <div>
+      <p class="ocr-loading-title">Lecture de l'image...</p>
+      <p class="ocr-loading-sub">L'IA extrait le texte 🤖</p>
+    </div>
+  </div>
+
+  <!-- ═══ RÉSULTAT ═══ -->
+  <div id="resultat" style="display:none;">
+
+    <!-- Texte extrait -->
+    <div class="ocr-result-card ocr-result-vert">
+      <div class="ocr-result-header">
+        <div class="ocr-result-icon"
+             style="background:linear-gradient(135deg,#00C853,#7ED321);">
+          📄
+        </div>
+        <div>
+          <h3 class="ocr-result-title">Texte extrait</h3>
+          <p class="ocr-result-sub">Texte détecté dans l'image</p>
+        </div>
+      </div>
+      <pre id="texte-extrait" class="ocr-texte-pre"></pre>
+      <div class="ocr-result-actions">
+        <button onclick="copier()" class="ocr-btn-action ocr-btn-copy">
+          <span>📋</span> Copier
+        </button>
+        <button onclick="telecharger()" class="ocr-btn-action ocr-btn-download">
+          <span>💾</span> Télécharger
+        </button>
+      </div>
+    </div>
+
+    <!-- Explication IA -->
+    <div id="zone-explication" class="ocr-result-card ocr-result-violet" style="display:none;">
+      <div class="ocr-result-header">
+        <div class="ocr-result-icon"
+             style="background:linear-gradient(135deg,#7B61FF,#A855F7);">
+          💡
+        </div>
+        <div>
+          <h3 class="ocr-result-title">Explication de l'IA</h3>
+          <p class="ocr-result-sub">Analyse intelligente du contenu</p>
+        </div>
+      </div>
+      <div id="explication" class="ocr-explication-text"></div>
+    </div>
+
+  </div>
+
 </div>
 
 <style>
-  .page-container { padding:2rem; max-width:1000px; margin:0 auto;}
-  .page-header { display:flex; align-items:center; gap:1.2rem; border-radius:20px; padding:1.5rem 2rem; margin-bottom:1.5rem; box-shadow:0 4px 20px rgba(0,0,0,0.05);}
-  .page-header-icon { width:60px; height:60px; border-radius:16px; display:flex; align-items:center; justify-content:center; font-size:1.8rem; color:white;}
-  .page-title { font-size:1.6rem; font-weight:800; margin:0;}
-  .page-subtitle { margin:0.2rem 0 0; font-size:0.95rem;}
 
-  .upload-zone { background:#F0FDF4; border:3px dashed #00C853; border-radius:24px; padding:3rem 2rem; text-align:center; cursor:pointer; margin-bottom:1.5rem; transition:0.3s;}
-  .upload-zone:hover { background:#BBF7D0; transform:scale(1.01);}
-  .upload-zone h2 { color:#14532D; margin:1rem 0 0.5rem;}
-  .upload-zone p { color:#166534;}
+/* ── ANIMATIONS ── */
+@keyframes fadeInUp {
+  from { opacity:0; transform:translateY(30px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+@keyframes floatCamera {
+  0%,100% { transform:translateY(0px) rotate(-3deg); }
+  50%      { transform:translateY(-10px) rotate(3deg); }
+}
+@keyframes scanLine {
+  0%   { top:0%; }
+  100% { top:100%; }
+}
+@keyframes pulseGreen {
+  0%,100% { box-shadow:0 0 0 0 rgba(0,200,83,0.4); }
+  50%      { box-shadow:0 0 0 12px rgba(0,200,83,0); }
+}
+@keyframes uploadPulse {
+  0%,100% { border-color:#00C853; }
+  50%      { border-color:#7ED321; }
+}
 
-  .options-card { background:white; border-radius:20px; padding:1.5rem; margin-bottom:1.5rem; box-shadow:0 4px 20px rgba(0,200,83,0.08); border-top:4px solid #00C853;}
-  .opt-label { display:block; font-weight:600; color:#374151; margin-bottom:0.5rem; cursor:pointer;}
-  .select-vert { width:100%; padding:0.7rem 1rem; border:2px solid #BBF7D0; border-radius:10px; font-size:0.95rem; background:#F0FDF4; color:#14532D; font-weight:600; outline:none;}
-  .select-vert:focus { border-color:#00C853;}
+/* ── CONTAINER ── */
+.ocr-container {
+  padding:1.5rem;
+  max-width:900px;
+  margin:0 auto;
+  animation:fadeInUp 0.5s ease;
+}
 
-  .btn-vert { width:100%; padding:1rem; background:linear-gradient(135deg, #00C853, #7ED321); color:white; border:none; border-radius:14px; font-weight:700; font-size:1.05rem; cursor:pointer; box-shadow:0 4px 15px rgba(0,200,83,0.4); margin-top:1rem;}
-  .btn-vert:hover { transform:translateY(-2px);}
-  .btn-vert:disabled { background:#D1D5DB; cursor:not-allowed; box-shadow:none;}
+/* ── HEADER ── */
+.ocr-header {
+  position:relative; overflow:hidden;
+  background:linear-gradient(135deg,#00C853 0%,#7ED321 50%,#FFD93D 100%);
+  border-radius:28px; padding:2rem;
+  margin-bottom:1.5rem;
+  display:flex; align-items:center; gap:1.2rem; flex-wrap:wrap;
+  box-shadow:0 8px 32px rgba(0,200,83,0.35);
+}
+.ocr-header-bg-emoji {
+  position:absolute; right:-10px; top:-20px;
+  font-size:9rem; opacity:0.12; pointer-events:none;
+  animation:floatCamera 4s ease-in-out infinite;
+}
+.ocr-header-icon {
+  width:72px; height:72px;
+  background:rgba(255,255,255,0.2);
+  border-radius:20px;
+  display:flex; align-items:center; justify-content:center;
+  font-size:2.2rem; flex-shrink:0;
+  backdrop-filter:blur(10px);
+  border:2px solid rgba(255,255,255,0.3);
+}
+.ocr-header-text { flex:1; }
+.ocr-header-title {
+  font-size:1.8rem; font-weight:900;
+  color:white; margin:0;
+  text-shadow:0 2px 10px rgba(0,0,0,0.2);
+}
+.ocr-header-sub {
+  color:rgba(255,255,255,0.85);
+  margin:0.3rem 0 0; font-size:0.95rem;
+}
+.ocr-header-badge {
+  background:rgba(255,255,255,0.2);
+  color:white; padding:0.5rem 1.2rem;
+  border-radius:50px; font-weight:700; font-size:0.85rem;
+  display:flex; align-items:center; gap:0.5rem;
+  backdrop-filter:blur(10px);
+  border:1px solid rgba(255,255,255,0.3);
+  white-space:nowrap;
+}
 
-  .loading-card { display:flex; align-items:center; gap:1.5rem; justify-content:center; background:#BBF7D0; border-radius:20px; padding:2rem; border:2px solid #00C853; margin-bottom:1.5rem;}
-  .spinner { width:40px; height:40px; border:4px solid #BBF7D0; border-top:4px solid #00C853; border-radius:50%; animation:spin 1s linear infinite;}
-  @keyframes spin { to { transform:rotate(360deg);}}
+/* ── UPLOAD ZONE ── */
+.ocr-upload-zone {
+  background:linear-gradient(135deg,#F0FDF4,#DCFCE7);
+  border:3px dashed #00C853; border-radius:24px;
+  padding:3rem 2rem; text-align:center;
+  cursor:pointer; margin-bottom:1.5rem;
+  transition:all 0.3s;
+  animation:uploadPulse 3s ease-in-out infinite;
+}
+.ocr-upload-zone:hover {
+  background:linear-gradient(135deg,#DCFCE7,#BBF7D0);
+  transform:scale(1.01);
+  box-shadow:0 8px 24px rgba(0,200,83,0.2);
+}
+.ocr-upload-zone.drag-over {
+  background:linear-gradient(135deg,#BBF7D0,#A7F3D0);
+  border-color:#059669;
+  transform:scale(1.02);
+}
+.ocr-upload-emoji { font-size:5rem; margin-bottom:1rem; }
+.ocr-upload-title {
+  font-size:1.4rem; font-weight:800; color:#14532D; margin:0 0 0.5rem;
+}
+.ocr-upload-sub { color:#166534; font-size:0.95rem; margin:0 0 1rem; }
+.ocr-upload-formats {
+  display:flex; gap:0.5rem; justify-content:center;
+}
+.ocr-upload-formats span {
+  background:rgba(0,200,83,0.15);
+  color:#14532D; padding:0.3rem 0.8rem;
+  border-radius:50px; font-size:0.8rem; font-weight:700;
+  border:2px solid rgba(0,200,83,0.3);
+}
 
-  .result-card { background:white; border-radius:20px; padding:1.5rem; margin-bottom:1rem; box-shadow:0 4px 20px rgba(0,0,0,0.06); border-left:5px solid #00C853;}
-  .result-card h3 { font-size:1.1rem; margin-bottom:1rem;}
-  .texte-extrait { background:#F0FDF4; border-radius:12px; padding:1rem; white-space:pre-wrap; font-family:inherit; font-size:0.95rem; line-height:1.7; color:#14532D; max-height:400px; overflow-y:auto;}
-  .explication { background:#FAF5FF; border-radius:12px; padding:1rem; white-space:pre-wrap; font-size:0.95rem; line-height:1.7; color:#5B21B6;}
+/* Aperçu image */
+.ocr-apercu { text-align:center; }
+.ocr-preview-img {
+  max-width:100%; max-height:380px;
+  border-radius:18px;
+  box-shadow:0 8px 24px rgba(0,0,0,0.15);
+  border:3px solid #00C853;
+}
+.ocr-preview-info {
+  display:inline-flex; align-items:center; gap:0.8rem;
+  margin-top:1rem;
+  background:rgba(0,200,83,0.1);
+  padding:0.6rem 1.2rem; border-radius:50px;
+  border:2px solid rgba(0,200,83,0.3);
+}
+.ocr-preview-icon { font-size:1.2rem; }
+.ocr-preview-nom { font-weight:700; color:#14532D; font-size:0.9rem; }
+.ocr-preview-clear {
+  background:#FEE2E2; color:#EF4444; border:none;
+  width:28px; height:28px; border-radius:50%;
+  cursor:pointer; font-weight:700; font-size:0.8rem;
+  display:flex; align-items:center; justify-content:center;
+  transition:all 0.2s;
+}
+.ocr-preview-clear:hover { background:#EF4444; color:white; }
 
-  .actions { display:flex; gap:0.6rem; margin-top:1rem; flex-wrap:wrap;}
-  .btn-action { background:#EDE9FE; color:#7B61FF; border:2px solid #7B61FF; padding:0.5rem 1rem; border-radius:10px; font-weight:600; font-size:0.85rem; cursor:pointer;}
-  .btn-action:hover { background:#7B61FF; color:white;}
+/* ── CARD OPTIONS ── */
+.ocr-card {
+  background:white; border-radius:24px;
+  padding:1.8rem; margin-bottom:1.5rem;
+  box-shadow:0 4px 24px rgba(0,200,83,0.12);
+  border-top:5px solid #00C853;
+  animation:fadeInUp 0.5s ease 0.1s both;
+}
+.ocr-card-header {
+  display:flex; align-items:center; gap:1rem;
+  margin-bottom:1.5rem;
+}
+.ocr-card-icon {
+  width:54px; height:54px; border-radius:16px;
+  display:flex; align-items:center; justify-content:center;
+  font-size:1.6rem; flex-shrink:0;
+  box-shadow:0 4px 16px rgba(0,0,0,0.15);
+}
+.ocr-card-title {
+  font-size:1.1rem; font-weight:800; color:#1A1D2E; margin:0;
+}
+.ocr-card-sub { font-size:0.85rem; color:#6B7280; margin:0.2rem 0 0; }
+
+/* ── LANGUE GRID ── */
+.ocr-field { margin-bottom:1.5rem; }
+.ocr-field-label {
+  display:block; font-weight:700; color:#374151;
+  font-size:0.95rem; margin-bottom:0.8rem;
+}
+.ocr-langue-grid {
+  display:flex; gap:0.5rem; flex-wrap:wrap;
+}
+.ocr-btn-langue {
+  padding:0.5rem 1rem; border-radius:50px;
+  background:#F0FDF4; color:#14532D;
+  border:2px solid #BBF7D0; font-weight:700;
+  font-size:0.85rem; cursor:pointer; transition:all 0.2s;
+}
+.ocr-btn-langue:hover {
+  background:#DCFCE7; border-color:#00C853;
+  transform:translateY(-2px);
+}
+.ocr-btn-langue.ocr-langue-actif {
+  background:linear-gradient(135deg,#00C853,#7ED321) !important;
+  color:white !important; border-color:transparent !important;
+  box-shadow:0 4px 12px rgba(0,200,83,0.3);
+}
+
+/* ── CHECKBOX ── */
+.ocr-checkbox-wrap {
+  display:flex; align-items:flex-start; gap:1rem;
+  padding:1rem 1.2rem;
+  background:#F0FDF4; border:2px solid #BBF7D0;
+  border-radius:16px; cursor:pointer;
+  margin-bottom:1.5rem; transition:all 0.2s;
+}
+.ocr-checkbox-wrap:hover {
+  background:#DCFCE7; border-color:#00C853;
+}
+.ocr-checkbox {
+  width:28px; height:28px; border-radius:8px;
+  border:2px solid #00C853; background:white;
+  display:flex; align-items:center; justify-content:center;
+  font-size:1rem; flex-shrink:0; transition:all 0.2s;
+}
+.ocr-checkbox.checked {
+  background:linear-gradient(135deg,#00C853,#7ED321);
+  border-color:transparent; color:white;
+}
+.ocr-checkbox-label {
+  display:block; font-weight:700; color:#14532D; font-size:0.95rem;
+}
+.ocr-checkbox-sub { display:block; font-size:0.8rem; color:#6B7280; margin-top:0.2rem; }
+
+/* ── BTN SCAN ── */
+.ocr-btn-scan {
+  width:100%;
+  display:flex; align-items:center; justify-content:center; gap:1rem;
+  padding:1.1rem;
+  background:linear-gradient(135deg,#00C853,#7ED321);
+  color:white; border:none; border-radius:50px;
+  font-weight:800; font-size:1.05rem; cursor:pointer;
+  box-shadow:0 6px 20px rgba(0,200,83,0.4);
+  transition:all 0.3s; position:relative; overflow:hidden;
+}
+.ocr-btn-scan::before {
+  content:'';
+  position:absolute; top:0; left:-100%;
+  width:100%; height:100%;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,0.2),transparent);
+  transition:left 0.5s;
+}
+.ocr-btn-scan:hover::before { left:100%; }
+.ocr-btn-scan:hover {
+  transform:translateY(-3px);
+  box-shadow:0 10px 28px rgba(0,200,83,0.5);
+  animation:pulseGreen 1s infinite;
+}
+.ocr-btn-scan:disabled {
+  background:linear-gradient(135deg,#D1D5DB,#9CA3AF);
+  box-shadow:none; cursor:not-allowed; transform:none;
+}
+.ocr-btn-circle {
+  width:36px; height:36px;
+  background:rgba(255,255,255,0.25);
+  border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  font-size:1.1rem; flex-shrink:0;
+}
+
+/* ── LOADING ── */
+.ocr-loading {
+  display:flex; align-items:center; gap:1.5rem;
+  background:linear-gradient(135deg,#F0FDF4,#DCFCE7);
+  border:2px solid #86EFAC; border-radius:20px;
+  padding:2rem; margin-bottom:1.5rem;
+  justify-content:center;
+}
+.ocr-scan-anim {
+  width:52px; height:52px;
+  background:linear-gradient(135deg,#00C853,#7ED321);
+  border-radius:12px;
+  position:relative; overflow:hidden;
+  flex-shrink:0;
+}
+.ocr-scan-line {
+  position:absolute; left:0; right:0; height:3px;
+  background:rgba(255,255,255,0.8);
+  animation:scanLine 1s linear infinite;
+  box-shadow:0 0 8px rgba(255,255,255,0.8);
+}
+.ocr-loading-title {
+  font-weight:800; color:#14532D; font-size:1rem; margin:0;
+}
+.ocr-loading-sub { color:#6B7280; font-size:0.85rem; margin:0.3rem 0 0; }
+
+/* ── RESULT CARDS ── */
+.ocr-result-card {
+  background:white; border-radius:24px;
+  padding:1.8rem; margin-bottom:1.2rem;
+  box-shadow:0 4px 24px rgba(0,0,0,0.08);
+  animation:fadeInUp 0.5s ease;
+}
+.ocr-result-vert   { border-left:5px solid #00C853; }
+.ocr-result-violet { border-left:5px solid #7B61FF; }
+
+.ocr-result-header {
+  display:flex; align-items:center; gap:1rem;
+  margin-bottom:1.2rem;
+}
+.ocr-result-icon {
+  width:48px; height:48px; border-radius:14px;
+  display:flex; align-items:center; justify-content:center;
+  font-size:1.4rem; flex-shrink:0;
+  box-shadow:0 4px 12px rgba(0,0,0,0.15);
+}
+.ocr-result-title {
+  font-size:1.05rem; font-weight:800; color:#1A1D2E; margin:0;
+}
+.ocr-result-sub { font-size:0.82rem; color:#6B7280; margin:0.2rem 0 0; }
+
+.ocr-texte-pre {
+  background:linear-gradient(135deg,#F0FDF4,#DCFCE7);
+  border-radius:14px; padding:1.2rem;
+  white-space:pre-wrap; font-family:inherit;
+  font-size:0.92rem; line-height:1.7;
+  color:#14532D; max-height:380px; overflow-y:auto;
+  border:2px solid #BBF7D0;
+}
+.ocr-explication-text {
+  background:linear-gradient(135deg,#FAF5FF,#EDE9FE);
+  border-radius:14px; padding:1.2rem;
+  white-space:pre-wrap; font-size:0.92rem;
+  line-height:1.7; color:#5B21B6;
+  border:2px solid #DDD6FE;
+}
+
+.ocr-result-actions {
+  display:flex; gap:0.6rem; margin-top:1rem; flex-wrap:wrap;
+}
+.ocr-btn-action {
+  display:flex; align-items:center; gap:0.4rem;
+  padding:0.55rem 1.1rem; border-radius:50px;
+  font-weight:700; font-size:0.85rem;
+  cursor:pointer; border:2px solid transparent;
+  transition:all 0.2s;
+}
+.ocr-btn-copy {
+  background:#EDE9FE; color:#7B61FF; border-color:#C4B5FD;
+}
+.ocr-btn-copy:hover { background:#7B61FF; color:white; transform:translateY(-2px); }
+.ocr-btn-download {
+  background:#DCFCE7; color:#00C853; border-color:#86EFAC;
+}
+.ocr-btn-download:hover { background:#00C853; color:white; transform:translateY(-2px); }
+
+/* ══════════════════════════════════ */
+/* MODE SOMBRE */
+/* ══════════════════════════════════ */
+[data-theme="dark"] .ocr-card,
+[data-theme="dark"] .ocr-result-card { background:#1E2235; }
+[data-theme="dark"] .ocr-card-title,
+[data-theme="dark"] .ocr-result-title { color:#F1F5F9; }
+[data-theme="dark"] .ocr-card-sub,
+[data-theme="dark"] .ocr-result-sub { color:#94A3B8; }
+[data-theme="dark"] .ocr-upload-zone {
+  background:linear-gradient(135deg,#1A2E1A,#1E3320);
+  border-color:#00C853;
+}
+[data-theme="dark"] .ocr-upload-title { color:#86EFAC; }
+[data-theme="dark"] .ocr-upload-sub { color:#4ADE80; }
+[data-theme="dark"] .ocr-btn-langue {
+  background:#252A40; color:#86EFAC; border-color:#374151;
+}
+[data-theme="dark"] .ocr-checkbox-wrap {
+  background:#252A40; border-color:#374151;
+}
+[data-theme="dark"] .ocr-checkbox-label { color:#86EFAC; }
+[data-theme="dark"] .ocr-texte-pre {
+  background:linear-gradient(135deg,#14532D,#166534);
+  border-color:#15803D; color:#DCFCE7;
+}
+[data-theme="dark"] .ocr-explication-text {
+  background:linear-gradient(135deg,#2E1065,#3B0764);
+  border-color:#6D28D9; color:#DDD6FE;
+}
+[data-theme="dark"] .ocr-loading {
+  background:linear-gradient(135deg,#1A2E1A,#1E3320);
+  border-color:#15803D;
+}
+
+/* ══════════════════════════════════ */
+/* RESPONSIVE */
+/* ══════════════════════════════════ */
+@media (max-width:640px) {
+  .ocr-container { padding:1rem; }
+  .ocr-header { padding:1.2rem; }
+  .ocr-header-title { font-size:1.4rem; }
+  .ocr-header-badge { display:none; }
+  .ocr-card { padding:1.2rem; }
+  .ocr-upload-zone { padding:2rem 1rem; }
+  .ocr-upload-emoji { font-size:3.5rem; }
+}
 </style>
 
 <script>
 let fichierSelectionne = null;
+let langueActuelle = 'fra';
+let expliquerActif = false;
 
+/* ── TOAST ── */
+function toast(msg, type = 'info') {
+  const colors = {
+    succes : 'linear-gradient(135deg,#00C853,#7ED321)',
+    erreur : 'linear-gradient(135deg,#EF4444,#DC2626)',
+    info   : 'linear-gradient(135deg,#2962FF,#7B61FF)',
+    warning: 'linear-gradient(135deg,#F59E0B,#FFD93D)',
+  };
+  const t = document.getElementById('toast');
+  t.innerHTML = msg;
+  t.style.background = colors[type] || colors.info;
+  t.style.transform = 'translateX(0)';
+  setTimeout(() => { t.style.transform = 'translateX(120%)'; }, 3200);
+}
+
+/* ── DRAG & DROP ── */
+function dragOver(e) {
+  e.preventDefault();
+  document.getElementById('upload-zone').classList.add('drag-over');
+}
+function dragLeave(e) {
+  document.getElementById('upload-zone').classList.remove('drag-over');
+}
+function dropFichier(e) {
+  e.preventDefault();
+  document.getElementById('upload-zone').classList.remove('drag-over');
+  const f = e.dataTransfer.files[0];
+  if (f && f.type.startsWith('image/')) {
+    traiterFichier(f);
+  } else {
+    toast('⚠️ Fichier non supporté !', 'warning');
+  }
+}
+
+/* ── APERÇU ── */
 function apercu(e) {
   const f = e.target.files[0];
   if (!f) return;
+  traiterFichier(f);
+}
+
+function traiterFichier(f) {
   fichierSelectionne = f;
   const reader = new FileReader();
-  reader.onload = (ev)=>{
+  reader.onload = (ev) => {
     document.getElementById('img-preview').src = ev.target.result;
-    document.getElementById('nom-fichier').textContent = '📎 ' + f.name;
+    document.getElementById('nom-fichier').textContent = f.name;
     document.getElementById('upload-default').style.display = 'none';
     document.getElementById('apercu-zone').style.display = 'block';
     document.getElementById('btn-scan').disabled = false;
+    toast('📸 Image chargée ! Clique sur Scanner.', 'succes');
   };
   reader.readAsDataURL(f);
 }
 
+function reinitialiser(e) {
+  e.stopPropagation();
+  fichierSelectionne = null;
+  document.getElementById('upload-default').style.display = 'block';
+  document.getElementById('apercu-zone').style.display = 'none';
+  document.getElementById('btn-scan').disabled = true;
+  document.getElementById('fichier').value = '';
+  toast('🗑️ Image supprimée', 'info');
+}
+
+/* ── LANGUE ── */
+function choisirLangue(lang, el) {
+  langueActuelle = lang;
+  document.querySelectorAll('.ocr-btn-langue')
+    .forEach(b => b.classList.remove('ocr-langue-actif'));
+  el.classList.add('ocr-langue-actif');
+}
+
+/* ── CHECKBOX ── */
+function toggleExpliquer() {
+  expliquerActif = !expliquerActif;
+  const cb = document.getElementById('checkbox-expliquer');
+  const ic = document.getElementById('check-icon');
+  cb.classList.toggle('checked', expliquerActif);
+  ic.textContent = expliquerActif ? '✓' : '';
+}
+
+/* ── SCANNER ── */
 function scanner() {
   if (!fichierSelectionne) return;
   const fd = new FormData();
   fd.append('fichier', fichierSelectionne);
-  fd.append('langue', document.getElementById('langue').value);
-  fd.append('expliquer', document.getElementById('expliquer').checked);
+  fd.append('langue', langueActuelle);
+  fd.append('expliquer', expliquerActif);
+  const btn = document.getElementById('btn-scan');
 
   document.getElementById('loading').style.display = 'flex';
   document.getElementById('resultat').style.display = 'none';
-  document.getElementById('btn-scan').disabled = true;
+  btn.disabled = true;
+  btn.innerHTML = '<span class="ocr-btn-circle">⏳</span><span>Scan en cours...</span>';
 
-  fetch('/api/ocr', {method:'POST', body: fd})
-  .then(r=>r.json())
-  .then(d=>{
+  fetch('/api/ocr', { method: 'POST', body: fd })
+  .then(r => r.json())
+  .then(d => {
     document.getElementById('loading').style.display = 'none';
-    document.getElementById('btn-scan').disabled = false;
+    btn.disabled = false;
+    btn.innerHTML = '<span class="ocr-btn-circle">📸</span><span>Scanner l\'image</span>';
+
     if (d.succes) {
-      document.getElementById('texte-extrait').textContent = d.texte || '(vide)';
+      document.getElementById('texte-extrait').textContent = d.texte || '(aucun texte détecté)';
       if (d.explication) {
         document.getElementById('explication').textContent = d.explication;
         document.getElementById('zone-explication').style.display = 'block';
@@ -150,25 +660,39 @@ function scanner() {
         document.getElementById('zone-explication').style.display = 'none';
       }
       document.getElementById('resultat').style.display = 'block';
-      document.getElementById('resultat').scrollIntoView({behavior:'smooth'});
+      document.getElementById('resultat').scrollIntoView({ behavior: 'smooth' });
+      toast('✅ Texte extrait avec succès !', 'succes');
     } else {
-      alert('❌ ' + d.erreur);
+      toast('❌ ' + (d.erreur || 'Erreur OCR'), 'erreur');
     }
+  })
+  .catch(e => {
+    document.getElementById('loading').style.display = 'none';
+    btn.disabled = false;
+    btn.innerHTML = '<span class="ocr-btn-circle">📸</span><span>Scanner l\'image</span>';
+    toast('❌ Erreur réseau : ' + e.message, 'erreur');
   });
 }
 
+/* ── COPIER ── */
 function copier() {
   const t = document.getElementById('texte-extrait').textContent;
-  navigator.clipboard.writeText(t).then(()=>alert('✅ Copié !'));
+  navigator.clipboard.writeText(t).then(() => {
+    toast('📋 Texte copié !', 'succes');
+  }).catch(() => toast('❌ Erreur copie', 'erreur'));
 }
 
+/* ── TÉLÉCHARGER ── */
 function telecharger() {
   const t = document.getElementById('texte-extrait').textContent;
-  const blob = new Blob([t], {type:'text/plain;charset=utf-8'});
+  const blob = new Blob([t], { type: 'text/plain;charset=utf-8' });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = 'OCR_NOKIROVA.txt';
+  a.download = 'OCR_NOKIROVA_' +
+    new Date().toLocaleDateString('fr-FR').replace(/\//g, '-') + '.txt';
   a.click();
+  toast('💾 Fichier téléchargé !', 'succes');
 }
 </script>
+
 {% endblock %}

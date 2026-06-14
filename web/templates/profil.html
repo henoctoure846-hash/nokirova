@@ -1,264 +1,872 @@
 {% extends "base.html" %}
 {% block title %}Mon Profil - NOKIROVA{% endblock %}
 {% block contenu %}
-<div class="profil-page">
 
-  <div class="page-header" style="background: linear-gradient(135deg, #D8B4FE, #EDE9FE); border-left: 5px solid #7B61FF;">
-    <div class="page-header-icon" style="background: linear-gradient(135deg, #7B61FF, #5B21B6);">🏆</div>
-    <div>
-      <h1 class="page-title" style="color: #5B21B6;">Mon Profil</h1>
-      <p class="page-subtitle" style="color: #7B61FF;">Tes infos, ta progression, tes badges 💎</p>
+<!-- TOAST -->
+<div id="toast" style="
+  position:fixed; top:20px; right:20px; z-index:9999;
+  background:#1A1D2E; color:white; padding:1rem 1.5rem;
+  border-radius:16px; font-weight:600; font-size:0.95rem;
+  box-shadow:0 8px 30px rgba(0,0,0,0.3);
+  transform:translateX(120%); transition:transform 0.4s cubic-bezier(0.175,0.885,0.32,1.275);
+  display:flex; align-items:center; gap:0.8rem; max-width:320px;
+"></div>
+
+<div class="prf-container">
+
+  <!-- ═══ HEADER ═══ -->
+  <div class="prf-header">
+    <div class="prf-header-bg-emoji">🏆</div>
+    <div class="prf-header-icon">🏆</div>
+    <div class="prf-header-text">
+      <h1 class="prf-header-title">Mon Profil</h1>
+      <p class="prf-header-sub">Tes infos, ta progression, tes badges 💎</p>
+    </div>
+    <div class="prf-header-badge">
+      <span>⭐</span>
+      Niveau {{ stats.niveau }}
     </div>
   </div>
 
-  <!-- 👤 CARTE PROFIL TOP -->
-  <div class="profil-top-card">
-    <div class="profil-photo" id="profil-photo">👤</div>
-    <div class="profil-infos">
-      <h2 id="profil-nom">{{ profil.nom_complet or 'Étudiant NOKIROVA' }}</h2>
-      <div class="titre-niveau">{{ titre_niveau or '🌱 Apprenti' }}</div>
-      <div class="profil-meta">
-        ⭐ Niveau {{ stats.niveau }} • ✨ {{ stats.xp }} XP
+  <!-- ═══ CARTE PROFIL TOP ═══ -->
+  <div class="prf-top-card">
+
+    <!-- Photo -->
+    <div class="prf-photo-wrap">
+      <div class="prf-photo" id="profil-photo">👤</div>
+      <div class="prf-photo-ring"></div>
+    </div>
+
+    <!-- Infos -->
+    <div class="prf-infos">
+      <h2 id="profil-nom" class="prf-nom">
+        {{ profil.nom_complet or 'Étudiant NOKIROVA' }}
+      </h2>
+      <div class="prf-titre-niveau">
+        {{ titre_niveau or '🌱 Apprenti' }}
       </div>
-      {% if profil.universite %}<div class="profil-meta">🎓 {{ profil.universite }}</div>{% endif %}
-      <button onclick="ouvrirForm()" class="btn-modifier">✏️ Modifier mon profil</button>
+      <div class="prf-meta-row">
+        <span class="prf-meta-pill prf-meta-bleu">
+          ⭐ Niveau {{ stats.niveau }}
+        </span>
+        <span class="prf-meta-pill prf-meta-violet">
+          ✨ {{ stats.xp }} XP
+        </span>
+        {% if profil.universite %}
+        <span class="prf-meta-pill prf-meta-vert">
+          🎓 {{ profil.universite }}
+        </span>
+        {% endif %}
+      </div>
+      <button onclick="ouvrirForm()" class="prf-btn-modifier">
+        <span class="prf-btn-circle">✏️</span>
+        <span>Modifier mon profil</span>
+      </button>
+    </div>
+
+  </div>
+
+  <!-- ═══ BARRE XP ═══ -->
+  <div class="prf-xp-card">
+    <div class="prf-xp-header">
+      <span class="prf-xp-label">🎯 Progression vers le niveau {{ stats.niveau + 1 }}</span>
+      <span class="prf-xp-val" id="xp-text">0/100 XP</span>
+    </div>
+    <div class="prf-xp-bar-wrap">
+      <div class="prf-xp-bar" id="xp-fill"></div>
+    </div>
+    <div class="prf-xp-milestones">
+      <span>🌱 Débutant</span>
+      <span>📚 Studieux</span>
+      <span>🔥 Expert</span>
+      <span>💎 Maître</span>
     </div>
   </div>
 
-  <!-- 📊 BARRE XP -->
-  <div class="xp-card">
-    <div class="xp-bar">
-      <div class="xp-fill" id="xp-fill"></div>
+  <!-- ═══ STREAK ═══ -->
+  <div class="prf-streak-card">
+    <div class="prf-streak-icon">🔥</div>
+    <div class="prf-streak-text">
+      <strong>Streak actuel</strong>
+      <span>{{ stats.streak_jours }} jour(s) consécutif(s) !</span>
     </div>
-    <div class="xp-text">
-      🎯 <strong id="xp-text">0/100</strong> XP vers le niveau {{ stats.niveau + 1 }}
+    <div class="prf-streak-badge">{{ stats.streak_jours }}🔥</div>
+  </div>
+
+  <!-- ═══ INFOS PERSO ═══ -->
+  <div class="prf-card prf-card-violet" id="infos-perso" style="display:none;">
+    <div class="prf-card-header">
+      <div class="prf-card-icon" style="background:linear-gradient(135deg,#7B61FF,#A855F7);">
+        📝
+      </div>
+      <div>
+        <h3 class="prf-card-title">Informations personnelles</h3>
+        <p class="prf-card-sub">Tes données de profil</p>
+      </div>
     </div>
+    <div id="liste-infos" class="prf-infos-liste"></div>
   </div>
 
-  <!-- 📝 INFOS PERSO -->
-  <div class="section-card" id="infos-perso" style="display:none;">
-    <h3 style="color:#5B21B6;">📝 INFORMATIONS PERSONNELLES</h3>
-    <div id="liste-infos"></div>
-  </div>
-
-  <!-- 💭 BIO -->
-  <div class="bio-card" id="bio-card" style="display:none;">
-    <h3 style="color:#C2185B;">💭 À PROPOS DE MOI</h3>
-    <p id="bio-text"></p>
-  </div>
-
-  <!-- 🔥 STREAK -->
-  <div class="streak-card">
-    🔥 STREAK : <strong>{{ stats.streak_jours }} jour(s)</strong> consécutif(s) !
-  </div>
-
-  <!-- 📊 STATS -->
-  <div class="section-card">
-    <h3 style="color:#2962FF;">📊 TES STATISTIQUES</h3>
-    <div class="stats-grid-pro">
-      <div class="stat-pro">📚 Cours : <strong>{{ stats.cours_importes }}</strong></div>
-      <div class="stat-pro">💬 Questions : <strong>{{ stats.questions_posees or 0 }}</strong></div>
-      <div class="stat-pro">🎧 Audios : <strong>{{ stats.audios_crees or 0 }}</strong></div>
-      <div class="stat-pro">🎯 QCM réussis : <strong>{{ stats.qcm_reussis or 0 }}</strong></div>
-      <div class="stat-pro">🍅 Pomodoros : <strong id="nb-pomo">0</strong></div>
-      <div class="stat-pro">⏱️ Minutes : <strong id="min-pomo">0</strong></div>
+  <!-- ═══ BIO ═══ -->
+  <div class="prf-bio-card" id="bio-card" style="display:none;">
+    <div class="prf-bio-icon">💭</div>
+    <div class="prf-bio-content">
+      <h3 class="prf-bio-title">À propos de moi</h3>
+      <p id="bio-text" class="prf-bio-text"></p>
     </div>
   </div>
 
-  <!-- 🏆 BADGES -->
-  <div class="section-card">
-    <h3 style="color:#5B21B6;">🏆 BADGES DÉBLOQUÉS (<span id="nb-badges">0</span>)</h3>
-    <div id="liste-badges" class="badges-pro"></div>
+  <!-- ═══ STATISTIQUES ═══ -->
+  <div class="prf-card prf-card-bleu">
+    <div class="prf-card-header">
+      <div class="prf-card-icon" style="background:linear-gradient(135deg,#2962FF,#7EC8FF);">
+        📊
+      </div>
+      <div>
+        <h3 class="prf-card-title">Tes Statistiques</h3>
+        <p class="prf-card-sub">Tout ce que tu as accompli</p>
+      </div>
+    </div>
+    <div class="prf-stats-grid">
+      <div class="prf-stat-item prf-stat-bleu">
+        <span class="prf-stat-emoji">📚</span>
+        <strong class="prf-stat-val">{{ stats.cours_importes }}</strong>
+        <span class="prf-stat-label">Cours importés</span>
+      </div>
+      <div class="prf-stat-item prf-stat-violet">
+        <span class="prf-stat-emoji">💬</span>
+        <strong class="prf-stat-val">{{ stats.questions_posees or 0 }}</strong>
+        <span class="prf-stat-label">Questions posées</span>
+      </div>
+      <div class="prf-stat-item prf-stat-orange">
+        <span class="prf-stat-emoji">🎧</span>
+        <strong class="prf-stat-val">{{ stats.audios_crees or 0 }}</strong>
+        <span class="prf-stat-label">Audios créés</span>
+      </div>
+      <div class="prf-stat-item prf-stat-rose">
+        <span class="prf-stat-emoji">🎯</span>
+        <strong class="prf-stat-val">{{ stats.qcm_reussis or 0 }}</strong>
+        <span class="prf-stat-label">QCM réussis</span>
+      </div>
+      <div class="prf-stat-item prf-stat-rouge">
+        <span class="prf-stat-emoji">🍅</span>
+        <strong class="prf-stat-val" id="nb-pomo">0</strong>
+        <span class="prf-stat-label">Pomodoros</span>
+      </div>
+      <div class="prf-stat-item prf-stat-vert">
+        <span class="prf-stat-emoji">⏱️</span>
+        <strong class="prf-stat-val" id="min-pomo">0</strong>
+        <span class="prf-stat-label">Minutes focus</span>
+      </div>
+    </div>
   </div>
+
+  <!-- ═══ BADGES ═══ -->
+  <div class="prf-card prf-card-or">
+    <div class="prf-card-header">
+      <div class="prf-card-icon" style="background:linear-gradient(135deg,#F59E0B,#FFD93D);">
+        🏆
+      </div>
+      <div>
+        <h3 class="prf-card-title">
+          Badges débloqués
+          <span class="prf-badge-count" id="nb-badges">0</span>
+        </h3>
+        <p class="prf-card-sub">Continue pour en débloquer plus !</p>
+      </div>
+    </div>
+    <div id="liste-badges" class="prf-badges-grid"></div>
+  </div>
+
 </div>
 
+<!-- ══════════════════════════════════════════ -->
 <!-- POPUP MODIFIER -->
-<div id="popup-overlay" class="popup-overlay" style="display:none;" onclick="if(event.target===this) fermerForm()">
-  <div class="popup-content">
-    <h2 style="color:#5B21B6; margin-bottom:1rem;">✏️ Modifier mon profil</h2>
-    <input type="text" id="f-nom" placeholder="👤 Nom complet *" class="f-input"/>
-    <input type="email" id="f-email" placeholder="📧 Email" class="f-input"/>
-    <input type="text" id="f-numero" placeholder="📱 Téléphone" class="f-input"/>
-    <input type="text" id="f-univ" placeholder="🎓 Université" class="f-input"/>
-    <input type="text" id="f-annee" placeholder="📅 Année d'étude" class="f-input"/>
-    <input type="text" id="f-date" placeholder="🎂 Date de naissance" class="f-input"/>
-    <textarea id="f-bio" placeholder="💭 Bio (à propos de toi)" rows="4" class="f-input"></textarea>
+<!-- ══════════════════════════════════════════ -->
+<div id="popup-overlay" class="prf-popup-overlay"
+     style="display:none;"
+     onclick="if(event.target===this) fermerForm()">
+  <div class="prf-popup">
 
-    <div class="popup-actions">
-      <button onclick="sauver()" class="btn-vert">💾 Sauvegarder</button>
-      <button onclick="fermerForm()" class="btn-rouge">❌ Annuler</button>
+    <div class="prf-popup-header">
+      <div class="prf-popup-icon">✏️</div>
+      <div>
+        <h2 class="prf-popup-title">Modifier mon profil</h2>
+        <p class="prf-popup-sub">Remplis tes informations</p>
+      </div>
+      <button onclick="fermerForm()" class="prf-popup-close">✕</button>
     </div>
+
+    <div class="prf-form-grid">
+      <div class="prf-form-field">
+        <label class="prf-form-label">👤 Nom complet *</label>
+        <input type="text" id="f-nom" placeholder="Ton nom complet" class="prf-form-input"/>
+      </div>
+      <div class="prf-form-field">
+        <label class="prf-form-label">📧 Email</label>
+        <input type="email" id="f-email" placeholder="ton@email.com" class="prf-form-input"/>
+      </div>
+      <div class="prf-form-field">
+        <label class="prf-form-label">📱 Téléphone</label>
+        <input type="text" id="f-numero" placeholder="+225 XX XX XX XX" class="prf-form-input"/>
+      </div>
+      <div class="prf-form-field">
+        <label class="prf-form-label">🎓 Université</label>
+        <input type="text" id="f-univ" placeholder="Ton université" class="prf-form-input"/>
+      </div>
+      <div class="prf-form-field">
+        <label class="prf-form-label">📅 Année d'étude</label>
+        <input type="text" id="f-annee" placeholder="Ex: Licence 2" class="prf-form-input"/>
+      </div>
+      <div class="prf-form-field">
+        <label class="prf-form-label">🎂 Date de naissance</label>
+        <input type="text" id="f-date" placeholder="JJ/MM/AAAA" class="prf-form-input"/>
+      </div>
+    </div>
+
+    <div class="prf-form-field" style="margin-top:0.5rem;">
+      <label class="prf-form-label">💭 Bio</label>
+      <textarea id="f-bio" placeholder="Parle un peu de toi..."
+                rows="3" class="prf-form-textarea"></textarea>
+    </div>
+
+    <div class="prf-popup-actions">
+      <button onclick="sauver()" class="prf-btn-sauver">
+        <span class="prf-btn-circle">💾</span>
+        <span>Sauvegarder</span>
+      </button>
+      <button onclick="fermerForm()" class="prf-btn-annuler">
+        <span class="prf-btn-circle">❌</span>
+        <span>Annuler</span>
+      </button>
+    </div>
+
   </div>
 </div>
 
+<!-- ══════════════════════════════════════════ -->
+<!-- STYLES -->
+<!-- ══════════════════════════════════════════ -->
 <style>
-  .profil-page { padding:2rem; max-width:1000px; margin:0 auto;}
-  .page-header { display:flex; align-items:center; gap:1.2rem; border-radius:20px; padding:1.5rem 2rem; margin-bottom:1.5rem; box-shadow:0 4px 20px rgba(0,0,0,0.05);}
-  .page-header-icon { width:60px; height:60px; border-radius:16px; display:flex; align-items:center; justify-content:center; font-size:1.8rem; color:white;}
-  .page-title { font-size:1.6rem; font-weight:800; margin:0;}
-  .page-subtitle { margin:0.2rem 0 0; font-size:0.95rem;}
 
-  .profil-top-card { display:flex; gap:1.5rem; background:linear-gradient(135deg, #EDE9FE, white); border-radius:24px; padding:2rem; margin-bottom:1rem; box-shadow:0 4px 25px rgba(123,97,255,0.15); flex-wrap:wrap;}
-  .profil-photo { width:140px; height:140px; border-radius:50%; background:white; display:flex; align-items:center; justify-content:center; font-size:5rem; box-shadow:0 4px 15px rgba(0,0,0,0.1); flex-shrink:0;}
-  .profil-infos { flex:1; min-width:250px;}
-  .profil-infos h2 { color:#5B21B6; font-size:2rem; margin-bottom:0.3rem;}
-  .titre-niveau { color:#F59E0B; font-weight:700; font-size:1.1rem; margin-bottom:0.5rem;}
-  .profil-meta { color:#374151; font-size:0.95rem; margin-bottom:0.3rem;}
-  .btn-modifier { background:linear-gradient(135deg, #7B61FF, #A855F7); color:white; border:none; padding:0.7rem 1.5rem; border-radius:12px; font-weight:700; cursor:pointer; margin-top:1rem; box-shadow:0 4px 15px rgba(123,97,255,0.4);}
-  .btn-modifier:hover { transform:translateY(-2px);}
+/* ── ANIMATIONS ── */
+@keyframes fadeInUp {
+  from { opacity:0; transform:translateY(30px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+@keyframes floatTrophy {
+  0%,100% { transform:translateY(0px) rotate(-2deg); }
+  50%      { transform:translateY(-10px) rotate(2deg); }
+}
+@keyframes xpFill {
+  from { width: 0%; }
+}
+@keyframes bounceIn {
+  0%   { transform:scale(0.3); opacity:0; }
+  50%  { transform:scale(1.05); }
+  70%  { transform:scale(0.9); }
+  100% { transform:scale(1); opacity:1; }
+}
+@keyframes pulseGold {
+  0%,100% { box-shadow:0 0 0 0 rgba(245,158,11,0.4); }
+  50%      { box-shadow:0 0 0 12px rgba(245,158,11,0); }
+}
+@keyframes shimmer {
+  0%   { background-position:-200% center; }
+  100% { background-position:200% center; }
+}
+@keyframes popupIn {
+  from { opacity:0; transform:scale(0.8) translateY(20px); }
+  to   { opacity:1; transform:scale(1) translateY(0); }
+}
 
-  .xp-card { background:linear-gradient(135deg, #FFF3B0, #FFE66D); border-radius:18px; padding:1.5rem; margin-bottom:1rem;}
-  .xp-bar { height:18px; background:white; border-radius:10px; overflow:hidden; margin-bottom:0.5rem;}
-  .xp-fill { height:100%; background:linear-gradient(90deg, #00C853, #7ED321); border-radius:10px; transition:width 1s ease;}
-  .xp-text { text-align:center; color:#374151; font-weight:700;}
+/* ── CONTAINER ── */
+.prf-container {
+  padding: 1.5rem;
+  max-width: 900px;
+  margin: 0 auto;
+  animation: fadeInUp 0.5s ease;
+}
 
-  .section-card { background:white; border-radius:18px; padding:1.5rem; margin-bottom:1rem; box-shadow:0 4px 20px rgba(0,0,0,0.06);}
-  .section-card h3 { font-size:1.05rem; margin-bottom:1rem; font-weight:700;}
+/* ── HEADER ── */
+.prf-header {
+  position: relative; overflow: hidden;
+  background: linear-gradient(135deg, #7B61FF 0%, #A855F7 50%, #EC4899 100%);
+  border-radius: 28px; padding: 2rem;
+  margin-bottom: 1.5rem;
+  display: flex; align-items: center; gap: 1.2rem; flex-wrap: wrap;
+  box-shadow: 0 8px 32px rgba(123,97,255,0.35);
+}
+.prf-header-bg-emoji {
+  position: absolute; right: -10px; top: -20px;
+  font-size: 9rem; opacity: 0.12; pointer-events: none;
+  animation: floatTrophy 4s ease-in-out infinite;
+}
+.prf-header-icon {
+  width: 72px; height: 72px;
+  background: rgba(255,255,255,0.2);
+  border-radius: 20px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 2.2rem; flex-shrink: 0;
+  backdrop-filter: blur(10px);
+  border: 2px solid rgba(255,255,255,0.3);
+}
+.prf-header-text { flex: 1; }
+.prf-header-title {
+  font-size: 1.8rem; font-weight: 900;
+  color: white; margin: 0;
+  text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+}
+.prf-header-sub {
+  color: rgba(255,255,255,0.85);
+  margin: 0.3rem 0 0; font-size: 0.95rem;
+}
+.prf-header-badge {
+  background: rgba(255,255,255,0.2);
+  color: white; padding: 0.5rem 1.2rem;
+  border-radius: 50px; font-weight: 700; font-size: 0.9rem;
+  display: flex; align-items: center; gap: 0.5rem;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.3);
+  white-space: nowrap;
+}
 
-  .bio-card { background:linear-gradient(135deg, #FFE5EF, #FFC9DE); border-radius:18px; padding:1.5rem; margin-bottom:1rem;}
-  .bio-card h3 { font-size:1.05rem; margin-bottom:0.5rem;}
-  .bio-card p { color:#374151; font-style:italic; line-height:1.6;}
+/* ── TOP CARD ── */
+.prf-top-card {
+  display: flex; gap: 1.5rem; flex-wrap: wrap;
+  background: linear-gradient(135deg, #FAF5FF, #EDE9FE);
+  border-radius: 28px; padding: 2rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 8px 32px rgba(123,97,255,0.15);
+  border: 2px solid #DDD6FE;
+  animation: fadeInUp 0.5s ease 0.1s both;
+}
+.prf-photo-wrap {
+  position: relative; flex-shrink: 0;
+}
+.prf-photo {
+  width: 130px; height: 130px; border-radius: 50%;
+  background: white;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 4.5rem;
+  box-shadow: 0 8px 24px rgba(123,97,255,0.2);
+  border: 4px solid white;
+  position: relative; z-index: 1;
+}
+.prf-photo-ring {
+  position: absolute; top: -6px; left: -6px;
+  width: 142px; height: 142px; border-radius: 50%;
+  background: linear-gradient(135deg, #7B61FF, #A855F7, #EC4899);
+  z-index: 0;
+  animation: pulseGold 2s infinite;
+}
 
-  .streak-card { background:linear-gradient(135deg, #FB923C, #F59E0B); color:white; padding:1.2rem; border-radius:16px; text-align:center; font-size:1.1rem; margin-bottom:1rem; box-shadow:0 4px 15px rgba(245,158,11,0.3);}
+.prf-infos { flex: 1; min-width: 220px; }
+.prf-nom {
+  font-size: 1.8rem; font-weight: 900;
+  color: #5B21B6; margin: 0 0 0.3rem;
+}
+.prf-titre-niveau {
+  font-weight: 700; font-size: 1.05rem;
+  color: #F59E0B; margin-bottom: 0.8rem;
+}
+.prf-meta-row {
+  display: flex; gap: 0.5rem; flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+.prf-meta-pill {
+  padding: 0.3rem 0.9rem; border-radius: 50px;
+  font-size: 0.82rem; font-weight: 700;
+}
+.prf-meta-bleu  { background: #DBEAFE; color: #1E40AF; }
+.prf-meta-violet{ background: #EDE9FE; color: #5B21B6; }
+.prf-meta-vert  { background: #DCFCE7; color: #14532D; }
 
-  .info-ligne { display:flex; padding:0.6rem 0; border-bottom:1px solid #F3F4F6;}
-  .info-label { color:#9CA3AF; font-weight:600; width:180px;}
-  .info-val { color:#5B21B6; font-weight:600;}
+.prf-btn-modifier {
+  display: inline-flex; align-items: center; gap: 0.7rem;
+  background: linear-gradient(135deg, #7B61FF, #A855F7);
+  color: white; border: none;
+  padding: 0.8rem 1.6rem; border-radius: 50px;
+  font-weight: 800; font-size: 0.95rem; cursor: pointer;
+  box-shadow: 0 6px 20px rgba(123,97,255,0.4);
+  transition: all 0.3s;
+}
+.prf-btn-modifier:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 28px rgba(123,97,255,0.5);
+}
+.prf-btn-circle {
+  width: 30px; height: 30px;
+  background: rgba(255,255,255,0.25);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.9rem; flex-shrink: 0;
+}
 
-  .stats-grid-pro { display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:0.8rem;}
-  .stat-pro { background:#EFF6FF; padding:0.8rem 1rem; border-radius:10px; color:#374151; border-left:3px solid #2962FF;}
+/* ── XP CARD ── */
+.prf-xp-card {
+  background: linear-gradient(135deg, #FFFBEB, #FEF3C7);
+  border-radius: 24px; padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  border: 2px solid #FDE68A;
+  box-shadow: 0 4px 20px rgba(245,158,11,0.15);
+  animation: fadeInUp 0.5s ease 0.2s both;
+}
+.prf-xp-header {
+  display: flex; justify-content: space-between;
+  align-items: center; margin-bottom: 0.8rem;
+}
+.prf-xp-label { font-weight: 700; color: #92400E; font-size: 0.95rem; }
+.prf-xp-val {
+  background: linear-gradient(135deg, #F59E0B, #FFD93D);
+  color: white; padding: 0.3rem 1rem;
+  border-radius: 50px; font-weight: 800; font-size: 0.85rem;
+  box-shadow: 0 4px 12px rgba(245,158,11,0.3);
+}
+.prf-xp-bar-wrap {
+  height: 14px; background: #FDE68A;
+  border-radius: 10px; overflow: hidden;
+  margin-bottom: 0.6rem;
+}
+.prf-xp-bar {
+  height: 100%; width: 0%;
+  background: linear-gradient(90deg, #00C853, #7ED321, #FFD93D);
+  background-size: 200% auto;
+  border-radius: 10px;
+  transition: width 1.2s cubic-bezier(0.4,0,0.2,1);
+  animation: shimmer 2s linear infinite;
+}
+.prf-xp-milestones {
+  display: flex; justify-content: space-between;
+  font-size: 0.75rem; color: #92400E; font-weight: 600;
+}
 
-  .badges-pro { display:grid; grid-template-columns:repeat(auto-fill, minmax(120px, 1fr)); gap:0.8rem;}
-  .badge-item-pro { background:linear-gradient(135deg, #FFF3B0, #FFE66D); border-radius:14px; padding:1rem; text-align:center; transition:transform 0.2s;}
-  .badge-item-pro:hover { transform:scale(1.05);}
-  .badge-item-pro.locked { background:#F3F4F6; opacity:0.5;}
-  .badge-emoji-pro { font-size:2.2rem; margin-bottom:0.3rem;}
-  .badge-nom-pro { font-size:0.8rem; font-weight:700; color:#374151;}
+/* ── STREAK ── */
+.prf-streak-card {
+  display: flex; align-items: center; gap: 1rem;
+  background: linear-gradient(135deg, #EF4444, #F59E0B);
+  border-radius: 20px; padding: 1.2rem 1.5rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 6px 20px rgba(239,68,68,0.3);
+  animation: fadeInUp 0.5s ease 0.3s both;
+}
+.prf-streak-icon { font-size: 2.5rem; }
+.prf-streak-text { flex: 1; }
+.prf-streak-text strong {
+  display: block; color: white;
+  font-size: 1rem; font-weight: 800;
+}
+.prf-streak-text span { color: rgba(255,255,255,0.85); font-size: 0.9rem; }
+.prf-streak-badge {
+  background: rgba(255,255,255,0.25);
+  color: white; padding: 0.5rem 1.2rem;
+  border-radius: 50px; font-weight: 900;
+  font-size: 1.1rem;
+  backdrop-filter: blur(10px);
+  border: 2px solid rgba(255,255,255,0.3);
+}
 
-  .popup-overlay { position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.6); display:flex; align-items:center; justify-content:center; z-index:9999;}
-  .popup-content { background:white; border-radius:20px; padding:2rem; max-width:500px; width:90%; max-height:90vh; overflow-y:auto; box-shadow:0 20px 60px rgba(0,0,0,0.3);}
-  .f-input { width:100%; padding:0.8rem 1rem; border:2px solid #D8B4FE; border-radius:12px; font-size:0.95rem; margin-bottom:0.7rem; outline:none; font-family:inherit;}
-  .f-input:focus { border-color:#7B61FF;}
-  .popup-actions { display:flex; gap:0.6rem; margin-top:1rem;}
-  .btn-vert { flex:1; background:linear-gradient(135deg, #00C853, #7ED321); color:white; border:none; padding:0.8rem; border-radius:12px; font-weight:700; cursor:pointer;}
-  .btn-rouge { flex:1; background:linear-gradient(135deg, #EF4444, #991B1B); color:white; border:none; padding:0.8rem; border-radius:12px; font-weight:700; cursor:pointer;}
+/* ── CARDS ── */
+.prf-card {
+  background: white; border-radius: 24px;
+  padding: 1.8rem; margin-bottom: 1.5rem;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+  animation: fadeInUp 0.5s ease both;
+}
+.prf-card-violet { border-top: 5px solid #7B61FF; }
+.prf-card-bleu   { border-top: 5px solid #2962FF; }
+.prf-card-or     { border-top: 5px solid #F59E0B; }
+
+.prf-card-header {
+  display: flex; align-items: center; gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+.prf-card-icon {
+  width: 52px; height: 52px; border-radius: 14px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.5rem; flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+.prf-card-title {
+  font-size: 1.1rem; font-weight: 800; color: #1A1D2E; margin: 0;
+  display: flex; align-items: center; gap: 0.6rem;
+}
+.prf-card-sub { font-size: 0.85rem; color: #6B7280; margin: 0.2rem 0 0; }
+.prf-badge-count {
+  background: linear-gradient(135deg, #F59E0B, #FFD93D);
+  color: white; padding: 0.2rem 0.7rem;
+  border-radius: 50px; font-size: 0.8rem; font-weight: 800;
+  box-shadow: 0 2px 8px rgba(245,158,11,0.3);
+}
+
+/* ── INFOS LISTE ── */
+.prf-infos-liste { display: flex; flex-direction: column; gap: 0.5rem; }
+.prf-info-ligne {
+  display: flex; align-items: center; gap: 1rem;
+  padding: 0.7rem 1rem;
+  background: linear-gradient(135deg, #FAF5FF, #EDE9FE);
+  border-radius: 12px;
+  border-left: 3px solid #7B61FF;
+  transition: all 0.2s;
+}
+.prf-info-ligne:hover { transform: translateX(4px); }
+.prf-info-label {
+  color: #6B7280; font-weight: 700; font-size: 0.85rem;
+  min-width: 140px;
+}
+.prf-info-val { color: #5B21B6; font-weight: 700; font-size: 0.9rem; }
+
+/* ── BIO CARD ── */
+.prf-bio-card {
+  display: flex; align-items: flex-start; gap: 1rem;
+  background: linear-gradient(135deg, #FDF2F8, #FCE7F3);
+  border: 2px solid #FBCFE8; border-radius: 20px;
+  padding: 1.5rem; margin-bottom: 1.5rem;
+  animation: fadeInUp 0.5s ease both;
+}
+.prf-bio-icon { font-size: 2rem; flex-shrink: 0; }
+.prf-bio-title { font-size: 1rem; font-weight: 800; color: #9D174D; margin: 0 0 0.5rem; }
+.prf-bio-text { color: #374151; font-style: italic; line-height: 1.6; margin: 0; font-size: 0.95rem; }
+
+/* ── STATS GRID ── */
+.prf-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 0.8rem;
+}
+.prf-stat-item {
+  border-radius: 16px; padding: 1.2rem 0.8rem;
+  text-align: center;
+  display: flex; flex-direction: column; align-items: center; gap: 0.3rem;
+  transition: all 0.3s; animation: bounceIn 0.5s ease both;
+}
+.prf-stat-item:hover { transform: translateY(-4px); }
+.prf-stat-bleu   { background: linear-gradient(135deg, #EFF6FF, #DBEAFE); border: 2px solid #93C5FD; }
+.prf-stat-violet { background: linear-gradient(135deg, #FAF5FF, #EDE9FE); border: 2px solid #C4B5FD; }
+.prf-stat-orange { background: linear-gradient(135deg, #FFFBEB, #FEF3C7); border: 2px solid #FDE68A; }
+.prf-stat-rose   { background: linear-gradient(135deg, #FFF1F2, #FFE4E6); border: 2px solid #FECDD3; }
+.prf-stat-rouge  { background: linear-gradient(135deg, #FEF2F2, #FEE2E2); border: 2px solid #FCA5A5; }
+.prf-stat-vert   { background: linear-gradient(135deg, #F0FDF4, #DCFCE7); border: 2px solid #86EFAC; }
+.prf-stat-emoji  { font-size: 1.8rem; }
+.prf-stat-val    { font-size: 1.6rem; font-weight: 900; color: #1A1D2E; }
+.prf-stat-label  { font-size: 0.72rem; color: #6B7280; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+
+/* ── BADGES GRID ── */
+.prf-badges-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+  gap: 0.8rem;
+}
+.prf-badge-item {
+  background: linear-gradient(135deg, #FFFBEB, #FEF3C7);
+  border: 2px solid #FDE68A; border-radius: 16px;
+  padding: 1rem 0.5rem; text-align: center;
+  transition: all 0.3s; cursor: default;
+  animation: bounceIn 0.5s ease both;
+}
+.prf-badge-item:hover {
+  transform: translateY(-4px) rotate(2deg);
+  box-shadow: 0 8px 20px rgba(245,158,11,0.3);
+}
+.prf-badge-emoji { font-size: 2rem; margin-bottom: 0.3rem; }
+.prf-badge-nom { font-size: 0.75rem; font-weight: 700; color: #374151; }
+
+.prf-badges-empty {
+  grid-column: 1/-1; text-align: center;
+  padding: 2rem; color: #9CA3AF;
+}
+.prf-badges-empty-icon { font-size: 3rem; margin-bottom: 0.5rem; }
+
+/* ══════════════════════════════════ */
+/* POPUP */
+/* ══════════════════════════════════ */
+.prf-popup-overlay {
+  position: fixed; top:0; left:0; right:0; bottom:0;
+  background: rgba(0,0,0,0.65);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 9999; backdrop-filter: blur(4px);
+}
+.prf-popup {
+  background: white; border-radius: 28px;
+  padding: 2rem; max-width: 520px; width: 90%;
+  max-height: 90vh; overflow-y: auto;
+  box-shadow: 0 24px 60px rgba(0,0,0,0.3);
+  animation: popupIn 0.4s cubic-bezier(0.175,0.885,0.32,1.275);
+}
+.prf-popup-header {
+  display: flex; align-items: center; gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+.prf-popup-icon {
+  width: 50px; height: 50px;
+  background: linear-gradient(135deg, #7B61FF, #A855F7);
+  border-radius: 14px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.5rem; flex-shrink: 0;
+}
+.prf-popup-title { font-size: 1.2rem; font-weight: 800; color: #1A1D2E; margin: 0; }
+.prf-popup-sub { font-size: 0.85rem; color: #6B7280; margin: 0.2rem 0 0; }
+.prf-popup-close {
+  margin-left: auto; width: 36px; height: 36px;
+  background: #F3F4F6; color: #6B7280;
+  border: none; border-radius: 50%; cursor: pointer;
+  font-size: 1rem; transition: all 0.2s; flex-shrink: 0;
+}
+.prf-popup-close:hover { background: #EF4444; color: white; }
+
+.prf-form-grid {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 0.8rem; margin-bottom: 0.5rem;
+}
+.prf-form-field { display: flex; flex-direction: column; gap: 0.4rem; }
+.prf-form-label { font-size: 0.82rem; font-weight: 700; color: #374151; }
+.prf-form-input, .prf-form-textarea {
+  padding: 0.75rem 1rem;
+  border: 2px solid #DDD6FE; border-radius: 12px;
+  font-size: 0.9rem; font-family: inherit;
+  outline: none; transition: border-color 0.2s;
+  color: #1A1D2E;
+}
+.prf-form-input:focus,
+.prf-form-textarea:focus { border-color: #7B61FF; }
+.prf-form-textarea { resize: vertical; width: 100%; }
+
+.prf-popup-actions {
+  display: flex; gap: 0.8rem; margin-top: 1.5rem;
+}
+.prf-btn-sauver, .prf-btn-annuler {
+  flex: 1;
+  display: flex; align-items: center; justify-content: center; gap: 0.6rem;
+  padding: 0.9rem; border: none; border-radius: 50px;
+  font-weight: 800; font-size: 0.95rem; cursor: pointer;
+  transition: all 0.3s;
+}
+.prf-btn-sauver {
+  background: linear-gradient(135deg, #00C853, #7ED321);
+  color: white;
+  box-shadow: 0 6px 20px rgba(0,200,83,0.4);
+}
+.prf-btn-sauver:hover { transform: translateY(-3px); }
+.prf-btn-annuler {
+  background: linear-gradient(135deg, #FEE2E2, #FECACA);
+  color: #EF4444; border: 2px solid #FCA5A5;
+}
+.prf-btn-annuler:hover {
+  background: linear-gradient(135deg, #EF4444, #DC2626);
+  color: white; border-color: transparent;
+  transform: translateY(-3px);
+}
+
+/* ══════════════════════════════════ */
+/* MODE SOMBRE */
+/* ══════════════════════════════════ */
+[data-theme="dark"] .prf-top-card { background: linear-gradient(135deg, #1E2235, #252A40); border-color: #4B5563; }
+[data-theme="dark"] .prf-nom { color: #C4B5FD; }
+[data-theme="dark"] .prf-card { background: #1E2235; }
+[data-theme="dark"] .prf-card-title { color: #F1F5F9; }
+[data-theme="dark"] .prf-card-sub { color: #94A3B8; }
+[data-theme="dark"] .prf-info-ligne { background: linear-gradient(135deg, #1E2235, #252A40); border-left-color: #7B61FF; }
+[data-theme="dark"] .prf-info-label { color: #94A3B8; }
+[data-theme="dark"] .prf-info-val { color: #C4B5FD; }
+[data-theme="dark"] .prf-bio-card { background: linear-gradient(135deg, #1E2235, #2D1B33); border-color: #4B5563; }
+[data-theme="dark"] .prf-bio-text { color: #CBD5E1; }
+[data-theme="dark"] .prf-stat-val { color: #F1F5F9; }
+[data-theme="dark"] .prf-xp-card { background: linear-gradient(135deg, #1C1810, #27200A); border-color: #92400E; }
+[data-theme="dark"] .prf-popup { background: #1E2235; }
+[data-theme="dark"] .prf-popup-title { color: #F1F5F9; }
+[data-theme="dark"] .prf-form-input,
+[data-theme="dark"] .prf-form-textarea { background: #252A40; border-color: #4B5563; color: #F1F5F9; }
+[data-theme="dark"] .prf-form-label { color: #CBD5E1; }
+[data-theme="dark"] .prf-popup-close { background: #374151; color: #9CA3AF; }
+
+/* ══════════════════════════════════ */
+/* RESPONSIVE */
+/* ══════════════════════════════════ */
+@media (max-width: 640px) {
+  .prf-container { padding: 1rem; }
+  .prf-header { padding: 1.2rem; }
+  .prf-header-title { font-size: 1.4rem; }
+  .prf-header-badge { display: none; }
+  .prf-top-card { flex-direction: column; align-items: center; text-align: center; }
+  .prf-meta-row { justify-content: center; }
+  .prf-photo { width: 100px; height: 100px; font-size: 3.5rem; }
+  .prf-photo-ring { width: 112px; height: 112px; }
+  .prf-nom { font-size: 1.4rem; }
+  .prf-form-grid { grid-template-columns: 1fr; }
+  .prf-stats-grid { grid-template-columns: repeat(2, 1fr); }
+}
 </style>
 
+<!-- ══════════════════════════════════════════ -->
+<!-- JAVASCRIPT -->
+<!-- ══════════════════════════════════════════ -->
 <script>
 let profilData = {};
 
 document.addEventListener('DOMContentLoaded', charger);
 
+/* ── TOAST ── */
+function toast(msg, type = 'info') {
+  const colors = {
+    succes : 'linear-gradient(135deg,#00C853,#7ED321)',
+    erreur : 'linear-gradient(135deg,#EF4444,#DC2626)',
+    info   : 'linear-gradient(135deg,#2962FF,#7B61FF)',
+    warning: 'linear-gradient(135deg,#F59E0B,#FFD93D)',
+  };
+  const t = document.getElementById('toast');
+  t.innerHTML = msg;
+  t.style.background = colors[type] || colors.info;
+  t.style.transform = 'translateX(0)';
+  setTimeout(() => { t.style.transform = 'translateX(120%)'; }, 3200);
+}
+
+/* ── CHARGER ── */
 function charger() {
-  fetch('/api/profil/info').then(r=>r.json()).then(d=>{
+  fetch('/api/profil/info').then(r => r.json()).then(d => {
     if (d.succes) {
       profilData = d.profil || {};
       afficher(d);
     }
-  });
+  }).catch(() => toast('❌ Erreur chargement profil', 'erreur'));
 }
 
+/* ── AFFICHER ── */
 function afficher(d) {
-  const p = d.profil || {};
-  const stats = d.stats || {};
-  const pomo = d.pomodoro || {};
-  const badges = d.badges || [];
+  const p      = d.profil  || {};
+  const stats  = d.stats   || {};
+  const pomo   = d.pomodoro|| {};
+  const badges = d.badges  || [];
 
-  // Photo
+  /* Photo */
   if (p.photo_url) {
-    document.getElementById('profil-photo').innerHTML = `<img src="${p.photo_url}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;"/>`;
+    document.getElementById('profil-photo').innerHTML =
+      `<img src="${p.photo_url}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;"/>`;
   }
 
-  // Barre XP
+  /* XP */
   const xpActuel = (stats.xp || 0) % 100;
-  setTimeout(()=>{
+  setTimeout(() => {
     document.getElementById('xp-fill').style.width = xpActuel + '%';
-  }, 200);
-  document.getElementById('xp-text').textContent = xpActuel + '/100';
+  }, 300);
+  document.getElementById('xp-text').textContent = xpActuel + '/100 XP';
 
-  // Infos perso
+  /* Infos perso */
   const infos = [
-    ['📧 Email', p.email],
-    ['📱 Téléphone', p.numero],
-    ['🎓 Université', p.universite],
-    ['📅 Année', p.annee_etude],
-    ['🎂 Naissance', p.date_naissance]
+    ['📧 Email',       p.email],
+    ['📱 Téléphone',   p.numero],
+    ['🎓 Université',  p.universite],
+    ['📅 Année',       p.annee_etude],
+    ['🎂 Naissance',   p.date_naissance],
   ];
-  const infosRemplies = infos.filter(([k,v]) => v && v.trim());
+  const infosRemplies = infos.filter(([, v]) => v && v.trim());
   if (infosRemplies.length > 0) {
     const c = document.getElementById('liste-infos');
     c.innerHTML = '';
     infosRemplies.forEach(([k, v]) => {
       const div = document.createElement('div');
-      div.className = 'info-ligne';
-      div.innerHTML = `<span class="info-label">${k}</span><span class="info-val">${esc(v)}</span>`;
+      div.className = 'prf-info-ligne';
+      div.innerHTML = `
+        <span class="prf-info-label">${k}</span>
+        <span class="prf-info-val">${esc(v)}</span>
+      `;
       c.appendChild(div);
     });
     document.getElementById('infos-perso').style.display = 'block';
   }
 
-  // Bio
+  /* Bio */
   if (p.bio && p.bio.trim()) {
     document.getElementById('bio-text').textContent = p.bio;
-    document.getElementById('bio-card').style.display = 'block';
+    document.getElementById('bio-card').style.display = 'flex';
   }
 
-  // Pomodoro
-  document.getElementById('nb-pomo').textContent = pomo.total_sessions || 0;
-  document.getElementById('min-pomo').textContent = pomo.total_minutes || 0;
+  /* Pomodoro */
+  document.getElementById('nb-pomo').textContent  = pomo.total_sessions || 0;
+  document.getElementById('min-pomo').textContent = pomo.total_minutes  || 0;
 
-  // Badges
+  /* Badges */
   document.getElementById('nb-badges').textContent = badges.length;
   const b = document.getElementById('liste-badges');
   b.innerHTML = '';
   if (badges.length > 0) {
-    badges.forEach(badge => {
+    badges.forEach((badge, i) => {
       const div = document.createElement('div');
-      div.className = 'badge-item-pro';
-      div.innerHTML = `<div class="badge-emoji-pro">${badge.emoji || '🏆'}</div><div class="badge-nom-pro">${esc(badge.nom)}</div>`;
+      div.className = 'prf-badge-item';
+      div.style.animationDelay = (i * 0.07) + 's';
+      div.innerHTML = `
+        <div class="prf-badge-emoji">${badge.emoji || '🏆'}</div>
+        <div class="prf-badge-nom">${esc(badge.nom)}</div>
+      `;
       b.appendChild(div);
     });
   } else {
-    b.innerHTML = '<p style="grid-column:1/-1; text-align:center; color:#9CA3AF;">🎯 Continue d\'utiliser NOKIROVA pour débloquer des badges !</p>';
+    b.innerHTML = `
+      <div class="prf-badges-empty">
+        <div class="prf-badges-empty-icon">🎯</div>
+        <p>Continue d'utiliser NOKIROVA pour débloquer des badges !</p>
+      </div>
+    `;
   }
 }
 
+/* ── OUVRIR FORM ── */
 function ouvrirForm() {
-  document.getElementById('f-nom').value = profilData.nom_complet || '';
-  document.getElementById('f-email').value = profilData.email || '';
-  document.getElementById('f-numero').value = profilData.numero || '';
-  document.getElementById('f-univ').value = profilData.universite || '';
-  document.getElementById('f-annee').value = profilData.annee_etude || '';
-  document.getElementById('f-date').value = profilData.date_naissance || '';
-  document.getElementById('f-bio').value = profilData.bio || '';
+  document.getElementById('f-nom').value   = profilData.nom_complet    || '';
+  document.getElementById('f-email').value = profilData.email          || '';
+  document.getElementById('f-numero').value= profilData.numero         || '';
+  document.getElementById('f-univ').value  = profilData.universite     || '';
+  document.getElementById('f-annee').value = profilData.annee_etude    || '';
+  document.getElementById('f-date').value  = profilData.date_naissance || '';
+  document.getElementById('f-bio').value   = profilData.bio            || '';
   document.getElementById('popup-overlay').style.display = 'flex';
 }
 
+/* ── FERMER FORM ── */
 function fermerForm() {
   document.getElementById('popup-overlay').style.display = 'none';
 }
 
+/* ── SAUVER ── */
 function sauver() {
   const data = {
-    nom_complet: document.getElementById('f-nom').value.trim(),
-    email: document.getElementById('f-email').value.trim(),
-    numero: document.getElementById('f-numero').value.trim(),
-    universite: document.getElementById('f-univ').value.trim(),
-    annee_etude: document.getElementById('f-annee').value.trim(),
-    date_naissance: document.getElementById('f-date').value.trim(),
-    bio: document.getElementById('f-bio').value.trim()
+    nom_complet    : document.getElementById('f-nom').value.trim(),
+    email          : document.getElementById('f-email').value.trim(),
+    numero         : document.getElementById('f-numero').value.trim(),
+    universite     : document.getElementById('f-univ').value.trim(),
+    annee_etude    : document.getElementById('f-annee').value.trim(),
+    date_naissance : document.getElementById('f-date').value.trim(),
+    bio            : document.getElementById('f-bio').value.trim(),
   };
-  if (!data.nom_complet) { alert('⚠️ Le nom est obligatoire !'); return; }
+
+  if (!data.nom_complet) {
+    toast('⚠️ Le nom est obligatoire !', 'warning');
+    return;
+  }
 
   fetch('/api/profil/save', {
-    method:'POST', headers:{'Content-Type':'application/json'},
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data)
-  }).then(r=>r.json()).then(d=>{
-    if (d.succes) { fermerForm(); location.reload(); }
-    else alert('❌ ' + d.erreur);
-  });
+  })
+  .then(r => r.json())
+  .then(d => {
+    if (d.succes) {
+      toast('✅ Profil sauvegardé !', 'succes');
+      fermerForm();
+      setTimeout(() => location.reload(), 1000);
+    } else {
+      toast('❌ ' + (d.erreur || 'Erreur'), 'erreur');
+    }
+  })
+  .catch(() => toast('❌ Erreur réseau', 'erreur'));
 }
 
-function esc(t) { const d = document.createElement('div'); d.textContent = t || ''; return d.innerHTML; }
+/* ── ESCAPE ── */
+function esc(t) {
+  const d = document.createElement('div');
+  d.textContent = t || '';
+  return d.innerHTML;
+}
 </script>
+
 {% endblock %}

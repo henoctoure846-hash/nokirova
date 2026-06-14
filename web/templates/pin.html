@@ -1,184 +1,629 @@
 {% extends "base.html" %}
 {% block title %}Sécurité PIN - NOKIROVA{% endblock %}
 {% block contenu %}
-<div class="page-container">
 
-  <div class="page-header" style="background: linear-gradient(135deg, #D8B4FE, #EDE9FE); border-left: 5px solid #7B61FF;">
-    <div class="page-header-icon" style="background: linear-gradient(135deg, #7B61FF, #5B21B6);">🔒</div>
-    <div>
-      <h1 class="page-title" style="color: #5B21B6;">Sécurité PIN</h1>
-      <p class="page-subtitle" style="color: #7B61FF;">Protège ton app avec un code PIN 🔐</p>
+<!-- TOAST -->
+<div id="toast" style="
+  position:fixed; top:20px; right:20px; z-index:9999;
+  background:#1A1D2E; color:white; padding:1rem 1.5rem;
+  border-radius:16px; font-weight:600; font-size:0.95rem;
+  box-shadow:0 8px 30px rgba(0,0,0,0.3);
+  transform:translateX(120%); transition:transform 0.4s cubic-bezier(0.175,0.885,0.32,1.275);
+  display:flex; align-items:center; gap:0.8rem; max-width:320px;
+"></div>
+
+<div class="pin-container">
+
+  <!-- ═══ HEADER ═══ -->
+  <div class="pin-header">
+    <div class="pin-header-bg-emoji">🔒</div>
+    <div class="pin-header-icon">🔒</div>
+    <div class="pin-header-text">
+      <h1 class="pin-header-title">Sécurité PIN</h1>
+      <p class="pin-header-sub">Protège ton app avec un code PIN 🔐</p>
+    </div>
+    <div class="pin-header-badge">
+      <span>🛡️</span> Sécurisé
     </div>
   </div>
 
-  <!-- STATUT -->
-  <div id="statut-card" class="statut-card">
-    <span style="font-size:2rem;" id="statut-emoji">⏳</span>
-    <div>
+  <!-- ═══ STATUT ═══ -->
+  <div id="statut-card" class="pin-statut-card">
+    <div class="pin-statut-icon-wrap" id="statut-icon-wrap">
+      <span id="statut-emoji">⏳</span>
+    </div>
+    <div class="pin-statut-text">
       <strong id="statut-titre">Chargement...</strong>
       <p id="statut-desc">Vérification du statut PIN</p>
     </div>
+    <div id="statut-badge" class="pin-statut-badge"></div>
   </div>
 
-  <!-- ZONE CRÉER (si pas de PIN) -->
-  <div id="zone-creer" class="action-card" style="display:none; border-top-color:#00C853;">
-    <h2 style="color:#14532D;">🆕 Créer un code PIN</h2>
-    <p>Choisis un code de 4 à 8 chiffres pour sécuriser ton app.</p>
+  <!-- ═══ CRÉER PIN ═══ -->
+  <div id="zone-creer" class="pin-card pin-card-vert" style="display:none;">
+    <div class="pin-card-header">
+      <div class="pin-card-icon"
+           style="background:linear-gradient(135deg,#00C853,#7ED321);">🆕</div>
+      <div>
+        <h2 class="pin-card-title">Créer un code PIN</h2>
+        <p class="pin-card-sub">Choisis un code de 4 à 8 chiffres</p>
+      </div>
+    </div>
 
-    <input type="password" id="nouveau-pin" placeholder="🔢 Nouveau PIN (4-8 chiffres)" class="input-pin" maxlength="8" inputmode="numeric"/>
-    <input type="password" id="confirmer-pin" placeholder="🔢 Confirmer le PIN" class="input-pin" maxlength="8" inputmode="numeric"/>
+    <div class="pin-dots-preview" id="dots-creer">
+      <span></span><span></span><span></span><span></span>
+    </div>
 
-    <button onclick="creerPin()" class="btn-action btn-vert">✅ Activer le PIN</button>
+    <div class="pin-input-wrap">
+      <span class="pin-input-icon">🔢</span>
+      <input type="password" id="nouveau-pin"
+             placeholder="Nouveau PIN (4-8 chiffres)"
+             class="pin-input" maxlength="8" inputmode="numeric"
+             oninput="majDots('dots-creer', this.value)"/>
+    </div>
+    <div class="pin-input-wrap">
+      <span class="pin-input-icon">🔁</span>
+      <input type="password" id="confirmer-pin"
+             placeholder="Confirmer le PIN"
+             class="pin-input" maxlength="8" inputmode="numeric"/>
+    </div>
+
+    <button onclick="creerPin()" class="pin-btn pin-btn-vert">
+      <span class="pin-btn-circle">✅</span>
+      <span>Activer le PIN</span>
+    </button>
   </div>
 
-  <!-- ZONE CHANGER/SUPPRIMER (si PIN actif) -->
-  <div id="zone-changer" class="action-card" style="display:none; border-top-color:#F59E0B;">
-    <h2 style="color:#92400E;">🔄 Changer le PIN</h2>
-    <input type="password" id="ancien-pin" placeholder="🔢 Ancien PIN" class="input-pin" maxlength="8" inputmode="numeric"/>
-    <input type="password" id="nouveau-pin2" placeholder="🔢 Nouveau PIN" class="input-pin" maxlength="8" inputmode="numeric"/>
-    <input type="password" id="confirmer-pin2" placeholder="🔢 Confirmer le nouveau" class="input-pin" maxlength="8" inputmode="numeric"/>
-    <button onclick="changerPin()" class="btn-action btn-orange">🔄 Changer le PIN</button>
+  <!-- ═══ CHANGER PIN ═══ -->
+  <div id="zone-changer" class="pin-card pin-card-orange" style="display:none;">
+    <div class="pin-card-header">
+      <div class="pin-card-icon"
+           style="background:linear-gradient(135deg,#F59E0B,#FB923C);">🔄</div>
+      <div>
+        <h2 class="pin-card-title">Changer le PIN</h2>
+        <p class="pin-card-sub">Entre l'ancien puis le nouveau PIN</p>
+      </div>
+    </div>
+
+    <div class="pin-input-wrap">
+      <span class="pin-input-icon">🔑</span>
+      <input type="password" id="ancien-pin"
+             placeholder="Ancien PIN"
+             class="pin-input" maxlength="8" inputmode="numeric"/>
+    </div>
+    <div class="pin-input-wrap">
+      <span class="pin-input-icon">🔢</span>
+      <input type="password" id="nouveau-pin2"
+             placeholder="Nouveau PIN"
+             class="pin-input" maxlength="8" inputmode="numeric"/>
+    </div>
+    <div class="pin-input-wrap">
+      <span class="pin-input-icon">🔁</span>
+      <input type="password" id="confirmer-pin2"
+             placeholder="Confirmer le nouveau"
+             class="pin-input" maxlength="8" inputmode="numeric"/>
+    </div>
+
+    <button onclick="changerPin()" class="pin-btn pin-btn-orange">
+      <span class="pin-btn-circle">🔄</span>
+      <span>Changer le PIN</span>
+    </button>
   </div>
 
-  <div id="zone-supprimer" class="action-card" style="display:none; border-top-color:#EF4444;">
-    <h2 style="color:#991B1B;">🗑️ Désactiver le PIN</h2>
-    <p>⚠️ N'importe qui pourra ouvrir ton app !</p>
-    <input type="password" id="pin-supprimer" placeholder="🔢 Ton PIN actuel" class="input-pin" maxlength="8" inputmode="numeric"/>
-    <button onclick="supprimerPin()" class="btn-action btn-rouge">🗑️ Désactiver</button>
+  <!-- ═══ SUPPRIMER PIN ═══ -->
+  <div id="zone-supprimer" class="pin-card pin-card-rouge" style="display:none;">
+    <div class="pin-card-header">
+      <div class="pin-card-icon"
+           style="background:linear-gradient(135deg,#EF4444,#DC2626);">🗑️</div>
+      <div>
+        <h2 class="pin-card-title">Désactiver le PIN</h2>
+        <p class="pin-card-sub">⚠️ N'importe qui pourra ouvrir ton app !</p>
+      </div>
+    </div>
+
+    <div class="pin-input-wrap">
+      <span class="pin-input-icon">🔑</span>
+      <input type="password" id="pin-supprimer"
+             placeholder="Ton PIN actuel"
+             class="pin-input" maxlength="8" inputmode="numeric"/>
+    </div>
+
+    <button onclick="supprimerPin()" class="pin-btn pin-btn-rouge">
+      <span class="pin-btn-circle">🗑️</span>
+      <span>Désactiver le PIN</span>
+    </button>
   </div>
 
-  <!-- INFO BOX -->
-  <div class="info-box">
-    <h3 style="color:#1E40AF;">💡 Comment ça marche ?</h3>
-    <ul>
-      <li>🔒 Le PIN est chiffré (SHA-256) → personne ne peut le lire</li>
-      <li>📱 Si tu oublies ton PIN, il faudra réinstaller l'app</li>
-      <li>🌐 Sur Web : le PIN sera demandé à chaque connexion</li>
-      <li>🔢 Recommandé : minimum 4 chiffres, idéal 6 chiffres</li>
-    </ul>
+  <!-- ═══ INFO BOX ═══ -->
+  <div class="pin-info-card">
+    <div class="pin-card-header">
+      <div class="pin-card-icon"
+           style="background:linear-gradient(135deg,#2962FF,#7EC8FF);">💡</div>
+      <div>
+        <h3 class="pin-card-title">Comment ça marche ?</h3>
+        <p class="pin-card-sub">Infos importantes sur la sécurité</p>
+      </div>
+    </div>
+    <div class="pin-info-items">
+      <div class="pin-info-item">
+        <span>🔒</span>
+        <span>Le PIN est chiffré (SHA-256) → personne ne peut le lire</span>
+      </div>
+      <div class="pin-info-item">
+        <span>📱</span>
+        <span>Si tu oublies ton PIN, il faudra réinstaller l'app</span>
+      </div>
+      <div class="pin-info-item">
+        <span>🌐</span>
+        <span>Sur Web : le PIN sera demandé à chaque connexion</span>
+      </div>
+      <div class="pin-info-item">
+        <span>🔢</span>
+        <span>Recommandé : minimum 4 chiffres, idéal 6 chiffres</span>
+      </div>
+    </div>
   </div>
 
-  <div id="message" class="message-toast" style="display:none;"></div>
 </div>
 
 <style>
-  .page-container { padding:2rem; max-width:900px; margin:0 auto;}
-  .page-header { display:flex; align-items:center; gap:1.2rem; border-radius:20px; padding:1.5rem 2rem; margin-bottom:1.5rem; box-shadow:0 4px 20px rgba(0,0,0,0.05);}
-  .page-header-icon { width:60px; height:60px; border-radius:16px; display:flex; align-items:center; justify-content:center; font-size:1.8rem; color:white;}
-  .page-title { font-size:1.6rem; font-weight:800; margin:0;}
-  .page-subtitle { margin:0.2rem 0 0; font-size:0.95rem;}
 
-  .statut-card { background:white; border-radius:18px; padding:1.5rem; margin-bottom:1.5rem; display:flex; align-items:center; gap:1.2rem; box-shadow:0 4px 20px rgba(0,0,0,0.06); border-left:5px solid #7B61FF;}
-  .statut-card.actif { border-left-color:#00C853;}
-  .statut-card.inactif { border-left-color:#EF4444;}
-  .statut-card strong { display:block; font-size:1.1rem; color:#1F2937;}
-  .statut-card p { color:#6B7280; font-size:0.9rem; margin-top:0.2rem;}
+/* ── ANIMATIONS ── */
+@keyframes fadeInUp {
+  from { opacity:0; transform:translateY(30px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+@keyframes floatLock {
+  0%,100% { transform:translateY(0px) rotate(-5deg); }
+  50%      { transform:translateY(-10px) rotate(5deg); }
+}
+@keyframes pulseViolet {
+  0%,100% { box-shadow:0 0 0 0 rgba(123,97,255,0.4); }
+  50%      { box-shadow:0 0 0 14px rgba(123,97,255,0); }
+}
+@keyframes pulseGreen {
+  0%,100% { box-shadow:0 0 0 0 rgba(0,200,83,0.4); }
+  50%      { box-shadow:0 0 0 12px rgba(0,200,83,0); }
+}
+@keyframes dotFill {
+  from { transform:scale(0); opacity:0; }
+  to   { transform:scale(1); opacity:1; }
+}
+@keyframes shakeErr {
+  0%,100% { transform:translateX(0); }
+  20%      { transform:translateX(-8px); }
+  40%      { transform:translateX(8px); }
+  60%      { transform:translateX(-6px); }
+  80%      { transform:translateX(6px); }
+}
+@keyframes lockPop {
+  0%   { transform:scale(0.5) rotate(-10deg); opacity:0; }
+  60%  { transform:scale(1.15) rotate(5deg); }
+  100% { transform:scale(1) rotate(0deg); opacity:1; }
+}
 
-  .action-card { background:white; border-radius:18px; padding:1.8rem; margin-bottom:1.2rem; box-shadow:0 4px 20px rgba(0,0,0,0.06); border-top:4px solid;}
-  .action-card h2 { font-size:1.1rem; margin-bottom:0.5rem;}
-  .action-card p { color:#6B7280; font-size:0.9rem; margin-bottom:1rem;}
+/* ── CONTAINER ── */
+.pin-container {
+  padding:1.5rem;
+  max-width:780px;
+  margin:0 auto;
+  animation:fadeInUp 0.5s ease;
+}
 
-  .input-pin { width:100%; padding:1rem; border:2px solid #D8B4FE; border-radius:14px; font-size:1.5rem; text-align:center; letter-spacing:8px; font-weight:700; margin-bottom:0.8rem; outline:none; background:#FAF5FF; color:#5B21B6;}
-  .input-pin:focus { border-color:#7B61FF;}
+/* ── HEADER ── */
+.pin-header {
+  position:relative; overflow:hidden;
+  background:linear-gradient(135deg,#7B61FF 0%,#5B21B6 50%,#A855F7 100%);
+  border-radius:28px; padding:2rem;
+  margin-bottom:1.5rem;
+  display:flex; align-items:center; gap:1.2rem; flex-wrap:wrap;
+  box-shadow:0 8px 32px rgba(123,97,255,0.4);
+}
+.pin-header-bg-emoji {
+  position:absolute; right:-10px; top:-20px;
+  font-size:9rem; opacity:0.12; pointer-events:none;
+  animation:floatLock 4s ease-in-out infinite;
+}
+.pin-header-icon {
+  width:72px; height:72px;
+  background:rgba(255,255,255,0.2);
+  border-radius:20px;
+  display:flex; align-items:center; justify-content:center;
+  font-size:2.2rem; flex-shrink:0;
+  backdrop-filter:blur(10px);
+  border:2px solid rgba(255,255,255,0.3);
+  animation:pulseViolet 2s infinite;
+}
+.pin-header-text { flex:1; }
+.pin-header-title {
+  font-size:1.8rem; font-weight:900;
+  color:white; margin:0;
+  text-shadow:0 2px 10px rgba(0,0,0,0.2);
+}
+.pin-header-sub {
+  color:rgba(255,255,255,0.85);
+  margin:0.3rem 0 0; font-size:0.95rem;
+}
+.pin-header-badge {
+  background:rgba(255,255,255,0.2);
+  color:white; padding:0.5rem 1.2rem;
+  border-radius:50px; font-weight:700; font-size:0.85rem;
+  display:flex; align-items:center; gap:0.5rem;
+  backdrop-filter:blur(10px);
+  border:1px solid rgba(255,255,255,0.3);
+  white-space:nowrap;
+}
 
-  .btn-action { width:100%; padding:0.9rem; border:none; border-radius:14px; font-weight:700; font-size:1rem; cursor:pointer; transition:0.2s; color:white;}
-  .btn-vert { background:linear-gradient(135deg, #00C853, #7ED321); box-shadow:0 4px 15px rgba(0,200,83,0.4);}
-  .btn-orange { background:linear-gradient(135deg, #F59E0B, #B45309); box-shadow:0 4px 15px rgba(245,158,11,0.4);}
-  .btn-rouge { background:linear-gradient(135deg, #EF4444, #991B1B); box-shadow:0 4px 15px rgba(239,68,68,0.4);}
-  .btn-action:hover { transform:translateY(-2px);}
+/* ── STATUT ── */
+.pin-statut-card {
+  display:flex; align-items:center; gap:1.2rem;
+  background:white; border-radius:24px;
+  padding:1.5rem; margin-bottom:1.5rem;
+  box-shadow:0 4px 24px rgba(0,0,0,0.08);
+  border-left:6px solid #7B61FF;
+  transition:all 0.5s; animation:fadeInUp 0.5s ease 0.1s both;
+}
+.pin-statut-card.actif   { border-left-color:#00C853; }
+.pin-statut-card.inactif { border-left-color:#EF4444; }
 
-  .info-box { background:#EFF6FF; border-radius:16px; padding:1.5rem; border-left:5px solid #2962FF;}
-  .info-box h3 { font-size:1.05rem; margin-bottom:0.8rem;}
-  .info-box ul { padding-left:1.5rem; color:#374151; line-height:2;}
+.pin-statut-icon-wrap {
+  width:64px; height:64px; border-radius:20px;
+  background:linear-gradient(135deg,#FAF5FF,#EDE9FE);
+  display:flex; align-items:center; justify-content:center;
+  font-size:2rem; flex-shrink:0;
+  border:2px solid #DDD6FE;
+  transition:all 0.5s;
+}
+.pin-statut-card.actif   .pin-statut-icon-wrap {
+  background:linear-gradient(135deg,#DCFCE7,#BBF7D0);
+  border-color:#86EFAC;
+  animation:pulseGreen 2s infinite;
+}
+.pin-statut-card.inactif .pin-statut-icon-wrap {
+  background:linear-gradient(135deg,#FEE2E2,#FECACA);
+  border-color:#FCA5A5;
+}
+#statut-emoji { animation:lockPop 0.5s ease; }
 
-  .message-toast { position:fixed; bottom:30px; right:30px; padding:1rem 1.5rem; border-radius:12px; font-weight:700; box-shadow:0 8px 25px rgba(0,0,0,0.2); animation:slideIn 0.3s ease; z-index:1000;}
-  .message-toast.ok { background:#00C853; color:white;}
-  .message-toast.err { background:#EF4444; color:white;}
-  @keyframes slideIn { from { transform:translateX(100%);} to { transform:translateX(0);}}
+.pin-statut-text { flex:1; }
+.pin-statut-text strong {
+  display:block; font-size:1.1rem;
+  font-weight:800; color:#1A1D2E;
+}
+.pin-statut-text p { color:#6B7280; font-size:0.88rem; margin:0.3rem 0 0; }
+
+.pin-statut-badge {
+  padding:0.4rem 1rem; border-radius:50px;
+  font-weight:800; font-size:0.82rem;
+}
+.pin-statut-badge.actif {
+  background:linear-gradient(135deg,#DCFCE7,#BBF7D0);
+  color:#14532D; border:2px solid #86EFAC;
+}
+.pin-statut-badge.inactif {
+  background:linear-gradient(135deg,#FEE2E2,#FECACA);
+  color:#EF4444; border:2px solid #FCA5A5;
+}
+
+/* ── CARDS ── */
+.pin-card {
+  background:white; border-radius:24px;
+  padding:1.8rem; margin-bottom:1.2rem;
+  box-shadow:0 4px 24px rgba(0,0,0,0.08);
+  animation:fadeInUp 0.5s ease both;
+}
+.pin-card-vert   { border-top:5px solid #00C853; }
+.pin-card-orange { border-top:5px solid #F59E0B; }
+.pin-card-rouge  { border-top:5px solid #EF4444; }
+
+.pin-card-header {
+  display:flex; align-items:center; gap:1rem;
+  margin-bottom:1.5rem;
+}
+.pin-card-icon {
+  width:54px; height:54px; border-radius:16px;
+  display:flex; align-items:center; justify-content:center;
+  font-size:1.6rem; flex-shrink:0;
+  box-shadow:0 4px 16px rgba(0,0,0,0.15);
+}
+.pin-card-title {
+  font-size:1.1rem; font-weight:800; color:#1A1D2E; margin:0;
+}
+.pin-card-sub { font-size:0.85rem; color:#6B7280; margin:0.2rem 0 0; }
+
+/* ── DOTS PREVIEW ── */
+.pin-dots-preview {
+  display:flex; justify-content:center; gap:0.8rem;
+  margin-bottom:1.2rem;
+}
+.pin-dots-preview span {
+  width:18px; height:18px; border-radius:50%;
+  border:2px solid #00C853; background:transparent;
+  transition:all 0.3s;
+}
+.pin-dots-preview span.filled {
+  background:linear-gradient(135deg,#00C853,#7ED321);
+  border-color:transparent;
+  animation:dotFill 0.2s ease;
+  box-shadow:0 2px 8px rgba(0,200,83,0.4);
+}
+
+/* ── INPUTS ── */
+.pin-input-wrap {
+  display:flex; align-items:center; gap:0.8rem;
+  background:#FAF5FF; border:2px solid #DDD6FE;
+  border-radius:16px; padding:0.9rem 1.2rem;
+  margin-bottom:0.8rem; transition:all 0.2s;
+}
+.pin-input-wrap:focus-within {
+  border-color:#7B61FF;
+  box-shadow:0 0 0 4px rgba(123,97,255,0.1);
+}
+.pin-input-wrap.shake { animation:shakeErr 0.4s ease; }
+.pin-input-icon { font-size:1.2rem; flex-shrink:0; }
+.pin-input {
+  flex:1; border:none; background:transparent;
+  font-size:1.8rem; text-align:center;
+  letter-spacing:12px; font-weight:800;
+  color:#5B21B6; outline:none;
+  font-family:'Courier New', monospace;
+}
+.pin-input::placeholder {
+  font-size:0.9rem; letter-spacing:0; color:#9CA3AF;
+  font-family:inherit; font-weight:400;
+}
+
+/* ── BOUTONS ── */
+.pin-btn {
+  width:100%;
+  display:flex; align-items:center; justify-content:center; gap:0.8rem;
+  padding:1.1rem; border:none; border-radius:50px;
+  font-weight:800; font-size:1.05rem; cursor:pointer;
+  transition:all 0.3s; position:relative; overflow:hidden;
+  margin-top:0.5rem;
+}
+.pin-btn::before {
+  content:'';
+  position:absolute; top:0; left:-100%;
+  width:100%; height:100%;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,0.2),transparent);
+  transition:left 0.5s;
+}
+.pin-btn:hover::before { left:100%; }
+.pin-btn:hover { transform:translateY(-3px); }
+.pin-btn-circle {
+  width:34px; height:34px;
+  background:rgba(255,255,255,0.25);
+  border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  font-size:1rem; flex-shrink:0;
+}
+.pin-btn-vert {
+  background:linear-gradient(135deg,#00C853,#7ED321);
+  color:white; box-shadow:0 6px 20px rgba(0,200,83,0.4);
+}
+.pin-btn-vert:hover { box-shadow:0 10px 28px rgba(0,200,83,0.5); }
+.pin-btn-orange {
+  background:linear-gradient(135deg,#F59E0B,#B45309);
+  color:white; box-shadow:0 6px 20px rgba(245,158,11,0.4);
+}
+.pin-btn-orange:hover { box-shadow:0 10px 28px rgba(245,158,11,0.5); }
+.pin-btn-rouge {
+  background:linear-gradient(135deg,#EF4444,#991B1B);
+  color:white; box-shadow:0 6px 20px rgba(239,68,68,0.4);
+}
+.pin-btn-rouge:hover { box-shadow:0 10px 28px rgba(239,68,68,0.5); }
+
+/* ── INFO CARD ── */
+.pin-info-card {
+  background:white; border-radius:24px;
+  padding:1.8rem; margin-bottom:1.5rem;
+  box-shadow:0 4px 20px rgba(0,0,0,0.06);
+  border-top:5px solid #2962FF;
+  animation:fadeInUp 0.5s ease 0.3s both;
+}
+.pin-info-items { display:flex; flex-direction:column; gap:0.8rem; }
+.pin-info-item {
+  display:flex; align-items:flex-start; gap:0.8rem;
+  padding:0.8rem 1rem;
+  background:linear-gradient(135deg,#EFF6FF,#DBEAFE);
+  border-radius:12px; border-left:3px solid #2962FF;
+  font-size:0.9rem; color:#374151; font-weight:500;
+  transition:all 0.2s;
+}
+.pin-info-item:hover { transform:translateX(4px); }
+.pin-info-item span:first-child { font-size:1.2rem; flex-shrink:0; }
+
+/* ══════════════════════════════════ */
+/* MODE SOMBRE */
+/* ══════════════════════════════════ */
+[data-theme="dark"] .pin-statut-card,
+[data-theme="dark"] .pin-card,
+[data-theme="dark"] .pin-info-card { background:#1E2235; }
+[data-theme="dark"] .pin-statut-text strong { color:#F1F5F9; }
+[data-theme="dark"] .pin-card-title { color:#F1F5F9; }
+[data-theme="dark"] .pin-card-sub { color:#94A3B8; }
+[data-theme="dark"] .pin-input-wrap {
+  background:#252A40; border-color:#4B5563;
+}
+[data-theme="dark"] .pin-input { color:#C4B5FD; }
+[data-theme="dark"] .pin-info-item {
+  background:linear-gradient(135deg,#1E2235,#1E3A5F);
+  border-left-color:#2962FF; color:#CBD5E1;
+}
+[data-theme="dark"] .pin-statut-card.actif .pin-statut-icon-wrap {
+  background:linear-gradient(135deg,#14532D,#166534);
+}
+[data-theme="dark"] .pin-statut-card.inactif .pin-statut-icon-wrap {
+  background:linear-gradient(135deg,#7F1D1D,#991B1B);
+}
+
+/* ══════════════════════════════════ */
+/* RESPONSIVE */
+/* ══════════════════════════════════ */
+@media (max-width:640px) {
+  .pin-container { padding:1rem; }
+  .pin-header { padding:1.2rem; }
+  .pin-header-title { font-size:1.4rem; }
+  .pin-header-badge { display:none; }
+  .pin-card { padding:1.2rem; }
+  .pin-input { font-size:1.4rem; letter-spacing:8px; }
+  .pin-statut-card { flex-wrap:wrap; }
+}
 </style>
 
 <script>
 document.addEventListener('DOMContentLoaded', verifierStatut);
 
-function verifierStatut() {
-  fetch('/api/pin/statut').then(r=>r.json()).then(d=>{
-    const c = document.getElementById('statut-card');
-    if (d.actif) {
-      c.classList.add('actif');
-      document.getElementById('statut-emoji').textContent = '✅';
-      document.getElementById('statut-titre').textContent = 'PIN ACTIVÉ';
-      document.getElementById('statut-desc').textContent = 'Ton app est protégée par un code PIN 🔒';
-      document.getElementById('zone-creer').style.display = 'none';
-      document.getElementById('zone-changer').style.display = 'block';
-      document.getElementById('zone-supprimer').style.display = 'block';
-    } else {
-      c.classList.add('inactif');
-      document.getElementById('statut-emoji').textContent = '🔓';
-      document.getElementById('statut-titre').textContent = 'PIN DÉSACTIVÉ';
-      document.getElementById('statut-desc').textContent = 'Aucune protection active. Active un PIN pour sécuriser ton app !';
-      document.getElementById('zone-creer').style.display = 'block';
-      document.getElementById('zone-changer').style.display = 'none';
-      document.getElementById('zone-supprimer').style.display = 'none';
-    }
+/* ── TOAST ── */
+function toast(msg, type = 'info') {
+  const colors = {
+    succes : 'linear-gradient(135deg,#00C853,#7ED321)',
+    erreur : 'linear-gradient(135deg,#EF4444,#DC2626)',
+    info   : 'linear-gradient(135deg,#2962FF,#7B61FF)',
+    warning: 'linear-gradient(135deg,#F59E0B,#FFD93D)',
+  };
+  const t = document.getElementById('toast');
+  t.innerHTML = msg;
+  t.style.background = colors[type] || colors.info;
+  t.style.transform = 'translateX(0)';
+  setTimeout(() => { t.style.transform = 'translateX(120%)'; }, 3200);
+}
+
+/* ── DOTS ── */
+function majDots(dotsId, val) {
+  const dots = document.querySelectorAll('#' + dotsId + ' span');
+  dots.forEach((d, i) => {
+    d.classList.toggle('filled', i < val.length);
   });
 }
 
+/* ── SHAKE ── */
+function shake(wrapId) {
+  const el = document.getElementById(wrapId);
+  if (!el) return;
+  el.classList.add('shake');
+  setTimeout(() => el.classList.remove('shake'), 500);
+}
+
+/* ── VÉRIFIER STATUT ── */
+function verifierStatut() {
+  fetch('/api/pin/statut').then(r => r.json()).then(d => {
+    const c = document.getElementById('statut-card');
+    const b = document.getElementById('statut-badge');
+
+    if (d.actif) {
+      c.className = 'pin-statut-card actif';
+      document.getElementById('statut-emoji').textContent  = '✅';
+      document.getElementById('statut-titre').textContent  = 'PIN ACTIVÉ';
+      document.getElementById('statut-desc').textContent   = 'Ton app est protégée par un code PIN 🔒';
+      b.className   = 'pin-statut-badge actif';
+      b.textContent = '🔒 Actif';
+      document.getElementById('zone-creer').style.display    = 'none';
+      document.getElementById('zone-changer').style.display  = 'block';
+      document.getElementById('zone-supprimer').style.display= 'block';
+    } else {
+      c.className = 'pin-statut-card inactif';
+      document.getElementById('statut-emoji').textContent  = '🔓';
+      document.getElementById('statut-titre').textContent  = 'PIN DÉSACTIVÉ';
+      document.getElementById('statut-desc').textContent   = 'Aucune protection active. Active un PIN !';
+      b.className   = 'pin-statut-badge inactif';
+      b.textContent = '🔓 Inactif';
+      document.getElementById('zone-creer').style.display    = 'block';
+      document.getElementById('zone-changer').style.display  = 'none';
+      document.getElementById('zone-supprimer').style.display= 'none';
+    }
+  }).catch(() => toast('❌ Erreur connexion', 'erreur'));
+}
+
+/* ── CRÉER PIN ── */
 function creerPin() {
   const p = document.getElementById('nouveau-pin').value;
   const c = document.getElementById('confirmer-pin').value;
-  if (p.length < 4) return toast('⚠️ Min 4 chiffres', 'err');
-  if (!/^\d+$/.test(p)) return toast('⚠️ Que des chiffres', 'err');
-  if (p !== c) return toast('❌ PINs différents', 'err');
+
+  if (p.length < 4) {
+    toast('⚠️ Minimum 4 chiffres !', 'warning');
+    shake('zone-creer'); return;
+  }
+  if (!/^\d+$/.test(p)) {
+    toast('⚠️ Seulement des chiffres !', 'warning');
+    shake('zone-creer'); return;
+  }
+  if (p !== c) {
+    toast('❌ Les deux PINs sont différents !', 'erreur');
+    shake('zone-creer'); return;
+  }
 
   fetch('/api/pin/set', {
-    method:'POST', headers:{'Content-Type':'application/json'},
-    body: JSON.stringify({pin: p})
-  }).then(r=>r.json()).then(d=>{
-    if (d.succes) { toast('✅ PIN activé !', 'ok'); verifierStatut(); }
-    else toast('❌ ' + d.erreur, 'err');
-  });
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ pin: p })
+  })
+  .then(r => r.json())
+  .then(d => {
+    if (d.succes) {
+      toast('✅ PIN activé avec succès !', 'succes');
+      verifierStatut();
+    } else {
+      toast('❌ ' + (d.erreur || 'Erreur'), 'erreur');
+    }
+  })
+  .catch(() => toast('❌ Erreur réseau', 'erreur'));
 }
 
+/* ── CHANGER PIN ── */
 function changerPin() {
   const a = document.getElementById('ancien-pin').value;
   const n = document.getElementById('nouveau-pin2').value;
   const c = document.getElementById('confirmer-pin2').value;
-  if (!a) return toast('⚠️ Entre l\'ancien PIN', 'err');
-  if (n.length < 4) return toast('⚠️ Min 4 chiffres', 'err');
-  if (n !== c) return toast('❌ Nouveaux PINs différents', 'err');
+
+  if (!a)        { toast('⚠️ Entre l\'ancien PIN !', 'warning'); return; }
+  if (n.length < 4){ toast('⚠️ Minimum 4 chiffres !', 'warning'); return; }
+  if (n !== c)   { toast('❌ Nouveaux PINs différents !', 'erreur'); shake('zone-changer'); return; }
 
   fetch('/api/pin/changer', {
-    method:'POST', headers:{'Content-Type':'application/json'},
-    body: JSON.stringify({ancien: a, nouveau: n})
-  }).then(r=>r.json()).then(d=>{
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ ancien: a, nouveau: n })
+  })
+  .then(r => r.json())
+  .then(d => {
     if (d.succes) {
-      toast('✅ PIN changé !', 'ok');
-      document.getElementById('ancien-pin').value = '';
-      document.getElementById('nouveau-pin2').value = '';
-      document.getElementById('confirmer-pin2').value = '';
-    } else toast('❌ ' + d.erreur, 'err');
-  });
+      toast('✅ PIN changé avec succès !', 'succes');
+      document.getElementById('ancien-pin').value    = '';
+      document.getElementById('nouveau-pin2').value  = '';
+      document.getElementById('confirmer-pin2').value= '';
+    } else {
+      toast('❌ ' + (d.erreur || 'Ancien PIN incorrect'), 'erreur');
+      shake('zone-changer');
+    }
+  })
+  .catch(() => toast('❌ Erreur réseau', 'erreur'));
 }
 
+/* ── SUPPRIMER PIN ── */
 function supprimerPin() {
   const p = document.getElementById('pin-supprimer').value;
-  if (!p) return toast('⚠️ Entre ton PIN', 'err');
-  if (!confirm('🗑️ Vraiment désactiver le PIN ?')) return;
-  fetch('/api/pin/supprimer', {
-    method:'POST', headers:{'Content-Type':'application/json'},
-    body: JSON.stringify({pin: p})
-  }).then(r=>r.json()).then(d=>{
-    if (d.succes) { toast('🔓 PIN désactivé', 'ok'); verifierStatut(); }
-    else toast('❌ ' + d.erreur, 'err');
-  });
-}
+  if (!p) { toast('⚠️ Entre ton PIN actuel !', 'warning'); return; }
+  if (!confirm('🗑️ Vraiment désactiver le PIN ?\nTon app ne sera plus protégée !')) return;
 
-function toast(msg, type) {
-  const t = document.getElementById('message');
-  t.textContent = msg;
-  t.className = 'message-toast ' + type;
-  t.style.display = 'block';
-  setTimeout(()=>{ t.style.display = 'none'; }, 3000);
+  fetch('/api/pin/supprimer', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ pin: p })
+  })
+  .then(r => r.json())
+  .then(d => {
+    if (d.succes) {
+      toast('🔓 PIN désactivé', 'info');
+      verifierStatut();
+    } else {
+      toast('❌ ' + (d.erreur || 'PIN incorrect'), 'erreur');
+      shake('zone-supprimer');
+    }
+  })
+  .catch(() => toast('❌ Erreur réseau', 'erreur'));
 }
 </script>
+
 {% endblock %}

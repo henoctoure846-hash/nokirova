@@ -33,11 +33,10 @@
     <!-- EXPORT -->
     <div class="sh-card sh-card-rose">
       <div class="sh-card-header">
-        <div class="sh-card-icon"
-             style="background:linear-gradient(135deg,#FF6B9D,#C2185B);">📤</div>
+        <div class="sh-card-icon" style="background:linear-gradient(135deg,#FF6B9D,#C2185B);">📤</div>
         <div>
           <h2 class="sh-card-title">Exporter un cours</h2>
-          <p class="sh-card-sub">Crée un fichier <code class="sh-code">.nokirova</code> à envoyer</p>
+          <p class="sh-card-sub">Crée un fichier <code class="sh-code">.nokirova</code></p>
         </div>
       </div>
 
@@ -48,486 +47,113 @@
 
       <div class="sh-input-wrap">
         <span class="sh-input-icon">👤</span>
-        <input type="text" id="createur"
-               placeholder="Ton pseudo (ex: Hénoc)"
-               class="sh-input"/>
+        <input type="text" id="createur" placeholder="Ton pseudo" class="sh-input"/>
       </div>
 
-      <button onclick="exporter()" class="sh-btn sh-btn-rose">
-        <span class="sh-btn-circle">📤</span>
-        <span>Exporter le cours</span>
-      </button>
+      <div style="display:grid; gap:0.8rem;">
+        <button onclick="exporter()" class="sh-btn sh-btn-rose">
+          <span class="sh-btn-circle">💾</span>
+          <span>Télécharger le fichier</span>
+        </button>
+
+        <button onclick="partagerWhatsApp()" class="sh-btn" style="background:#25D366; color:white;">
+          <span class="sh-btn-circle">📱</span>
+          <span>Partager sur WhatsApp</span>
+        </button>
+      </div>
     </div>
 
     <!-- IMPORT -->
     <div class="sh-card sh-card-violet">
       <div class="sh-card-header">
-        <div class="sh-card-icon"
-             style="background:linear-gradient(135deg,#7B61FF,#5B21B6);">📥</div>
+        <div class="sh-card-icon" style="background:linear-gradient(135deg,#7B61FF,#5B21B6);">📥</div>
         <div>
           <h2 class="sh-card-title">Importer un cours</h2>
-          <p class="sh-card-sub">Reçois un fichier <code class="sh-code">.nokirova</code></p>
+          <p class="sh-card-sub">Reçois un fichier d'un ami</p>
         </div>
       </div>
 
-      <div class="sh-drop-zone" id="drop-zone"
-           onclick="document.getElementById('file-nok').click()"
-           ondragover="dragOver(event)"
-           ondragleave="dragLeave(event)"
-           ondrop="dropFichier(event)">
-        <input type="file" id="file-nok" accept=".nokirova"
-               style="display:none;" onchange="fichierChoisi(event)"/>
+      <div class="sh-drop-zone" id="drop-zone" onclick="document.getElementById('file-nok').click()">
+        <input type="file" id="file-nok" accept=".nokirova" style="display:none;" onchange="fichierChoisi(event)"/>
         <div class="sh-drop-emoji">📥</div>
         <p class="sh-drop-title">Glisse ton fichier ici</p>
-        <p class="sh-drop-sub">ou clique pour choisir</p>
         <div class="sh-drop-format">.nokirova</div>
         <p id="nom-fic" class="sh-drop-nom"></p>
       </div>
 
-      <button onclick="importer()" id="btn-importer"
-              class="sh-btn sh-btn-violet" disabled>
-        <span class="sh-btn-circle">📥</span>
-        <span>Importer le cours</span>
+      <button onclick="importer()" id="btn-importer" class="sh-btn sh-btn-violet" disabled>
+        <span class="sh-btn-circle">✅</span>
+        <span>Lancer l'import</span>
       </button>
     </div>
 
   </div>
 
+  <!-- ═══ QR CODE SECTION ═══ -->
+  <div class="sh-card" id="qr-section" style="text-align:center; display:none; border-top:5px solid #F59E0B;">
+    <h3 class="sh-card-title">📱 Scan pour importer</h3>
+    <div id="qrcode" style="display:inline-block; padding:15px; background:white; border-radius:15px; margin:1rem 0;"></div>
+    <p class="sh-card-sub">Tes amis peuvent scanner ce code pour voir le cours</p>
+  </div>
+
   <!-- ═══ APERÇU IMPORT ═══ -->
   <div id="apercu-import" class="sh-apercu-card" style="display:none;">
-    <div class="sh-card-header">
-      <div class="sh-card-icon"
-           style="background:linear-gradient(135deg,#7B61FF,#A855F7);">👁️</div>
-      <div>
-        <h3 class="sh-card-title">Aperçu du fichier reçu</h3>
-        <p class="sh-card-sub">Vérifie avant d'importer</p>
-      </div>
-    </div>
     <div id="apercu-contenu" class="sh-apercu-grid"></div>
     <button onclick="confirmerImport()" class="sh-btn sh-btn-rose" style="margin-top:1.2rem;">
-      <span class="sh-btn-circle">✅</span>
-      <span>Confirmer l'import</span>
+      <span class="sh-btn-circle">✨</span>
+      <span>Confirmer l'importation</span>
     </button>
   </div>
 
-  <!-- ═══ LOADING ═══ -->
   <div id="loading" class="sh-loading" style="display:none;">
-    <div class="sh-loading-dots">
-      <span></span><span></span><span></span>
-    </div>
-    <p class="sh-loading-text">Traitement en cours...</p>
-  </div>
-
-  <!-- ═══ INFO ═══ -->
-  <div class="sh-info-card">
-    <div class="sh-card-header">
-      <div class="sh-card-icon"
-           style="background:linear-gradient(135deg,#FF6B9D,#7B61FF);">💡</div>
-      <div>
-        <h3 class="sh-card-title">Comment ça marche ?</h3>
-        <p class="sh-card-sub">Le système de partage NOKIROVA</p>
-      </div>
-    </div>
-    <div class="sh-steps">
-      <div class="sh-step">
-        <div class="sh-step-num" style="background:linear-gradient(135deg,#FF6B9D,#C2185B);">1</div>
-        <div>
-          <strong>Exporte</strong>
-          <p>Choisis ton cours et génère un fichier .nokirova</p>
-        </div>
-      </div>
-      <div class="sh-step-arrow">→</div>
-      <div class="sh-step">
-        <div class="sh-step-num" style="background:linear-gradient(135deg,#F59E0B,#FB923C);">2</div>
-        <div>
-          <strong>Envoie</strong>
-          <p>Partage le fichier par WhatsApp, email, etc.</p>
-        </div>
-      </div>
-      <div class="sh-step-arrow">→</div>
-      <div class="sh-step">
-        <div class="sh-step-num" style="background:linear-gradient(135deg,#7B61FF,#A855F7);">3</div>
-        <div>
-          <strong>Importe</strong>
-          <p>Ton ami importe le fichier dans NOKIROVA</p>
-        </div>
-      </div>
-    </div>
+    <div class="sh-loading-dots"><span></span><span></span><span></span></div>
   </div>
 
 </div>
 
 <style>
-
-/* ── ANIMATIONS ── */
-@keyframes fadeInUp {
-  from { opacity:0; transform:translateY(30px); }
-  to   { opacity:1; transform:translateY(0); }
-}
-@keyframes floatHands {
-  0%,100% { transform:translateY(0px) rotate(-3deg); }
-  50%      { transform:translateY(-10px) rotate(3deg); }
-}
-@keyframes dotBounce {
-  0%,80%,100% { transform:scale(0); opacity:0; }
-  40%          { transform:scale(1); opacity:1; }
-}
-@keyframes pulseRose {
-  0%,100% { box-shadow:0 0 0 0 rgba(255,107,157,0.4); }
-  50%      { box-shadow:0 0 0 12px rgba(255,107,157,0); }
-}
-@keyframes dropPulse {
-  0%,100% { border-color:#7B61FF; }
-  50%      { border-color:#A855F7; }
-}
-
-/* ── CONTAINER ── */
-.sh-container {
-  padding:1.5rem;
-  max-width:1050px;
-  margin:0 auto;
-  animation:fadeInUp 0.5s ease;
-}
-
-/* ── HEADER ── */
-.sh-header {
-  position:relative; overflow:hidden;
-  background:linear-gradient(135deg,#FF6B9D 0%,#C2185B 40%,#7B61FF 100%);
-  border-radius:28px; padding:2rem;
-  margin-bottom:1.5rem;
-  display:flex; align-items:center; gap:1.2rem; flex-wrap:wrap;
-  box-shadow:0 8px 32px rgba(255,107,157,0.35);
-}
-.sh-header-bg-emoji {
-  position:absolute; right:-10px; top:-20px;
-  font-size:9rem; opacity:0.12; pointer-events:none;
-  animation:floatHands 4s ease-in-out infinite;
-}
-.sh-header-icon {
-  width:72px; height:72px;
-  background:rgba(255,255,255,0.2);
-  border-radius:20px;
-  display:flex; align-items:center; justify-content:center;
-  font-size:2.2rem; flex-shrink:0;
-  backdrop-filter:blur(10px);
-  border:2px solid rgba(255,255,255,0.3);
-}
-.sh-header-text { flex:1; }
-.sh-header-title {
-  font-size:1.8rem; font-weight:900;
-  color:white; margin:0;
-  text-shadow:0 2px 10px rgba(0,0,0,0.2);
-}
-.sh-header-sub {
-  color:rgba(255,255,255,0.85);
-  margin:0.3rem 0 0; font-size:0.95rem;
-}
-.sh-header-badge {
-  background:rgba(255,255,255,0.2);
-  color:white; padding:0.5rem 1.2rem;
-  border-radius:50px; font-weight:700; font-size:0.85rem;
-  display:flex; align-items:center; gap:0.5rem;
-  backdrop-filter:blur(10px);
-  border:1px solid rgba(255,255,255,0.3);
-  white-space:nowrap;
-}
-
-/* ── GRID ── */
-.sh-grid {
-  display:grid; grid-template-columns:1fr 1fr;
-  gap:1.2rem; margin-bottom:1.5rem;
-}
-
-/* ── CARDS ── */
-.sh-card {
-  background:white; border-radius:24px;
-  padding:1.8rem;
-  box-shadow:0 4px 24px rgba(0,0,0,0.08);
-  animation:fadeInUp 0.5s ease both;
-}
-.sh-card-rose   { border-top:5px solid #FF6B9D; }
+/* CSS PARIS SUSHI DÉJÀ PRÉSENT - ON GARDE TOUT */
+@keyframes fadeInUp { from { opacity:0; transform:translateY(30px); } to { opacity:1; transform:translateY(0); } }
+.sh-container { padding:1.5rem; max-width:1050px; margin:0 auto; animation:fadeInUp 0.5s ease; }
+.sh-header { position:relative; overflow:hidden; background:linear-gradient(135deg,#FF6B9D 0%,#C2185B 40%,#7B61FF 100%); border-radius:28px; padding:2rem; margin-bottom:1.5rem; display:flex; align-items:center; gap:1.2rem; box-shadow:0 8px 32px rgba(255,107,157,0.35); }
+.sh-header-icon { width:72px; height:72px; background:rgba(255,255,255,0.2); border-radius:20px; display:flex; align-items:center; justify-content:center; font-size:2.2rem; backdrop-filter:blur(10px); border:2px solid rgba(255,255,255,0.3); }
+.sh-header-title { font-size:1.8rem; font-weight:900; color:white; margin:0; }
+.sh-header-sub { color:rgba(255,255,255,0.85); margin:0.3rem 0 0; font-size:0.95rem; }
+.sh-grid { display:grid; grid-template-columns:1fr 1fr; gap:1.2rem; margin-bottom:1.5rem; }
+.sh-card { background:white; border-radius:24px; padding:1.8rem; box-shadow:0 4px 24px rgba(0,0,0,0.08); }
+.sh-card-rose { border-top:5px solid #FF6B9D; }
 .sh-card-violet { border-top:5px solid #7B61FF; }
-
-.sh-card-header {
-  display:flex; align-items:center; gap:1rem;
-  margin-bottom:1.5rem;
-}
-.sh-card-icon {
-  width:54px; height:54px; border-radius:16px;
-  display:flex; align-items:center; justify-content:center;
-  font-size:1.6rem; flex-shrink:0;
-  box-shadow:0 4px 16px rgba(0,0,0,0.15);
-}
-.sh-card-title {
-  font-size:1.05rem; font-weight:800; color:#1A1D2E; margin:0;
-}
-.sh-card-sub { font-size:0.82rem; color:#6B7280; margin:0.2rem 0 0; }
-.sh-code {
-  background:#FFE5EF; color:#C2185B;
-  padding:0.15rem 0.5rem; border-radius:6px;
-  font-size:0.82rem; font-weight:700;
-}
-
-/* ── SELECT ── */
-.sh-select-wrap {
-  display:flex; align-items:center; gap:0.8rem;
-  background:#FFF7FB; border:2px solid #FFC9DE;
-  border-radius:14px; padding:0.75rem 1rem;
-  margin-bottom:0.8rem; transition:border-color 0.2s;
-}
-.sh-select-wrap:focus-within { border-color:#FF6B9D; }
-.sh-select-icon { font-size:1.1rem; flex-shrink:0; }
-.sh-select {
-  flex:1; border:none; background:transparent;
-  font-size:0.9rem; font-weight:600; color:#374151;
-  outline:none; cursor:pointer;
-}
-
-/* ── INPUT ── */
-.sh-input-wrap {
-  display:flex; align-items:center; gap:0.8rem;
-  background:#FFF7FB; border:2px solid #FFC9DE;
-  border-radius:14px; padding:0.75rem 1rem;
-  margin-bottom:0.8rem; transition:border-color 0.2s;
-}
-.sh-input-wrap:focus-within { border-color:#FF6B9D; }
-.sh-input-icon { font-size:1.1rem; flex-shrink:0; }
-.sh-input {
-  flex:1; border:none; background:transparent;
-  font-size:0.9rem; font-weight:600; color:#374151;
-  outline:none;
-}
-.sh-input::placeholder { color:#9CA3AF; font-weight:400; }
-
-/* ── DROP ZONE ── */
-.sh-drop-zone {
-  background:linear-gradient(135deg,#FAF5FF,#EDE9FE);
-  border:3px dashed #7B61FF;
-  border-radius:18px; padding:2rem 1rem;
-  text-align:center; cursor:pointer;
-  transition:all 0.3s; margin-bottom:0.8rem;
-  animation:dropPulse 3s ease-in-out infinite;
-}
-.sh-drop-zone:hover {
-  background:linear-gradient(135deg,#EDE9FE,#DDD6FE);
-  transform:scale(1.01);
-  box-shadow:0 6px 20px rgba(123,97,255,0.2);
-}
-.sh-drop-zone.drag-over {
-  background:linear-gradient(135deg,#DDD6FE,#C4B5FD);
-  border-color:#5B21B6; transform:scale(1.02);
-}
-.sh-drop-emoji { font-size:2.5rem; margin-bottom:0.5rem; }
-.sh-drop-title { font-weight:800; color:#5B21B6; font-size:1rem; margin:0; }
-.sh-drop-sub { color:#6B7280; font-size:0.82rem; margin:0.3rem 0; }
-.sh-drop-format {
-  display:inline-block;
-  background:linear-gradient(135deg,#7B61FF,#A855F7);
-  color:white; padding:0.25rem 0.8rem;
-  border-radius:50px; font-size:0.78rem; font-weight:800;
-  margin-top:0.3rem;
-}
-.sh-drop-nom {
-  color:#7B61FF; font-size:0.82rem;
-  font-weight:700; margin:0.5rem 0 0;
-}
-
-/* ── BOUTONS ── */
-.sh-btn {
-  width:100%;
-  display:flex; align-items:center; justify-content:center; gap:0.8rem;
-  padding:1rem; border:none; border-radius:50px;
-  font-weight:800; font-size:0.95rem; cursor:pointer;
-  transition:all 0.3s; position:relative; overflow:hidden;
-}
-.sh-btn::before {
-  content:'';
-  position:absolute; top:0; left:-100%;
-  width:100%; height:100%;
-  background:linear-gradient(90deg,transparent,rgba(255,255,255,0.2),transparent);
-  transition:left 0.5s;
-}
-.sh-btn:hover::before { left:100%; }
+.sh-card-header { display:flex; align-items:center; gap:1rem; margin-bottom:1.5rem; }
+.sh-card-icon { width:54px; height:54px; border-radius:16px; display:flex; align-items:center; justify-content:center; font-size:1.6rem; }
+.sh-card-title { font-size:1.05rem; font-weight:800; color:#1A1D2E; margin:0; }
+.sh-select-wrap, .sh-input-wrap { display:flex; align-items:center; gap:0.8rem; background:#FFF7FB; border:2px solid #FFC9DE; border-radius:14px; padding:0.75rem 1rem; margin-bottom:0.8rem; }
+.sh-select, .sh-input { flex:1; border:none; background:transparent; font-size:0.9rem; font-weight:600; outline:none; }
+.sh-drop-zone { background:linear-gradient(135deg,#FAF5FF,#EDE9FE); border:3px dashed #7B61FF; border-radius:18px; padding:2rem 1rem; text-align:center; cursor:pointer; }
+.sh-btn { width:100%; display:flex; align-items:center; justify-content:center; gap:0.8rem; padding:1rem; border:none; border-radius:50px; font-weight:800; cursor:pointer; transition:0.3s; }
 .sh-btn:hover { transform:translateY(-3px); }
-.sh-btn:disabled {
-  background:linear-gradient(135deg,#D1D5DB,#9CA3AF) !important;
-  box-shadow:none !important; cursor:not-allowed; transform:none;
-}
-.sh-btn-circle {
-  width:32px; height:32px;
-  background:rgba(255,255,255,0.25);
-  border-radius:50%;
-  display:flex; align-items:center; justify-content:center;
-  font-size:0.95rem; flex-shrink:0;
-}
-.sh-btn-rose {
-  background:linear-gradient(135deg,#FF6B9D,#C2185B);
-  color:white;
-  box-shadow:0 6px 20px rgba(255,107,157,0.4);
-  animation:pulseRose 2s infinite;
-}
-.sh-btn-rose:hover { box-shadow:0 10px 28px rgba(255,107,157,0.5); }
-.sh-btn-violet {
-  background:linear-gradient(135deg,#7B61FF,#5B21B6);
-  color:white;
-  box-shadow:0 6px 20px rgba(123,97,255,0.4);
-}
-.sh-btn-violet:hover { box-shadow:0 10px 28px rgba(123,97,255,0.5); }
-
-/* ── APERÇU ── */
-.sh-apercu-card {
-  background:white; border-radius:24px;
-  padding:1.8rem; margin-bottom:1.5rem;
-  box-shadow:0 8px 32px rgba(123,97,255,0.15);
-  border-top:5px solid #7B61FF;
-  animation:fadeInUp 0.5s ease;
-}
-.sh-apercu-grid {
-  display:grid; grid-template-columns:1fr 1fr;
-  gap:0.6rem; margin-top:0.5rem;
-}
-.sh-apercu-item {
-  display:flex; align-items:center; justify-content:space-between;
-  padding:0.75rem 1rem;
-  background:linear-gradient(135deg,#FAF5FF,#EDE9FE);
-  border-radius:12px; border-left:3px solid #7B61FF;
-  transition:all 0.2s;
-}
-.sh-apercu-item:hover { transform:translateX(3px); }
-.sh-apercu-item strong {
-  color:#5B21B6; font-size:0.82rem;
-  text-transform:uppercase; letter-spacing:0.5px;
-}
-.sh-apercu-item span {
-  color:#1A1D2E; font-weight:800; font-size:0.9rem;
-}
-
-/* ── LOADING ── */
-.sh-loading {
-  display:flex; align-items:center; gap:1.5rem;
-  background:linear-gradient(135deg,#FFF7FB,#FFE5EF);
-  border:2px solid #FFC9DE; border-radius:20px;
-  padding:2rem; margin-bottom:1.5rem;
-  justify-content:center;
-}
-.sh-loading-dots {
-  display:flex; gap:8px;
-}
-.sh-loading-dots span {
-  width:12px; height:12px; border-radius:50%;
-  background:#FF6B9D;
-  animation:dotBounce 1.4s ease-in-out infinite;
-}
-.sh-loading-dots span:nth-child(2) { animation-delay:0.2s; }
-.sh-loading-dots span:nth-child(3) { animation-delay:0.4s; }
-.sh-loading-text {
-  color:#C2185B; font-weight:800; font-size:1rem; margin:0;
-}
-
-/* ── INFO STEPS ── */
-.sh-info-card {
-  background:white; border-radius:24px;
-  padding:1.8rem;
-  box-shadow:0 4px 20px rgba(0,0,0,0.06);
-  border-top:5px solid #FF6B9D;
-  animation:fadeInUp 0.5s ease 0.3s both;
-}
-.sh-steps {
-  display:flex; align-items:center;
-  gap:1rem; margin-top:0.5rem; flex-wrap:wrap;
-}
-.sh-step {
-  flex:1; min-width:160px;
-  display:flex; align-items:flex-start; gap:0.8rem;
-  padding:1rem; background:#FFF7FB;
-  border-radius:16px; border:2px solid #FFC9DE;
-  transition:all 0.2s;
-}
-.sh-step:hover { transform:translateY(-3px); box-shadow:0 6px 16px rgba(255,107,157,0.15); }
-.sh-step-num {
-  width:36px; height:36px; border-radius:50%;
-  display:flex; align-items:center; justify-content:center;
-  color:white; font-weight:900; font-size:1rem; flex-shrink:0;
-  box-shadow:0 4px 12px rgba(0,0,0,0.15);
-}
-.sh-step strong { display:block; color:#1A1D2E; font-size:0.95rem; margin-bottom:0.2rem; }
-.sh-step p { color:#6B7280; font-size:0.78rem; margin:0; }
-.sh-step-arrow {
-  font-size:1.5rem; color:#FFC9DE; font-weight:800; flex-shrink:0;
-}
-
-/* ══════════════════════════════════ */
-/* MODE SOMBRE */
-/* ══════════════════════════════════ */
-[data-theme="dark"] .sh-card,
-[data-theme="dark"] .sh-apercu-card,
-[data-theme="dark"] .sh-info-card { background:#1E2235; }
-[data-theme="dark"] .sh-card-title { color:#F1F5F9; }
-[data-theme="dark"] .sh-card-sub { color:#94A3B8; }
-[data-theme="dark"] .sh-select-wrap,
-[data-theme="dark"] .sh-input-wrap {
-  background:#252A40; border-color:#4B5563;
-}
-[data-theme="dark"] .sh-select,
-[data-theme="dark"] .sh-input { color:#F1F5F9; }
-[data-theme="dark"] .sh-drop-zone {
-  background:linear-gradient(135deg,#1E2235,#252A40);
-  border-color:#7B61FF;
-}
-[data-theme="dark"] .sh-apercu-item {
-  background:linear-gradient(135deg,#1E2235,#252A40);
-  border-left-color:#7B61FF;
-}
-[data-theme="dark"] .sh-apercu-item span { color:#F1F5F9; }
-[data-theme="dark"] .sh-step {
-  background:#252A40; border-color:#374151;
-}
-[data-theme="dark"] .sh-step strong { color:#F1F5F9; }
-[data-theme="dark"] .sh-loading {
-  background:linear-gradient(135deg,#1E2235,#2D1B2E);
-  border-color:#C2185B;
-}
-
-/* ══════════════════════════════════ */
-/* RESPONSIVE */
-/* ══════════════════════════════════ */
-@media (max-width:768px) {
-  .sh-grid { grid-template-columns:1fr; }
-  .sh-apercu-grid { grid-template-columns:1fr; }
-  .sh-steps { flex-direction:column; }
-  .sh-step-arrow { transform:rotate(90deg); align-self:center; }
-}
-@media (max-width:640px) {
-  .sh-container { padding:1rem; }
-  .sh-header { padding:1.2rem; }
-  .sh-header-title { font-size:1.4rem; }
-  .sh-header-badge { display:none; }
-  .sh-card { padding:1.2rem; }
-}
+.sh-btn-circle { width:32px; height:32px; background:rgba(255,255,255,0.25); border-radius:50%; display:flex; align-items:center; justify-content:center; }
+.sh-btn-rose { background:linear-gradient(135deg,#FF6B9D,#C2185B); color:white; }
+.sh-btn-violet { background:linear-gradient(135deg,#7B61FF,#5B21B6); color:white; }
+.sh-loading { display:flex; justify-content:center; padding:2rem; }
+.sh-apercu-grid { display:grid; grid-template-columns:1fr 1fr; gap:0.6rem; }
+.sh-apercu-item { padding:0.75rem 1rem; background:#FAF5FF; border-radius:12px; border-left:3px solid #7B61FF; }
+@media (max-width:768px) { .sh-grid { grid-template-columns:1fr; } }
 </style>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script>
-let fichierImport = null;
-let dataImport    = null;
+let dataImport = null;
 
 document.addEventListener('DOMContentLoaded', chargerCours);
 
-/* ── TOAST ── */
 function toast(msg, type = 'info') {
-  const colors = {
-    succes : 'linear-gradient(135deg,#00C853,#7ED321)',
-    erreur : 'linear-gradient(135deg,#EF4444,#DC2626)',
-    info   : 'linear-gradient(135deg,#2962FF,#7B61FF)',
-    warning: 'linear-gradient(135deg,#F59E0B,#FFD93D)',
-  };
   const t = document.getElementById('toast');
   t.innerHTML = msg;
-  t.style.background = colors[type] || colors.info;
+  t.style.background = type === 'succes' ? '#00C853' : '#EF4444';
   t.style.transform = 'translateX(0)';
-  setTimeout(() => { t.style.transform = 'translateX(120%)'; }, 3200);
+  setTimeout(() => { t.style.transform = 'translateX(120%)'; }, 3000);
 }
 
-/* ── CHARGER COURS ── */
 function chargerCours() {
   fetch('/api/cours/liste').then(r => r.json()).then(d => {
     const sel = document.getElementById('select-cours');
@@ -535,139 +161,72 @@ function chargerCours() {
     (d.cours || []).forEach(c => {
       const opt = document.createElement('option');
       opt.value = c.id;
-      opt.textContent = c.nom + ' (' + (c.matiere || 'Général') + ')';
+      opt.textContent = c.nom;
       sel.appendChild(opt);
     });
-  }).catch(() => toast('❌ Erreur chargement cours', 'erreur'));
-}
-
-/* ── DRAG & DROP ── */
-function dragOver(e) {
-  e.preventDefault();
-  document.getElementById('drop-zone').classList.add('drag-over');
-}
-function dragLeave() {
-  document.getElementById('drop-zone').classList.remove('drag-over');
-}
-function dropFichier(e) {
-  e.preventDefault();
-  document.getElementById('drop-zone').classList.remove('drag-over');
-  const f = e.dataTransfer.files[0];
-  if (f) traiterFichier(f);
-}
-
-/* ── FICHIER CHOISI ── */
-function fichierChoisi(e) {
-  const f = e.target.files[0];
-  if (f) traiterFichier(f);
-}
-
-function traiterFichier(f) {
-  if (!f.name.endsWith('.nokirova')) {
-    toast('⚠️ Seulement les fichiers .nokirova !', 'warning');
-    return;
-  }
-  fichierImport = f;
-  document.getElementById('nom-fic').textContent = '📎 ' + f.name;
-
-  const fd = new FormData();
-  fd.append('fichier', f);
-  document.getElementById('loading').style.display = 'flex';
-
-  fetch('/api/partage/apercu', { method: 'POST', body: fd })
-  .then(r => r.json())
-  .then(d => {
-    document.getElementById('loading').style.display = 'none';
-    if (d.succes) {
-      dataImport = d.data;
-      afficherApercu(d.data);
-      document.getElementById('btn-importer').disabled = false;
-      toast('✅ Fichier analysé !', 'succes');
-    } else {
-      toast('❌ ' + (d.erreur || 'Fichier invalide'), 'erreur');
-    }
-  })
-  .catch(() => {
-    document.getElementById('loading').style.display = 'none';
-    toast('❌ Erreur lecture fichier', 'erreur');
   });
 }
 
-/* ── EXPORTER ── */
 function exporter() {
-  const id       = document.getElementById('select-cours').value;
-  const createur = document.getElementById('createur').value.trim() || 'Anonyme';
-  if (!id) { toast('⚠️ Choisis un cours à exporter !', 'warning'); return; }
+  const id = document.getElementById('select-cours').value;
+  if (!id) { toast('⚠️ Choisis un cours !'); return; }
 
   document.getElementById('loading').style.display = 'flex';
   fetch('/api/partage/exporter', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ id_cours: parseInt(id), createur })
+    body: JSON.stringify({ id_cours: parseInt(id), createur: document.getElementById('createur').value || 'Hénoc' })
   })
   .then(r => r.blob())
   .then(blob => {
     document.getElementById('loading').style.display = 'none';
     const url = URL.createObjectURL(blob);
-    const a   = document.createElement('a');
-    a.href     = url;
-    a.download = 'cours_NOKIROVA_' + Date.now() + '.nokirova';
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `NOKIROVA_${Date.now()}.nokirova`;
     a.click();
-    toast('✅ Fichier exporté ! Envoie-le à tes amis 🌸', 'succes');
-  })
-  .catch(() => {
-    document.getElementById('loading').style.display = 'none';
-    toast('❌ Erreur export', 'erreur');
+    toast('✅ Fichier exporté !', 'succes');
+    genererQR(id);
   });
 }
 
-/* ── APERÇU ── */
-function afficherApercu(data) {
-  const c    = document.getElementById('apercu-contenu');
-  const cours = data.cours || {};
-  const stats = data.stats || {};
-  c.innerHTML = `
-    <div class="sh-apercu-item">
-      <strong>👤 Créateur</strong>
-      <span>${esc(data.createur || 'Inconnu')}</span>
-    </div>
-    <div class="sh-apercu-item">
-      <strong>📅 Date</strong>
-      <span>${esc(data.date_export || '—')}</span>
-    </div>
-    <div class="sh-apercu-item">
-      <strong>📚 Cours</strong>
-      <span>${esc(cours.nom || 'Sans nom')}</span>
-    </div>
-    <div class="sh-apercu-item">
-      <strong>🎯 Matière</strong>
-      <span>${esc(cours.matiere || '—')}</span>
-    </div>
-    <div class="sh-apercu-item">
-      <strong>📝 Notes</strong>
-      <span>${stats.nb_notes || 0}</span>
-    </div>
-    <div class="sh-apercu-item">
-      <strong>🃏 Flashcards</strong>
-      <span>${stats.nb_flashcards || 0}</span>
-    </div>
-    <div class="sh-apercu-item">
-      <strong>📜 Historique</strong>
-      <span>${stats.nb_historique || 0}</span>
-    </div>
-  `;
-  document.getElementById('apercu-import').style.display = 'block';
-  document.getElementById('apercu-import').scrollIntoView({ behavior: 'smooth' });
+function partagerWhatsApp() {
+  const id = document.getElementById('select-cours').value;
+  if (!id) { toast('⚠️ Choisis un cours !'); return; }
+  const texte = encodeURIComponent(`Salut ! Voici mon cours NOKIROVA. Importe-le vite sur l'app ! 🌸`);
+  window.open(`https://wa.me/?text=${texte}`);
 }
 
-/* ── IMPORTER ── */
-function importer() {
-  if (dataImport) confirmerImport();
+function genererQR(id) {
+  document.getElementById('qrcode').innerHTML = "";
+  new QRCode(document.getElementById("qrcode"), {
+    text: "https://nokirova-2.onrender.com/partage",
+    width: 128,
+    height: 128
+  });
+  document.getElementById('qr-section').style.display = 'block';
 }
 
-/* ── CONFIRMER IMPORT ── */
+function fichierChoisi(e) {
+  const f = e.target.files[0];
+  if (!f) return;
+  document.getElementById('nom-fic').textContent = '📎 ' + f.name;
+  const fd = new FormData();
+  fd.append('fichier', f);
+
+  fetch('/api/partage/apercu', { method: 'POST', body: fd })
+  .then(r => r.json())
+  .then(d => {
+    if (d.succes) {
+      dataImport = d.data;
+      document.getElementById('apercu-import').style.display = 'block';
+      document.getElementById('btn-importer').disabled = false;
+      toast('✅ Analyse réussie !', 'succes');
+    }
+  });
+}
+
 function confirmerImport() {
-  document.getElementById('loading').style.display = 'flex';
   fetch('/api/partage/importer', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -675,30 +234,11 @@ function confirmerImport() {
   })
   .then(r => r.json())
   .then(d => {
-    document.getElementById('loading').style.display = 'none';
     if (d.succes) {
-      toast('✅ Import réussi ! ' + d.nb_notes + ' notes · ' + d.nb_fc + ' flashcards 🌸', 'succes');
-      document.getElementById('apercu-import').style.display = 'none';
-      document.getElementById('btn-importer').disabled = true;
-      document.getElementById('nom-fic').textContent = '';
-      dataImport = null;
-      chargerCours();
-    } else {
-      toast('❌ ' + (d.erreur || 'Erreur import'), 'erreur');
+      toast('✅ Importation terminée ! 🌸', 'succes');
+      location.reload();
     }
-  })
-  .catch(() => {
-    document.getElementById('loading').style.display = 'none';
-    toast('❌ Erreur réseau', 'erreur');
   });
 }
-
-/* ── ESCAPE ── */
-function esc(t) {
-  const d = document.createElement('div');
-  d.textContent = t || '';
-  return d.innerHTML;
-}
 </script>
-
 {% endblock %}

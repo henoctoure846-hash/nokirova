@@ -1,228 +1,711 @@
 {% extends "base.html" %}
 {% block title %}Mes Notes - NOKIROVA{% endblock %}
 {% block contenu %}
-<div class="page-container">
 
-  <div class="page-header" style="background: linear-gradient(135deg, #FFE66D, #FFF3B0); border-left: 5px solid #00C853;">
-    <div class="page-header-icon" style="background: linear-gradient(135deg, #00C853, #7ED321);">✍️</div>
-    <div>
-      <h1 class="page-title" style="color: #14532D;">Mes Notes</h1>
-      <p class="page-subtitle" style="color: #166534;">Crée et organise tes notes par couleur 📒</p>
+<!-- TOAST -->
+<div id="toast" style="
+  position:fixed; top:20px; right:20px; z-index:9999;
+  background:#1A1D2E; color:white; padding:1rem 1.5rem;
+  border-radius:16px; font-weight:600; font-size:0.95rem;
+  box-shadow:0 8px 30px rgba(0,0,0,0.3);
+  transform:translateX(120%); transition:transform 0.4s cubic-bezier(0.175,0.885,0.32,1.275);
+  display:flex; align-items:center; gap:0.8rem; max-width:320px;
+"></div>
+
+<div class="nt-container">
+
+  <!-- ═══ HEADER ═══ -->
+  <div class="nt-header">
+    <div class="nt-header-bg-emoji">✍️</div>
+    <div class="nt-header-icon">✍️</div>
+    <div class="nt-header-text">
+      <h1 class="nt-header-title">Mes Notes</h1>
+      <p class="nt-header-sub">Crée et organise tes notes par couleur 📒</p>
+    </div>
+    <div class="nt-header-badge">
+      <span id="nb-notes-badge">0</span> notes
     </div>
   </div>
 
-  <!-- ZONE CRÉATION/ÉDITION -->
-  <div class="note-editor">
-    <input type="text" id="note-titre" placeholder="📝 Titre de la note..." class="note-input-titre"/>
-    <textarea id="note-contenu" placeholder="✍️ Écris tes notes ici..." rows="6" class="note-input-contenu"></textarea>
-
-    <div class="editor-options">
-      <input type="text" id="note-matiere" placeholder="📚 Matière (ex: Économie)" class="note-input-matiere"/>
-
-      <div class="couleurs">
-        <span>🎨 Couleur :</span>
-        <div class="couleur-puce" data-couleur="#FFE66D" style="background:#FFE66D" onclick="choisirCouleur('#FFE66D', this)"></div>
-        <div class="couleur-puce" data-couleur="#FFC9DE" style="background:#FFC9DE" onclick="choisirCouleur('#FFC9DE', this)"></div>
-        <div class="couleur-puce" data-couleur="#A5D8FF" style="background:#A5D8FF" onclick="choisirCouleur('#A5D8FF', this)"></div>
-        <div class="couleur-puce" data-couleur="#9FD93B" style="background:#9FD93B" onclick="choisirCouleur('#9FD93B', this)"></div>
-        <div class="couleur-puce" data-couleur="#D8B4FE" style="background:#D8B4FE" onclick="choisirCouleur('#D8B4FE', this)"></div>
-        <div class="couleur-puce" data-couleur="#FDBA74" style="background:#FDBA74" onclick="choisirCouleur('#FDBA74', this)"></div>
+  <!-- ═══ ÉDITEUR ═══ -->
+  <div class="nt-editor-card">
+    <div class="nt-editor-header">
+      <div class="nt-editor-icon">📝</div>
+      <div>
+        <h2 class="nt-editor-title" id="editor-title">Nouvelle note</h2>
+        <p class="nt-editor-sub">Remplis les champs et sauvegarde</p>
       </div>
     </div>
 
-    <div class="editor-actions">
-      <button id="btn-save" onclick="sauvegarder()" class="btn-save">💾 Sauvegarder</button>
-      <button onclick="annulerEdition()" class="btn-cancel" id="btn-cancel" style="display:none;">❌ Annuler</button>
+    <!-- Titre -->
+    <div class="nt-field-wrap">
+      <span class="nt-field-icon">📌</span>
+      <input type="text" id="note-titre"
+             placeholder="Titre de la note..."
+             class="nt-input-titre"/>
+    </div>
+
+    <!-- Contenu -->
+    <textarea id="note-contenu"
+              placeholder="✍️ Écris tes notes ici..."
+              rows="6" class="nt-textarea"></textarea>
+
+    <!-- Options -->
+    <div class="nt-options-row">
+
+      <!-- Matière -->
+      <div class="nt-matiere-wrap">
+        <span class="nt-field-icon">📚</span>
+        <input type="text" id="note-matiere"
+               placeholder="Matière (ex: Économie)"
+               class="nt-input-matiere"/>
+      </div>
+
+      <!-- Couleurs -->
+      <div class="nt-couleurs-wrap">
+        <span class="nt-couleurs-label">🎨</span>
+        <div class="nt-couleur-puce actif"
+             data-couleur="#FFE66D" style="background:#FFE66D"
+             onclick="choisirCouleur('#FFE66D', this)"></div>
+        <div class="nt-couleur-puce"
+             data-couleur="#FFC9DE" style="background:#FFC9DE"
+             onclick="choisirCouleur('#FFC9DE', this)"></div>
+        <div class="nt-couleur-puce"
+             data-couleur="#A5D8FF" style="background:#A5D8FF"
+             onclick="choisirCouleur('#A5D8FF', this)"></div>
+        <div class="nt-couleur-puce"
+             data-couleur="#9FD93B" style="background:#9FD93B"
+             onclick="choisirCouleur('#9FD93B', this)"></div>
+        <div class="nt-couleur-puce"
+             data-couleur="#D8B4FE" style="background:#D8B4FE"
+             onclick="choisirCouleur('#D8B4FE', this)"></div>
+        <div class="nt-couleur-puce"
+             data-couleur="#FDBA74" style="background:#FDBA74"
+             onclick="choisirCouleur('#FDBA74', this)"></div>
+      </div>
+
+    </div>
+
+    <!-- Preview couleur -->
+    <div class="nt-preview" id="color-preview">
+      <span>👁️ Aperçu de la couleur choisie</span>
+    </div>
+
+    <!-- Actions -->
+    <div class="nt-editor-actions">
+      <button id="btn-save" onclick="sauvegarder()" class="nt-btn-save">
+        <span class="nt-btn-circle">💾</span>
+        <span id="save-label">Sauvegarder</span>
+      </button>
+      <button onclick="annulerEdition()" class="nt-btn-cancel"
+              id="btn-cancel" style="display:none;">
+        <span class="nt-btn-circle">❌</span>
+        <span>Annuler</span>
+      </button>
     </div>
   </div>
 
-  <!-- BARRE FILTRE -->
-  <div class="filtres-notes">
-    <input type="text" id="recherche-locale" placeholder="🔍 Rechercher dans les notes..." oninput="filtrer()"/>
-    <span id="nb-notes" class="badge-nb">0 notes</span>
+  <!-- ═══ BARRE FILTRE ═══ -->
+  <div class="nt-filtre-bar">
+    <div class="nt-search-wrap">
+      <span class="nt-search-icon">🔍</span>
+      <input type="text" id="recherche-locale"
+             placeholder="Rechercher dans les notes..."
+             oninput="filtrer()" class="nt-search-input"/>
+    </div>
+    <div class="nt-badge-nb" id="nb-notes">0 notes</div>
   </div>
 
-  <!-- GRILLE DES NOTES -->
-  <div id="grille-notes" class="grille-notes"></div>
+  <!-- ═══ GRILLE NOTES ═══ -->
+  <div id="grille-notes" class="nt-grille"></div>
 
-  <div id="empty-state" class="empty-state" style="display:none;">
-    <div style="font-size:4rem;">📒</div>
-    <h2>Aucune note pour l'instant</h2>
-    <p>Crée ta première note ci-dessus !</p>
+  <!-- EMPTY STATE -->
+  <div id="empty-state" class="nt-empty" style="display:none;">
+    <div class="nt-empty-icon">📒</div>
+    <h2 class="nt-empty-title">Aucune note pour l'instant</h2>
+    <p class="nt-empty-sub">Crée ta première note ci-dessus !</p>
   </div>
+
 </div>
 
+<!-- ══════════════════════════════════════════ -->
+<!-- STYLES -->
+<!-- ══════════════════════════════════════════ -->
 <style>
-  .page-container { padding:2rem; max-width:1200px; margin:0 auto;}
-  .page-header { display:flex; align-items:center; gap:1.2rem; border-radius:20px; padding:1.5rem 2rem; margin-bottom:1.5rem; box-shadow:0 4px 20px rgba(0,0,0,0.05);}
-  .page-header-icon { width:60px; height:60px; border-radius:16px; display:flex; align-items:center; justify-content:center; font-size:1.8rem; color:white;}
-  .page-title { font-size:1.6rem; font-weight:800; margin:0;}
-  .page-subtitle { margin:0.2rem 0 0; font-size:0.95rem;}
 
-  .note-editor { background:white; border-radius:20px; padding:1.8rem; margin-bottom:1.5rem; box-shadow:0 4px 20px rgba(0,200,83,0.1); border-top:4px solid #00C853;}
-  .note-input-titre { width:100%; padding:0.8rem 1rem; border:2px solid #BBF7D0; border-radius:12px; font-size:1.1rem; font-weight:700; margin-bottom:0.8rem; outline:none; transition:0.2s;}
-  .note-input-titre:focus { border-color:#00C853;}
-  .note-input-contenu { width:100%; padding:0.8rem 1rem; border:2px solid #BBF7D0; border-radius:12px; font-size:0.95rem; outline:none; resize:vertical; font-family:inherit; line-height:1.6; transition:0.2s;}
-  .note-input-contenu:focus { border-color:#00C853;}
+/* ── ANIMATIONS ── */
+@keyframes fadeInUp {
+  from { opacity:0; transform:translateY(30px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+@keyframes slideInRight {
+  from { opacity:0; transform:translateX(40px); }
+  to   { opacity:1; transform:translateX(0); }
+}
+@keyframes floatNote {
+  0%,100% { transform:translateY(0px) rotate(-1deg); }
+  50%      { transform:translateY(-8px) rotate(1deg); }
+}
+@keyframes bounceIn {
+  0%   { transform:scale(0.3); opacity:0; }
+  50%  { transform:scale(1.05); }
+  70%  { transform:scale(0.9); }
+  100% { transform:scale(1); opacity:1; }
+}
+@keyframes pulseGreen {
+  0%,100% { box-shadow:0 0 0 0 rgba(0,200,83,0.4); }
+  50%      { box-shadow:0 0 0 12px rgba(0,200,83,0); }
+}
+@keyframes shimmer {
+  0%   { background-position:-200% center; }
+  100% { background-position:200% center; }
+}
 
-  .editor-options { display:flex; gap:1rem; margin-top:1rem; flex-wrap:wrap; align-items:center;}
-  .note-input-matiere { flex:1; min-width:180px; padding:0.6rem 1rem; border:2px solid #BBF7D0; border-radius:10px; font-size:0.9rem; outline:none;}
-  .note-input-matiere:focus { border-color:#00C853;}
+/* ── CONTAINER ── */
+.nt-container {
+  padding: 1.5rem;
+  max-width: 1100px;
+  margin: 0 auto;
+  animation: fadeInUp 0.5s ease;
+}
 
-  .couleurs { display:flex; gap:0.4rem; align-items:center; flex-wrap:wrap;}
-  .couleurs span { font-size:0.85rem; color:#374151; font-weight:600; margin-right:0.4rem;}
-  .couleur-puce { width:30px; height:30px; border-radius:50%; cursor:pointer; transition:all 0.2s; border:3px solid transparent;}
-  .couleur-puce:hover { transform:scale(1.15);}
-  .couleur-puce.actif { border-color:#374151; transform:scale(1.2);}
+/* ── HEADER ── */
+.nt-header {
+  position: relative; overflow: hidden;
+  background: linear-gradient(135deg, #00C853 0%, #7ED321 50%, #FFD93D 100%);
+  border-radius: 28px;
+  padding: 2rem;
+  margin-bottom: 1.5rem;
+  display: flex; align-items: center; gap: 1.2rem; flex-wrap: wrap;
+  box-shadow: 0 8px 32px rgba(0,200,83,0.35);
+}
+.nt-header-bg-emoji {
+  position: absolute; right: -10px; top: -20px;
+  font-size: 9rem; opacity: 0.12; pointer-events: none;
+  animation: floatNote 4s ease-in-out infinite;
+}
+.nt-header-icon {
+  width: 72px; height: 72px;
+  background: rgba(255,255,255,0.2);
+  border-radius: 20px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 2.2rem; flex-shrink: 0;
+  backdrop-filter: blur(10px);
+  border: 2px solid rgba(255,255,255,0.3);
+}
+.nt-header-text { flex: 1; }
+.nt-header-title {
+  font-size: 1.8rem; font-weight: 900;
+  color: white; margin: 0;
+  text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+}
+.nt-header-sub {
+  color: rgba(255,255,255,0.85);
+  margin: 0.3rem 0 0; font-size: 0.95rem;
+}
+.nt-header-badge {
+  background: rgba(255,255,255,0.25);
+  color: white; padding: 0.6rem 1.4rem;
+  border-radius: 50px; font-weight: 800;
+  font-size: 1rem;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.3);
+}
 
-  .editor-actions { display:flex; gap:0.6rem; margin-top:1.2rem; justify-content:flex-end;}
-  .btn-save { background:linear-gradient(135deg, #00C853, #7ED321); color:white; padding:0.7rem 1.5rem; border:none; border-radius:12px; font-weight:700; cursor:pointer; box-shadow:0 4px 12px rgba(0,200,83,0.3);}
-  .btn-save:hover { transform:translateY(-2px);}
-  .btn-cancel { background:#FEE2E2; color:#EF4444; padding:0.7rem 1.2rem; border:2px solid #EF4444; border-radius:12px; font-weight:700; cursor:pointer;}
-  .btn-cancel:hover { background:#EF4444; color:white;}
+/* ── ÉDITEUR ── */
+.nt-editor-card {
+  background: white;
+  border-radius: 24px;
+  padding: 1.8rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 4px 24px rgba(0,200,83,0.12);
+  border-top: 5px solid #00C853;
+  animation: fadeInUp 0.5s ease 0.1s both;
+}
+.nt-editor-header {
+  display: flex; align-items: center; gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+.nt-editor-icon {
+  width: 52px; height: 52px;
+  background: linear-gradient(135deg, #00C853, #7ED321);
+  border-radius: 14px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.5rem; flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(0,200,83,0.3);
+}
+.nt-editor-title {
+  font-size: 1.1rem; font-weight: 800; color: #1A1D2E; margin: 0;
+}
+.nt-editor-sub { font-size: 0.85rem; color: #6B7280; margin: 0.2rem 0 0; }
 
-  .filtres-notes { display:flex; gap:0.8rem; margin-bottom:1.5rem; align-items:center; background:white; padding:1rem; border-radius:16px; box-shadow:0 2px 12px rgba(0,0,0,0.05);}
-  .filtres-notes input { flex:1; padding:0.7rem 1rem; border:2px solid #BBF7D0; border-radius:12px; font-size:0.9rem; outline:none;}
-  .badge-nb { background:#00C853; color:white; font-weight:700; padding:0.4rem 1rem; border-radius:20px; font-size:0.85rem;}
+/* Input titre */
+.nt-field-wrap {
+  display: flex; align-items: center; gap: 0.8rem;
+  background: #F0FDF4;
+  border: 2px solid #BBF7D0;
+  border-radius: 14px; padding: 0.8rem 1.2rem;
+  margin-bottom: 0.8rem;
+  transition: border-color 0.2s;
+}
+.nt-field-wrap:focus-within { border-color: #00C853; }
+.nt-field-icon { font-size: 1.2rem; flex-shrink: 0; }
+.nt-input-titre {
+  flex: 1; border: none; background: transparent;
+  font-size: 1.05rem; font-weight: 700; color: #1A1D2E;
+  outline: none;
+}
+.nt-input-titre::placeholder { color: #9CA3AF; font-weight: 400; }
 
-  .grille-notes { display:grid; grid-template-columns:repeat(auto-fill, minmax(280px, 1fr)); gap:1rem;}
-  .note-card { border-radius:16px; padding:1.3rem; box-shadow:0 4px 15px rgba(0,0,0,0.08); transition:all 0.3s; position:relative;}
-  .note-card:hover { transform:translateY(-4px); box-shadow:0 8px 25px rgba(0,0,0,0.15);}
-  .note-card-titre { font-weight:800; font-size:1.05rem; color:#1F2937; margin-bottom:0.5rem; word-break:break-word;}
-  .note-card-matiere { background:rgba(255,255,255,0.6); display:inline-block; font-size:0.7rem; font-weight:700; padding:0.2rem 0.6rem; border-radius:12px; margin-bottom:0.6rem; color:#374151;}
-  .note-card-contenu { color:#374151; font-size:0.9rem; line-height:1.5; white-space:pre-wrap; max-height:150px; overflow:hidden; position:relative; word-break:break-word;}
-  .note-card-date { color:rgba(55,65,81,0.6); font-size:0.75rem; margin-top:0.8rem;}
-  .note-card-actions { display:flex; gap:0.4rem; margin-top:0.8rem;}
-  .btn-mini { padding:0.3rem 0.7rem; border-radius:8px; font-size:0.75rem; font-weight:600; cursor:pointer; border:none; background:rgba(255,255,255,0.8); color:#374151;}
-  .btn-mini:hover { background:white; transform:scale(1.05);}
-  .btn-mini.sup { background:rgba(239,68,68,0.2); color:#EF4444;}
-  .btn-mini.sup:hover { background:#EF4444; color:white;}
+/* Textarea */
+.nt-textarea {
+  width: 100%; padding: 1rem 1.2rem;
+  border: 2px solid #BBF7D0; border-radius: 14px;
+  font-size: 0.95rem; font-family: inherit;
+  line-height: 1.6; resize: vertical;
+  outline: none; transition: border-color 0.2s;
+  background: #F0FDF4; color: #1A1D2E;
+  margin-bottom: 1rem;
+}
+.nt-textarea:focus { border-color: #00C853; }
 
-  .empty-state { text-align:center; padding:4rem 2rem; background:white; border-radius:20px; box-shadow:0 4px 20px rgba(0,0,0,0.05);}
-  .empty-state h2 { color:#374151; margin:1rem 0 0.5rem;}
-  .empty-state p { color:#9CA3AF;}
+/* Options row */
+.nt-options-row {
+  display: flex; gap: 1rem; flex-wrap: wrap;
+  align-items: center; margin-bottom: 1rem;
+}
+.nt-matiere-wrap {
+  display: flex; align-items: center; gap: 0.6rem;
+  flex: 1; min-width: 200px;
+  background: #F0FDF4; border: 2px solid #BBF7D0;
+  border-radius: 50px; padding: 0.6rem 1.2rem;
+  transition: border-color 0.2s;
+}
+.nt-matiere-wrap:focus-within { border-color: #00C853; }
+.nt-input-matiere {
+  flex: 1; border: none; background: transparent;
+  font-size: 0.9rem; font-weight: 600; color: #374151;
+  outline: none;
+}
+.nt-input-matiere::placeholder { color: #9CA3AF; font-weight: 400; }
+
+/* Couleurs */
+.nt-couleurs-wrap {
+  display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;
+}
+.nt-couleurs-label { font-size: 1.2rem; }
+.nt-couleur-puce {
+  width: 32px; height: 32px; border-radius: 50%;
+  cursor: pointer; transition: all 0.2s;
+  border: 3px solid transparent;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+.nt-couleur-puce:hover { transform: scale(1.2); }
+.nt-couleur-puce.actif {
+  border-color: #1A1D2E;
+  transform: scale(1.25);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+}
+
+/* Preview */
+.nt-preview {
+  border-radius: 12px; padding: 0.8rem 1.2rem;
+  font-size: 0.85rem; font-weight: 600; color: #374151;
+  margin-bottom: 1.2rem;
+  transition: background 0.3s;
+  border: 2px dashed rgba(0,0,0,0.1);
+  text-align: center;
+}
+
+/* Boutons éditeur */
+.nt-editor-actions {
+  display: flex; gap: 0.8rem; justify-content: flex-end;
+}
+.nt-btn-save, .nt-btn-cancel {
+  display: flex; align-items: center; gap: 0.7rem;
+  padding: 0.8rem 1.6rem; border: none;
+  border-radius: 50px; font-weight: 800;
+  font-size: 0.95rem; cursor: pointer;
+  transition: all 0.3s; position: relative; overflow: hidden;
+}
+.nt-btn-save {
+  background: linear-gradient(135deg, #00C853, #7ED321);
+  color: white;
+  box-shadow: 0 6px 20px rgba(0,200,83,0.4);
+  animation: pulseGreen 2s infinite;
+}
+.nt-btn-save:hover { transform: translateY(-3px); box-shadow: 0 10px 28px rgba(0,200,83,0.5); }
+.nt-btn-cancel {
+  background: linear-gradient(135deg, #FEE2E2, #FECACA);
+  color: #EF4444; border: 2px solid #FCA5A5;
+}
+.nt-btn-cancel:hover {
+  background: linear-gradient(135deg, #EF4444, #DC2626);
+  color: white; border-color: transparent;
+  transform: translateY(-3px);
+}
+.nt-btn-circle {
+  width: 30px; height: 30px;
+  background: rgba(255,255,255,0.25);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.9rem; flex-shrink: 0;
+}
+
+/* ── FILTRE ── */
+.nt-filtre-bar {
+  display: flex; align-items: center; gap: 1rem;
+  background: white; border-radius: 20px;
+  padding: 1rem 1.5rem; margin-bottom: 1.5rem;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+  border-top: 4px solid #7ED321;
+}
+.nt-search-wrap {
+  display: flex; align-items: center; gap: 0.8rem;
+  flex: 1; background: #F0FDF4;
+  border: 2px solid #BBF7D0; border-radius: 50px;
+  padding: 0.6rem 1.2rem;
+  transition: border-color 0.2s;
+}
+.nt-search-wrap:focus-within { border-color: #00C853; }
+.nt-search-icon { font-size: 1.1rem; flex-shrink: 0; }
+.nt-search-input {
+  flex: 1; border: none; background: transparent;
+  font-size: 0.9rem; font-weight: 600; color: #374151;
+  outline: none;
+}
+.nt-search-input::placeholder { color: #9CA3AF; font-weight: 400; }
+.nt-badge-nb {
+  background: linear-gradient(135deg, #00C853, #7ED321);
+  color: white; font-weight: 800;
+  padding: 0.4rem 1.2rem; border-radius: 50px;
+  font-size: 0.85rem; white-space: nowrap;
+  box-shadow: 0 4px 12px rgba(0,200,83,0.3);
+}
+
+/* ── GRILLE NOTES ── */
+.nt-grille {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.2rem;
+}
+
+/* Note card */
+.nt-note-card {
+  border-radius: 20px; padding: 1.5rem;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+  transition: all 0.3s; position: relative;
+  animation: bounceIn 0.5s ease both;
+  border: 2px solid rgba(255,255,255,0.5);
+}
+.nt-note-card:hover {
+  transform: translateY(-6px) rotate(0.5deg);
+  box-shadow: 0 12px 32px rgba(0,0,0,0.18);
+}
+
+/* Épingle déco */
+.nt-note-card::before {
+  content: '📌';
+  position: absolute; top: -8px; left: 16px;
+  font-size: 1.2rem;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+}
+
+.nt-note-titre {
+  font-weight: 800; font-size: 1.05rem;
+  color: #1A1D2E; margin-bottom: 0.5rem;
+  margin-top: 0.5rem;
+  word-break: break-word;
+  line-height: 1.3;
+}
+.nt-note-matiere {
+  display: inline-flex; align-items: center; gap: 0.3rem;
+  background: rgba(255,255,255,0.65);
+  font-size: 0.72rem; font-weight: 700;
+  padding: 0.25rem 0.7rem; border-radius: 50px;
+  color: #374151; margin-bottom: 0.7rem;
+  backdrop-filter: blur(4px);
+  border: 1px solid rgba(255,255,255,0.8);
+}
+.nt-note-contenu {
+  color: rgba(26,29,46,0.8); font-size: 0.88rem;
+  line-height: 1.55; white-space: pre-wrap;
+  max-height: 140px; overflow: hidden;
+  word-break: break-word; position: relative;
+}
+.nt-note-contenu::after {
+  content: '';
+  position: absolute; bottom: 0; left: 0; right: 0;
+  height: 40px;
+  background: linear-gradient(transparent, var(--card-color, #FFE66D));
+}
+.nt-note-date {
+  color: rgba(55,65,81,0.55); font-size: 0.75rem;
+  margin-top: 0.8rem; font-weight: 600;
+}
+.nt-note-actions {
+  display: flex; gap: 0.5rem; margin-top: 0.8rem;
+}
+.nt-btn-mini {
+  display: flex; align-items: center; gap: 0.3rem;
+  padding: 0.35rem 0.8rem; border-radius: 50px;
+  font-size: 0.75rem; font-weight: 700;
+  cursor: pointer; border: none;
+  background: rgba(255,255,255,0.7);
+  color: #374151; transition: all 0.2s;
+  backdrop-filter: blur(4px);
+}
+.nt-btn-mini:hover { background: white; transform: scale(1.05); }
+.nt-btn-mini.sup {
+  background: rgba(239,68,68,0.15); color: #EF4444;
+  border: 1px solid rgba(239,68,68,0.3);
+}
+.nt-btn-mini.sup:hover { background: #EF4444; color: white; }
+
+/* ── EMPTY ── */
+.nt-empty {
+  text-align: center; padding: 4rem 2rem;
+  background: white; border-radius: 24px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+  animation: fadeInUp 0.5s ease;
+}
+.nt-empty-icon { font-size: 5rem; margin-bottom: 1rem; }
+.nt-empty-title { color: #374151; font-size: 1.3rem; font-weight: 800; margin: 0; }
+.nt-empty-sub { color: #9CA3AF; margin: 0.5rem 0 0; }
+
+/* ══════════════════════════════════ */
+/* MODE SOMBRE */
+/* ══════════════════════════════════ */
+[data-theme="dark"] .nt-editor-card,
+[data-theme="dark"] .nt-filtre-bar,
+[data-theme="dark"] .nt-empty {
+  background: #1E2235;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.3);
+}
+[data-theme="dark"] .nt-editor-title { color: #F1F5F9; }
+[data-theme="dark"] .nt-editor-sub { color: #94A3B8; }
+[data-theme="dark"] .nt-field-wrap,
+[data-theme="dark"] .nt-matiere-wrap,
+[data-theme="dark"] .nt-search-wrap {
+  background: #252A40; border-color: #374151;
+}
+[data-theme="dark"] .nt-input-titre,
+[data-theme="dark"] .nt-input-matiere,
+[data-theme="dark"] .nt-search-input { color: #F1F5F9; }
+[data-theme="dark"] .nt-textarea {
+  background: #252A40; border-color: #374151; color: #F1F5F9;
+}
+[data-theme="dark"] .nt-preview { border-color: #4B5563; color: #D1D5DB; }
+[data-theme="dark"] .nt-note-titre { color: #1A1D2E; }
+[data-theme="dark"] .nt-empty-title { color: #F1F5F9; }
+
+/* ══════════════════════════════════ */
+/* RESPONSIVE */
+/* ══════════════════════════════════ */
+@media (max-width: 640px) {
+  .nt-container { padding: 1rem; }
+  .nt-header { padding: 1.2rem; }
+  .nt-header-title { font-size: 1.4rem; }
+  .nt-header-badge { display: none; }
+  .nt-editor-card { padding: 1.2rem; }
+  .nt-options-row { flex-direction: column; }
+  .nt-matiere-wrap { min-width: unset; width: 100%; }
+  .nt-editor-actions { justify-content: stretch; }
+  .nt-btn-save, .nt-btn-cancel { flex: 1; justify-content: center; }
+  .nt-grille { grid-template-columns: 1fr; }
+}
 </style>
 
+<!-- ══════════════════════════════════════════ -->
+<!-- JAVASCRIPT -->
+<!-- ══════════════════════════════════════════ -->
 <script>
 let toutesNotes = [];
 let couleurActuelle = '#FFE66D';
 let idEnEdition = null;
 
-document.addEventListener('DOMContentLoaded', ()=>{
-  // Pré-sélectionner la première couleur
-  document.querySelector('.couleur-puce').classList.add('actif');
+document.addEventListener('DOMContentLoaded', () => {
   charger();
+  mettreAJourPreview();
 });
 
+/* ── TOAST ── */
+function toast(msg, type = 'info') {
+  const colors = {
+    succes : 'linear-gradient(135deg,#00C853,#7ED321)',
+    erreur : 'linear-gradient(135deg,#EF4444,#DC2626)',
+    info   : 'linear-gradient(135deg,#2962FF,#7B61FF)',
+    warning: 'linear-gradient(135deg,#F59E0B,#FFD93D)',
+  };
+  const t = document.getElementById('toast');
+  t.innerHTML = msg;
+  t.style.background = colors[type] || colors.info;
+  t.style.transform = 'translateX(0)';
+  setTimeout(() => { t.style.transform = 'translateX(120%)'; }, 3200);
+}
+
+/* ── COULEUR ── */
 function choisirCouleur(c, el) {
   couleurActuelle = c;
-  document.querySelectorAll('.couleur-puce').forEach(p=>p.classList.remove('actif'));
+  document.querySelectorAll('.nt-couleur-puce').forEach(p => p.classList.remove('actif'));
   el.classList.add('actif');
+  mettreAJourPreview();
 }
 
+function mettreAJourPreview() {
+  const preview = document.getElementById('color-preview');
+  preview.style.background = couleurActuelle;
+}
+
+/* ── CHARGER ── */
 function charger() {
-  fetch('/api/notes/liste').then(r=>r.json()).then(d=>{
+  fetch('/api/notes/liste').then(r => r.json()).then(d => {
     toutesNotes = d.notes || [];
     afficher(toutesNotes);
-  });
+  }).catch(() => toast('❌ Erreur chargement notes', 'erreur'));
 }
 
+/* ── AFFICHER ── */
 function afficher(notes) {
   const grille = document.getElementById('grille-notes');
-  const empty = document.getElementById('empty-state');
+  const empty  = document.getElementById('empty-state');
   grille.innerHTML = '';
-  document.getElementById('nb-notes').textContent = notes.length + ' notes';
 
-  if (!notes || notes.length === 0) { empty.style.display = 'block'; return; }
+  const nb = notes ? notes.length : 0;
+  document.getElementById('nb-notes').textContent = nb + ' note' + (nb > 1 ? 's' : '');
+  document.getElementById('nb-notes-badge').textContent = nb;
+
+  if (!notes || notes.length === 0) {
+    empty.style.display = 'block';
+    return;
+  }
   empty.style.display = 'none';
 
-  notes.forEach(n => {
+  notes.forEach((n, i) => {
     const card = document.createElement('div');
-    card.className = 'note-card';
+    card.className = 'nt-note-card';
     card.style.background = n.couleur || '#FFE66D';
+    card.style.setProperty('--card-color', n.couleur || '#FFE66D');
+    card.style.animationDelay = (i * 0.07) + 's';
     card.innerHTML = `
-      <div class="note-card-titre">📌 ${esc(n.titre)}</div>
-      <span class="note-card-matiere">${esc(n.matiere || 'Général')}</span>
-      <div class="note-card-contenu">${esc(n.contenu)}</div>
-      <div class="note-card-date">📅 ${esc(n.date_modification || n.date_creation || '')}</div>
-      <div class="note-card-actions">
-        <button class="btn-mini" onclick="editer(${n.id})">✏️ Modifier</button>
-        <button class="btn-mini sup" onclick="supprimer(${n.id})">🗑️ Supprimer</button>
+      <div class="nt-note-titre">${esc(n.titre)}</div>
+      <span class="nt-note-matiere">📚 ${esc(n.matiere || 'Général')}</span>
+      <div class="nt-note-contenu">${esc(n.contenu)}</div>
+      <div class="nt-note-date">📅 ${esc(n.date_modification || n.date_creation || '')}</div>
+      <div class="nt-note-actions">
+        <button class="nt-btn-mini" onclick="editer(${n.id})">✏️ Modifier</button>
+        <button class="nt-btn-mini sup" onclick="supprimer(${n.id})">🗑️ Supprimer</button>
       </div>
     `;
     grille.appendChild(card);
   });
 }
 
+/* ── FILTRER ── */
 function filtrer() {
   const q = document.getElementById('recherche-locale').value.toLowerCase();
-  if (!q) afficher(toutesNotes);
-  else afficher(toutesNotes.filter(n=>
-    (n.titre||'').toLowerCase().includes(q) ||
-    (n.contenu||'').toLowerCase().includes(q) ||
-    (n.matiere||'').toLowerCase().includes(q)
+  if (!q) { afficher(toutesNotes); return; }
+  afficher(toutesNotes.filter(n =>
+    (n.titre   || '').toLowerCase().includes(q) ||
+    (n.contenu || '').toLowerCase().includes(q) ||
+    (n.matiere || '').toLowerCase().includes(q)
   ));
 }
 
+/* ── SAUVEGARDER ── */
 function sauvegarder() {
-  const titre = document.getElementById('note-titre').value.trim();
+  const titre   = document.getElementById('note-titre').value.trim();
   const contenu = document.getElementById('note-contenu').value.trim();
   const matiere = document.getElementById('note-matiere').value.trim() || 'Général';
 
-  if (!titre || !contenu) {
-    alert('⚠️ Titre et contenu obligatoires !');
-    return;
-  }
+  if (!titre)   { toast('⚠️ Le titre est obligatoire !', 'warning'); return; }
+  if (!contenu) { toast('⚠️ Le contenu est obligatoire !', 'warning'); return; }
 
-  const data = {titre, contenu, matiere, couleur: couleurActuelle};
-  let url = '/api/notes/creer';
-  if (idEnEdition) { url = '/api/notes/modifier/' + idEnEdition; }
+  const data = { titre, contenu, matiere, couleur: couleurActuelle };
+  const url  = idEnEdition
+    ? '/api/notes/modifier/' + idEnEdition
+    : '/api/notes/creer';
 
   fetch(url, {
-    method:'POST', headers:{'Content-Type':'application/json'},
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data)
-  }).then(r=>r.json()).then(d=>{
+  })
+  .then(r => r.json())
+  .then(d => {
     if (d.succes) {
+      toast(idEnEdition ? '✅ Note mise à jour !' : '✅ Note créée !', 'succes');
       annulerEdition();
       charger();
     } else {
-      alert('❌ ' + d.erreur);
+      toast('❌ ' + (d.erreur || 'Erreur'), 'erreur');
     }
-  });
+  })
+  .catch(() => toast('❌ Erreur réseau', 'erreur'));
 }
 
+/* ── ÉDITER ── */
 function editer(id) {
-  const n = toutesNotes.find(x=>x.id === id);
+  const n = toutesNotes.find(x => x.id === id);
   if (!n) return;
-  document.getElementById('note-titre').value = n.titre || '';
+
+  document.getElementById('note-titre').value   = n.titre   || '';
   document.getElementById('note-contenu').value = n.contenu || '';
   document.getElementById('note-matiere').value = n.matiere || '';
+
   couleurActuelle = n.couleur || '#FFE66D';
-  document.querySelectorAll('.couleur-puce').forEach(p=>{
+  document.querySelectorAll('.nt-couleur-puce').forEach(p => {
     p.classList.toggle('actif', p.dataset.couleur === couleurActuelle);
   });
+  mettreAJourPreview();
+
   idEnEdition = id;
-  document.getElementById('btn-save').textContent = '💾 Mettre à jour';
-  document.getElementById('btn-cancel').style.display = 'inline-block';
-  document.querySelector('.note-editor').scrollIntoView({behavior:'smooth'});
+  document.getElementById('editor-title').textContent = '✏️ Modifier la note';
+  document.getElementById('save-label').textContent   = 'Mettre à jour';
+  document.getElementById('btn-cancel').style.display = 'flex';
+
+  document.querySelector('.nt-editor-card').scrollIntoView({ behavior: 'smooth' });
+  toast('✏️ Mode édition activé', 'info');
 }
 
+/* ── ANNULER ÉDITION ── */
 function annulerEdition() {
-  document.getElementById('note-titre').value = '';
+  document.getElementById('note-titre').value   = '';
   document.getElementById('note-contenu').value = '';
   document.getElementById('note-matiere').value = '';
   idEnEdition = null;
-  document.getElementById('btn-save').textContent = '💾 Sauvegarder';
+  couleurActuelle = '#FFE66D';
+  document.querySelectorAll('.nt-couleur-puce').forEach((p, i) => {
+    p.classList.toggle('actif', i === 0);
+  });
+  mettreAJourPreview();
+  document.getElementById('editor-title').textContent = 'Nouvelle note';
+  document.getElementById('save-label').textContent   = 'Sauvegarder';
   document.getElementById('btn-cancel').style.display = 'none';
 }
 
+/* ── SUPPRIMER ── */
 function supprimer(id) {
-  if (!confirm('🗑️ Supprimer cette note ?')) return;
-  fetch('/api/notes/supprimer/' + id, {method:'DELETE'}).then(r=>r.json()).then(d=>{
-    if (d.succes) charger();
-  });
+  if (!confirm('🗑️ Supprimer cette note ?\nIrréversible !')) return;
+  fetch('/api/notes/supprimer/' + id, { method: 'DELETE' })
+  .then(r => r.json())
+  .then(d => {
+    if (d.succes) {
+      toast('🗑️ Note supprimée', 'warning');
+      charger();
+    } else {
+      toast('❌ Erreur suppression', 'erreur');
+    }
+  })
+  .catch(() => toast('❌ Erreur réseau', 'erreur'));
 }
 
-function esc(t) { const d = document.createElement('div'); d.textContent = t || ''; return d.innerHTML; }
+/* ── ESCAPE ── */
+function esc(t) {
+  const d = document.createElement('div');
+  d.textContent = t || '';
+  return d.innerHTML;
+}
 </script>
+
 {% endblock %}

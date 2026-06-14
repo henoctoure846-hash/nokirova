@@ -4,108 +4,364 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 {% endblock %}
 {% block contenu %}
-<div class="page-container">
 
-  <div class="page-header" style="background: linear-gradient(135deg, #D8B4FE, #EDE9FE); border-left: 5px solid #A855F7;">
-    <div class="page-header-icon" style="background: linear-gradient(135deg, #A855F7, #7B61FF);">📊</div>
-    <div>
-      <h1 class="page-title" style="color: #6B21A8;">Mes Statistiques</h1>
-      <p class="page-subtitle" style="color: #7E22CE;">Suis ta progression en temps réel 📈</p>
+<!-- TOAST -->
+<div id="toast" style="
+  position:fixed; top:20px; right:20px; z-index:9999;
+  background:#1A1D2E; color:white; padding:1rem 1.5rem;
+  border-radius:16px; font-weight:600; font-size:0.95rem;
+  box-shadow:0 8px 30px rgba(0,0,0,0.3);
+  transform:translateX(120%); transition:transform 0.4s cubic-bezier(0.175,0.885,0.32,1.275);
+  display:flex; align-items:center; gap:0.8rem; max-width:320px;
+"></div>
+
+<div class="gr-container">
+
+  <!-- ═══ HEADER ═══ -->
+  <div class="gr-header">
+    <div class="gr-header-bg-emoji">📊</div>
+    <div class="gr-header-icon">📊</div>
+    <div class="gr-header-text">
+      <h1 class="gr-header-title">Mes Statistiques</h1>
+      <p class="gr-header-sub">Suis ta progression en temps réel 📈</p>
+    </div>
+    <div class="gr-header-badge">
+      <span>📈</span> Live Stats
     </div>
   </div>
 
-  <!-- STATS RAPIDES -->
-  <div class="quick-stats">
-    <div class="qs qs-niveau"><div class="qs-emoji">🏆</div><div class="qs-val" id="qs-niv">0</div><div class="qs-name">Niveau</div></div>
-    <div class="qs qs-xp"><div class="qs-emoji">⭐</div><div class="qs-val" id="qs-xp">0</div><div class="qs-name">XP total</div></div>
-    <div class="qs qs-streak"><div class="qs-emoji">🔥</div><div class="qs-val" id="qs-streak">0</div><div class="qs-name">Streak (jours)</div></div>
-    <div class="qs qs-cours"><div class="qs-emoji">📚</div><div class="qs-val" id="qs-cours">0</div><div class="qs-name">Cours importés</div></div>
+  <!-- ═══ QUICK STATS ═══ -->
+  <div class="gr-quick-grid">
+    <div class="gr-qs gr-qs-or">
+      <span class="gr-qs-emoji">🏆</span>
+      <strong class="gr-qs-val" id="qs-niv">0</strong>
+      <span class="gr-qs-name">Niveau</span>
+    </div>
+    <div class="gr-qs gr-qs-violet">
+      <span class="gr-qs-emoji">⭐</span>
+      <strong class="gr-qs-val" id="qs-xp">0</strong>
+      <span class="gr-qs-name">XP total</span>
+    </div>
+    <div class="gr-qs gr-qs-rouge">
+      <span class="gr-qs-emoji">🔥</span>
+      <strong class="gr-qs-val" id="qs-streak">0</strong>
+      <span class="gr-qs-name">Streak (jours)</span>
+    </div>
+    <div class="gr-qs gr-qs-vert">
+      <span class="gr-qs-emoji">📚</span>
+      <strong class="gr-qs-val" id="qs-cours">0</strong>
+      <span class="gr-qs-name">Cours importés</span>
+    </div>
   </div>
 
-  <!-- GRAPHIQUES GRILLE -->
-  <div class="charts-grid">
+  <!-- ═══ CHARTS GRID ═══ -->
+  <div class="gr-charts-grid">
 
-    <div class="chart-card">
-      <h3 style="color:#6B21A8;">📅 Activité (7 derniers jours)</h3>
+    <div class="gr-chart-card">
+      <div class="gr-chart-header">
+        <div class="gr-chart-icon"
+             style="background:linear-gradient(135deg,#A855F7,#7B61FF);">📅</div>
+        <h3 class="gr-chart-title">Activité (7 derniers jours)</h3>
+      </div>
       <canvas id="chart-activite"></canvas>
     </div>
 
-    <div class="chart-card">
-      <h3 style="color:#6B21A8;">⏱️ Pomodoro (7 derniers jours)</h3>
+    <div class="gr-chart-card">
+      <div class="gr-chart-header">
+        <div class="gr-chart-icon"
+             style="background:linear-gradient(135deg,#EF4444,#F59E0B);">⏱️</div>
+        <h3 class="gr-chart-title">Pomodoro (7 derniers jours)</h3>
+      </div>
       <canvas id="chart-pomodoro"></canvas>
     </div>
 
-    <div class="chart-card">
-      <h3 style="color:#6B21A8;">🎯 Activité par type</h3>
+    <div class="gr-chart-card">
+      <div class="gr-chart-header">
+        <div class="gr-chart-icon"
+             style="background:linear-gradient(135deg,#FF6B9D,#7B61FF);">🎯</div>
+        <h3 class="gr-chart-title">Activité par type</h3>
+      </div>
       <canvas id="chart-types"></canvas>
     </div>
 
-    <div class="chart-card">
-      <h3 style="color:#6B21A8;">📚 Cours par matière</h3>
+    <div class="gr-chart-card">
+      <div class="gr-chart-header">
+        <div class="gr-chart-icon"
+             style="background:linear-gradient(135deg,#00C853,#FFD93D);">📚</div>
+        <h3 class="gr-chart-title">Cours par matière</h3>
+      </div>
       <canvas id="chart-matieres"></canvas>
     </div>
 
-    <div class="chart-card full">
-      <h3 style="color:#6B21A8;">🃏 Performances Flashcards</h3>
+    <div class="gr-chart-card gr-chart-full">
+      <div class="gr-chart-header">
+        <div class="gr-chart-icon"
+             style="background:linear-gradient(135deg,#2962FF,#00C853);">🃏</div>
+        <h3 class="gr-chart-title">Performances Flashcards</h3>
+      </div>
       <canvas id="chart-flashcards"></canvas>
     </div>
 
   </div>
 
-  <!-- RÉSUMÉ DÉTAILLÉ -->
-  <div class="resume-card">
-    <h3 style="color:#6B21A8;">📋 Résumé complet</h3>
-    <div class="resume-grid" id="resume-grid"></div>
+  <!-- ═══ RÉSUMÉ ═══ -->
+  <div class="gr-resume-card">
+    <div class="gr-resume-header">
+      <div class="gr-resume-icon"
+           style="background:linear-gradient(135deg,#A855F7,#7B61FF);">📋</div>
+      <div>
+        <h3 class="gr-resume-title">Résumé complet</h3>
+        <p class="gr-resume-sub">Toutes tes statistiques détaillées</p>
+      </div>
+    </div>
+    <div class="gr-resume-grid" id="resume-grid"></div>
   </div>
+
 </div>
 
 <style>
-  .page-container { padding:2rem; max-width:1200px; margin:0 auto;}
-  .page-header { display:flex; align-items:center; gap:1.2rem; border-radius:20px; padding:1.5rem 2rem; margin-bottom:1.5rem; box-shadow:0 4px 20px rgba(0,0,0,0.05);}
-  .page-header-icon { width:60px; height:60px; border-radius:16px; display:flex; align-items:center; justify-content:center; font-size:1.8rem; color:white;}
-  .page-title { font-size:1.6rem; font-weight:800; margin:0;}
-  .page-subtitle { margin:0.2rem 0 0; font-size:0.95rem;}
 
-  .quick-stats { display:grid; grid-template-columns:repeat(auto-fit, minmax(160px, 1fr)); gap:1rem; margin-bottom:1.5rem;}
-  .qs { background:white; border-radius:18px; padding:1.5rem; text-align:center; box-shadow:0 4px 15px rgba(0,0,0,0.06); border-top:4px solid;}
-  .qs-niveau { border-color:#FFD93D;}
-  .qs-xp { border-color:#7B61FF;}
-  .qs-streak { border-color:#F59E0B;}
-  .qs-cours { border-color:#00C853;}
-  .qs-emoji { font-size:2.5rem;}
-  .qs-val { font-size:2rem; font-weight:800; color:#1F2937; margin:0.3rem 0;}
-  .qs-name { font-size:0.85rem; color:#9CA3AF; font-weight:600; text-transform:uppercase;}
+/* ── ANIMATIONS ── */
+@keyframes fadeInUp {
+  from { opacity:0; transform:translateY(30px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+@keyframes floatChart {
+  0%,100% { transform:translateY(0px) rotate(-2deg); }
+  50%      { transform:translateY(-10px) rotate(2deg); }
+}
+@keyframes bounceIn {
+  0%   { transform:scale(0.3); opacity:0; }
+  50%  { transform:scale(1.05); }
+  70%  { transform:scale(0.9); }
+  100% { transform:scale(1); opacity:1; }
+}
+@keyframes countUp {
+  from { opacity:0; transform:translateY(10px); }
+  to   { opacity:1; transform:translateY(0); }
+}
 
-  .charts-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(380px, 1fr)); gap:1rem; margin-bottom:1.5rem;}
-  .chart-card { background:white; border-radius:18px; padding:1.5rem; box-shadow:0 4px 20px rgba(168,85,247,0.08); border-top:4px solid #A855F7;}
-  .chart-card.full { grid-column:1 / -1;}
-  .chart-card h3 { font-size:1.05rem; font-weight:700; margin-bottom:1rem;}
-  .chart-card canvas { max-height:280px;}
+/* ── CONTAINER ── */
+.gr-container {
+  padding:1.5rem;
+  max-width:1200px;
+  margin:0 auto;
+  animation:fadeInUp 0.5s ease;
+}
 
-  .resume-card { background:white; border-radius:20px; padding:1.8rem; box-shadow:0 4px 20px rgba(0,0,0,0.05);}
-  .resume-card h3 { font-size:1.2rem; font-weight:700; margin-bottom:1rem;}
-  .resume-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:0.8rem;}
-  .resume-item { background:#FAF5FF; border-radius:12px; padding:1rem; border-left:3px solid #A855F7;}
-  .resume-item strong { display:block; color:#6B21A8; font-size:0.85rem; margin-bottom:0.3rem;}
-  .resume-item span { color:#1F2937; font-size:1.2rem; font-weight:800;}
+/* ── HEADER ── */
+.gr-header {
+  position:relative; overflow:hidden;
+  background:linear-gradient(135deg,#A855F7 0%,#7B61FF 50%,#2962FF 100%);
+  border-radius:28px; padding:2rem;
+  margin-bottom:1.5rem;
+  display:flex; align-items:center; gap:1.2rem; flex-wrap:wrap;
+  box-shadow:0 8px 32px rgba(168,85,247,0.35);
+}
+.gr-header-bg-emoji {
+  position:absolute; right:-10px; top:-20px;
+  font-size:9rem; opacity:0.12; pointer-events:none;
+  animation:floatChart 4s ease-in-out infinite;
+}
+.gr-header-icon {
+  width:72px; height:72px;
+  background:rgba(255,255,255,0.2);
+  border-radius:20px;
+  display:flex; align-items:center; justify-content:center;
+  font-size:2.2rem; flex-shrink:0;
+  backdrop-filter:blur(10px);
+  border:2px solid rgba(255,255,255,0.3);
+}
+.gr-header-text { flex:1; }
+.gr-header-title {
+  font-size:1.8rem; font-weight:900;
+  color:white; margin:0;
+  text-shadow:0 2px 10px rgba(0,0,0,0.2);
+}
+.gr-header-sub {
+  color:rgba(255,255,255,0.85);
+  margin:0.3rem 0 0; font-size:0.95rem;
+}
+.gr-header-badge {
+  background:rgba(255,255,255,0.2);
+  color:white; padding:0.5rem 1.2rem;
+  border-radius:50px; font-weight:700; font-size:0.85rem;
+  display:flex; align-items:center; gap:0.5rem;
+  backdrop-filter:blur(10px);
+  border:1px solid rgba(255,255,255,0.3);
+  white-space:nowrap;
+}
+
+/* ── QUICK STATS ── */
+.gr-quick-grid {
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+  gap:1rem; margin-bottom:1.5rem;
+}
+.gr-qs {
+  background:white; border-radius:20px;
+  padding:1.4rem 1rem; text-align:center;
+  box-shadow:0 4px 20px rgba(0,0,0,0.07);
+  display:flex; flex-direction:column; align-items:center; gap:0.3rem;
+  transition:all 0.3s; animation:bounceIn 0.5s ease both;
+}
+.gr-qs:hover { transform:translateY(-5px); }
+.gr-qs-or     { border-top:5px solid #F59E0B; }
+.gr-qs-violet { border-top:5px solid #A855F7; }
+.gr-qs-rouge  { border-top:5px solid #EF4444; }
+.gr-qs-vert   { border-top:5px solid #00C853; }
+.gr-qs-emoji  { font-size:2.2rem; }
+.gr-qs-val {
+  font-size:2rem; font-weight:900; color:#1A1D2E;
+  animation:countUp 0.5s ease;
+}
+.gr-qs-name {
+  font-size:0.72rem; color:#9CA3AF;
+  font-weight:700; text-transform:uppercase; letter-spacing:1px;
+}
+
+/* ── CHARTS GRID ── */
+.gr-charts-grid {
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(360px,1fr));
+  gap:1rem; margin-bottom:1.5rem;
+}
+.gr-chart-card {
+  background:white; border-radius:24px;
+  padding:1.5rem;
+  box-shadow:0 4px 24px rgba(168,85,247,0.1);
+  border-top:5px solid #A855F7;
+  animation:fadeInUp 0.5s ease both;
+  transition:all 0.3s;
+}
+.gr-chart-card:hover {
+  transform:translateY(-4px);
+  box-shadow:0 8px 32px rgba(168,85,247,0.2);
+}
+.gr-chart-full { grid-column:1 / -1; }
+
+.gr-chart-header {
+  display:flex; align-items:center; gap:0.8rem;
+  margin-bottom:1.2rem;
+}
+.gr-chart-icon {
+  width:42px; height:42px; border-radius:12px;
+  display:flex; align-items:center; justify-content:center;
+  font-size:1.2rem; flex-shrink:0;
+  box-shadow:0 4px 12px rgba(0,0,0,0.15);
+}
+.gr-chart-title {
+  font-size:1rem; font-weight:800; color:#1A1D2E; margin:0;
+}
+
+/* ── RÉSUMÉ ── */
+.gr-resume-card {
+  background:white; border-radius:24px;
+  padding:1.8rem;
+  box-shadow:0 4px 24px rgba(0,0,0,0.07);
+  border-top:5px solid #A855F7;
+  animation:fadeInUp 0.5s ease 0.3s both;
+}
+.gr-resume-header {
+  display:flex; align-items:center; gap:1rem;
+  margin-bottom:1.5rem;
+}
+.gr-resume-icon {
+  width:52px; height:52px; border-radius:14px;
+  display:flex; align-items:center; justify-content:center;
+  font-size:1.5rem; flex-shrink:0;
+  box-shadow:0 4px 12px rgba(0,0,0,0.15);
+}
+.gr-resume-title {
+  font-size:1.1rem; font-weight:800; color:#1A1D2E; margin:0;
+}
+.gr-resume-sub { font-size:0.85rem; color:#6B7280; margin:0.2rem 0 0; }
+
+.gr-resume-grid {
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+  gap:0.8rem;
+}
+.gr-resume-item {
+  background:linear-gradient(135deg,#FAF5FF,#EDE9FE);
+  border-radius:14px; padding:1rem 1.2rem;
+  border-left:4px solid #A855F7;
+  transition:all 0.2s; animation:fadeInUp 0.4s ease both;
+}
+.gr-resume-item:hover { transform:translateX(4px); }
+.gr-resume-item strong {
+  display:block; color:#6B21A8;
+  font-size:0.8rem; margin-bottom:0.4rem;
+  text-transform:uppercase; letter-spacing:0.5px;
+}
+.gr-resume-item span {
+  color:#1A1D2E; font-size:1.3rem; font-weight:900;
+}
+
+/* ══════════════════════════════════ */
+/* MODE SOMBRE */
+/* ══════════════════════════════════ */
+[data-theme="dark"] .gr-qs,
+[data-theme="dark"] .gr-chart-card,
+[data-theme="dark"] .gr-resume-card { background:#1E2235; }
+[data-theme="dark"] .gr-qs-val { color:#F1F5F9; }
+[data-theme="dark"] .gr-chart-title { color:#F1F5F9; }
+[data-theme="dark"] .gr-resume-title { color:#F1F5F9; }
+[data-theme="dark"] .gr-resume-sub { color:#94A3B8; }
+[data-theme="dark"] .gr-resume-item {
+  background:linear-gradient(135deg,#2E1065,#1E2235);
+  border-left-color:#A855F7;
+}
+[data-theme="dark"] .gr-resume-item span { color:#F1F5F9; }
+[data-theme="dark"] .gr-resume-item strong { color:#C4B5FD; }
+
+/* ══════════════════════════════════ */
+/* RESPONSIVE */
+/* ══════════════════════════════════ */
+@media (max-width:768px) {
+  .gr-charts-grid { grid-template-columns:1fr; }
+  .gr-chart-full { grid-column:1; }
+}
+@media (max-width:640px) {
+  .gr-container { padding:1rem; }
+  .gr-header { padding:1.2rem; }
+  .gr-header-title { font-size:1.4rem; }
+  .gr-header-badge { display:none; }
+  .gr-quick-grid { grid-template-columns:repeat(2,1fr); }
+}
 </style>
 
 <script>
 document.addEventListener('DOMContentLoaded', charger);
 
+/* ── TOAST ── */
+function toast(msg, type = 'info') {
+  const colors = {
+    succes : 'linear-gradient(135deg,#00C853,#7ED321)',
+    erreur : 'linear-gradient(135deg,#EF4444,#DC2626)',
+    info   : 'linear-gradient(135deg,#2962FF,#7B61FF)',
+  };
+  const t = document.getElementById('toast');
+  t.innerHTML = msg;
+  t.style.background = colors[type] || colors.info;
+  t.style.transform = 'translateX(0)';
+  setTimeout(() => { t.style.transform = 'translateX(120%)'; }, 3200);
+}
+
+/* ── CHARGER ── */
 function charger() {
-  fetch('/api/graphiques/data').then(r=>r.json()).then(d=>{
-    if (!d.succes) { alert('Erreur : ' + d.erreur); return; }
-    const data = d.data;
+  fetch('/api/graphiques/data').then(r => r.json()).then(d => {
+    if (!d.succes) { toast('❌ Erreur : ' + d.erreur, 'erreur'); return; }
+    const data   = d.data;
     const resume = d.resume;
 
-    // Stats rapides
-    document.getElementById('qs-niv').textContent = data.stats.niveau || 1;
-    document.getElementById('qs-xp').textContent = data.stats.xp || 0;
-    document.getElementById('qs-streak').textContent = data.stats.streak_jours || 0;
-    document.getElementById('qs-cours').textContent = data.stats.cours_importes || 0;
+    /* Stats rapides */
+    animerVal('qs-niv',    data.stats.niveau         || 1);
+    animerVal('qs-xp',     data.stats.xp             || 0);
+    animerVal('qs-streak', data.stats.streak_jours   || 0);
+    animerVal('qs-cours',  data.stats.cours_importes || 0);
 
-    // Graphique 1 : Activité 7j
+    /* Chart 1 : Activité 7j */
     new Chart(document.getElementById('chart-activite'), {
       type: 'line',
       data: {
@@ -113,28 +369,46 @@ function charger() {
         datasets: [{
           label: 'Activités IA',
           data: data.activite_jours,
-          borderColor: '#A855F7', backgroundColor: 'rgba(168,85,247,0.2)',
-          tension: 0.4, fill: true, borderWidth: 3, pointRadius: 5
+          borderColor: '#A855F7',
+          backgroundColor: 'rgba(168,85,247,0.15)',
+          tension: 0.4, fill: true, borderWidth: 3, pointRadius: 5,
+          pointBackgroundColor: '#A855F7',
+          pointBorderColor: 'white', pointBorderWidth: 2,
         }]
       },
-      options: {responsive:true, plugins:{legend:{display:false}}}
+      options: {
+        responsive: true,
+        plugins: { legend: { display: false } },
+        scales: {
+          y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)' } },
+          x: { grid: { display: false } }
+        }
+      }
     });
 
-    // Graphique 2 : Pomodoro 7j
+    /* Chart 2 : Pomodoro 7j */
     new Chart(document.getElementById('chart-pomodoro'), {
       type: 'bar',
       data: {
         labels: data.jours,
         datasets: [{
-          label: 'Minutes Pomodoro',
+          label: 'Minutes',
           data: data.pomodoro_jours,
-          backgroundColor: '#EF4444', borderRadius: 8
+          backgroundColor: 'rgba(239,68,68,0.8)',
+          borderRadius: 10, borderSkipped: false,
         }]
       },
-      options: {responsive:true, plugins:{legend:{display:false}}}
+      options: {
+        responsive: true,
+        plugins: { legend: { display: false } },
+        scales: {
+          y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)' } },
+          x: { grid: { display: false } }
+        }
+      }
     });
 
-    // Graphique 3 : Activité par type
+    /* Chart 3 : Types */
     const typesLabels = Object.keys(data.activite_par_type);
     const typesValues = Object.values(data.activite_par_type);
     if (typesLabels.length > 0) {
@@ -144,14 +418,25 @@ function charger() {
           labels: typesLabels,
           datasets: [{
             data: typesValues,
-            backgroundColor: ['#FF6B9D','#2962FF','#F59E0B','#00C853','#7B61FF','#FFD93D','#A855F7']
+            backgroundColor: [
+              '#FF6B9D','#2962FF','#F59E0B',
+              '#00C853','#7B61FF','#FFD93D','#A855F7'
+            ],
+            borderWidth: 3, borderColor: 'white',
+            hoverOffset: 8,
           }]
         },
-        options: {responsive:true}
+        options: {
+          responsive: true,
+          plugins: {
+            legend: { position: 'bottom', labels: { padding: 16, usePointStyle: true } }
+          },
+          cutout: '60%',
+        }
       });
     }
 
-    // Graphique 4 : Cours par matière
+    /* Chart 4 : Matières */
     const matLabels = Object.keys(data.cours_par_matiere);
     const matValues = Object.values(data.cours_par_matiere);
     if (matLabels.length > 0) {
@@ -161,48 +446,85 @@ function charger() {
           labels: matLabels,
           datasets: [{
             data: matValues,
-            backgroundColor: ['#7ED321','#FFD93D','#7EC8FF','#FFC9DE','#A855F7','#F59E0B','#00C853','#7B61FF']
+            backgroundColor: [
+              '#7ED321','#FFD93D','#7EC8FF','#FFC9DE',
+              '#A855F7','#F59E0B','#00C853','#7B61FF'
+            ],
+            borderWidth: 3, borderColor: 'white',
+            hoverOffset: 8,
           }]
         },
-        options: {responsive:true}
+        options: {
+          responsive: true,
+          plugins: {
+            legend: { position: 'bottom', labels: { padding: 16, usePointStyle: true } }
+          }
+        }
       });
     }
 
-    // Graphique 5 : Flashcards
+    /* Chart 5 : Flashcards */
     new Chart(document.getElementById('chart-flashcards'), {
       type: 'bar',
       data: {
-        labels: ['Réussis ✅', 'Ratés ❌', 'Total vus 👀'],
+        labels: ['✅ Réussis', '❌ Ratés', '👀 Total vus'],
         datasets: [{
           data: [data.fc_reussis, data.fc_rates, data.fc_vus],
-          backgroundColor: ['#00C853', '#EF4444', '#7B61FF'],
-          borderRadius: 10
+          backgroundColor: [
+            'rgba(0,200,83,0.85)',
+            'rgba(239,68,68,0.85)',
+            'rgba(123,97,255,0.85)'
+          ],
+          borderRadius: 12, borderSkipped: false,
         }]
       },
-      options: {responsive:true, plugins:{legend:{display:false}}}
+      options: {
+        responsive: true,
+        plugins: { legend: { display: false } },
+        scales: {
+          y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)' } },
+          x: { grid: { display: false } }
+        }
+      }
     });
 
-    // Résumé
+    /* Résumé */
     const r = document.getElementById('resume-grid');
     const items = [
-      ['🏆 Niveau', resume.niveau],
-      ['⭐ XP total', resume.xp],
-      ['🔥 Streak', resume.streak + ' j'],
-      ['📚 Cours', resume.nb_cours],
-      ['📝 Notes', resume.nb_notes],
-      ['🃏 Flashcards', resume.nb_flashcards],
-      ['🎯 QCM réussis', resume.qcm_reussis + '/' + resume.qcm_total + ' (' + resume.taux_qcm + '%)'],
-      ['🍅 Pomodoros', resume.sessions_pomodoro + ' (' + resume.minutes_pomodoro + ' min)'],
-      ['📜 Historique', resume.nb_historique],
-      ['💎 Taux Flashcards', resume.taux_flashcards + '%'],
+      ['🏆 Niveau',           resume.niveau],
+      ['⭐ XP total',         resume.xp],
+      ['🔥 Streak',           resume.streak + ' j'],
+      ['📚 Cours',            resume.nb_cours],
+      ['📝 Notes',            resume.nb_notes],
+      ['🃏 Flashcards',       resume.nb_flashcards],
+      ['🎯 QCM réussis',      resume.qcm_reussis + '/' + resume.qcm_total + ' (' + resume.taux_qcm + '%)'],
+      ['🍅 Pomodoros',        resume.sessions_pomodoro + ' (' + resume.minutes_pomodoro + ' min)'],
+      ['📜 Historique',       resume.nb_historique],
+      ['💎 Taux Flashcards',  resume.taux_flashcards + '%'],
     ];
-    items.forEach(([k, v]) => {
+    items.forEach(([k, v], i) => {
       const div = document.createElement('div');
-      div.className = 'resume-item';
+      div.className = 'gr-resume-item';
+      div.style.animationDelay = (i * 0.05) + 's';
       div.innerHTML = `<strong>${k}</strong><span>${v}</span>`;
       r.appendChild(div);
     });
-  });
+
+  }).catch(() => toast('❌ Erreur chargement stats', 'erreur'));
+}
+
+/* ── ANIMER VALEUR ── */
+function animerVal(id, cible) {
+  const el  = document.getElementById(id);
+  const dur = 800;
+  const pas = Math.ceil(cible / (dur / 16));
+  let val   = 0;
+  const iv  = setInterval(() => {
+    val = Math.min(val + pas, cible);
+    el.textContent = val;
+    if (val >= cible) clearInterval(iv);
+  }, 16);
 }
 </script>
+
 {% endblock %}

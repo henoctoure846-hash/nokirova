@@ -1,136 +1,479 @@
 {% extends "base.html" %}
 {% block title %}Recherche - NOKIROVA{% endblock %}
 {% block contenu %}
-<div class="page-container">
 
-  <div class="page-header" style="background: linear-gradient(135deg, #9FD93B, #BBF7D0); border-left: 5px solid #00C853;">
-    <div class="page-header-icon" style="background: linear-gradient(135deg, #00C853, #7ED321);">🔍</div>
-    <div>
-      <h1 class="page-title" style="color: #14532D;">Recherche intelligente</h1>
-      <p class="page-subtitle" style="color: #166534;">Cherche un mot ou un concept dans tous tes cours</p>
+<!-- TOAST -->
+<div id="toast" style="
+  position:fixed; top:20px; right:20px; z-index:9999;
+  background:#1A1D2E; color:white; padding:1rem 1.5rem;
+  border-radius:16px; font-weight:600; font-size:0.95rem;
+  box-shadow:0 8px 30px rgba(0,0,0,0.3);
+  transform:translateX(120%); transition:transform 0.4s cubic-bezier(0.175,0.885,0.32,1.275);
+  display:flex; align-items:center; gap:0.8rem; max-width:320px;
+"></div>
+
+<div class="rch-container">
+
+  <!-- ═══ HEADER ═══ -->
+  <div class="rch-header">
+    <div class="rch-header-bg-emoji">🔍</div>
+    <div class="rch-header-icon">🔍</div>
+    <div class="rch-header-text">
+      <h1 class="rch-header-title">Recherche intelligente</h1>
+      <p class="rch-header-sub">Cherche un mot ou concept dans tous tes cours 🧠</p>
+    </div>
+    <div class="rch-header-badge">
+      <span>⚡</span> Instantané
     </div>
   </div>
 
-  <div class="search-box">
-    <input type="text" id="champ-recherche" placeholder="🔍 Tape ton mot-clé... (ex: 'inflation', 'PIB')" onkeypress="if(event.key==='Enter') rechercher()" />
-    <button onclick="rechercher()" class="btn-search">🔎 Rechercher</button>
+  <!-- ═══ SEARCH BOX ═══ -->
+  <div class="rch-search-card">
+    <div class="rch-search-wrap">
+      <span class="rch-search-icon">🔍</span>
+      <input type="text" id="champ-recherche"
+             placeholder="Tape ton mot-clé... (ex: inflation, PIB)"
+             class="rch-input"
+             onkeypress="if(event.key==='Enter') rechercher()"/>
+    </div>
+    <button onclick="rechercher()" class="rch-btn-search">
+      <span class="rch-btn-circle">🔎</span>
+      <span>Rechercher</span>
+    </button>
   </div>
 
-  <div id="loading" style="display:none; text-align:center; padding:2rem;">
-    <div class="spinner-mini"></div>
-    <p style="color:#00C853; font-weight:700; margin-top:1rem;">🔍 Recherche en cours...</p>
+  <!-- ═══ LOADING ═══ -->
+  <div id="loading" class="rch-loading" style="display:none;">
+    <div class="rch-loading-dots">
+      <span></span><span></span><span></span>
+    </div>
+    <p class="rch-loading-text">Recherche en cours...</p>
   </div>
 
-  <div id="nb-resultats" style="display:none;" class="badge-resultats"></div>
+  <!-- ═══ BADGE RÉSULTATS ═══ -->
+  <div id="nb-resultats" class="rch-badge-resultats" style="display:none;"></div>
+
+  <!-- ═══ RÉSULTATS ═══ -->
   <div id="resultats"></div>
 
-  <div id="empty-state" class="empty-state">
-    <div style="font-size:4rem;">🔍</div>
-    <h2>Lance ta recherche</h2>
-    <p>Tape un mot-clé pour trouver ce que tu cherches dans tous tes cours</p>
+  <!-- ═══ EMPTY STATE ═══ -->
+  <div id="empty-state" class="rch-empty">
+    <div class="rch-empty-icon">🔍</div>
+    <h2 class="rch-empty-title">Lance ta recherche</h2>
+    <p class="rch-empty-sub">
+      Tape un mot-clé pour trouver ce que tu cherches dans tous tes cours
+    </p>
+    <!-- Suggestions -->
+    <div class="rch-suggestions">
+      <p class="rch-suggestions-label">💡 Essaie par exemple :</p>
+      <div class="rch-tags">
+        <span onclick="rechercheRapide('inflation')">💰 Inflation</span>
+        <span onclick="rechercheRapide('PIB')">📊 PIB</span>
+        <span onclick="rechercheRapide('marketing')">📣 Marketing</span>
+        <span onclick="rechercheRapide('comptabilité')">📒 Comptabilité</span>
+        <span onclick="rechercheRapide('offre demande')">⚖️ Offre & Demande</span>
+        <span onclick="rechercheRapide('statistiques')">📉 Statistiques</span>
+      </div>
+    </div>
   </div>
+
 </div>
 
 <style>
-  .page-container { padding:2rem; max-width:1100px; margin:0 auto;}
-  .page-header { display:flex; align-items:center; gap:1.2rem; border-radius:20px; padding:1.5rem 2rem; margin-bottom:1.5rem; box-shadow:0 4px 20px rgba(0,0,0,0.05);}
-  .page-header-icon { width:60px; height:60px; border-radius:16px; display:flex; align-items:center; justify-content:center; font-size:1.8rem; color:white;}
-  .page-title { font-size:1.6rem; font-weight:800; margin:0;}
-  .page-subtitle { margin:0.2rem 0 0; font-size:0.95rem;}
 
-  .search-box { background:white; padding:1.5rem; border-radius:20px; box-shadow:0 4px 20px rgba(0,200,83,0.1); display:flex; gap:0.8rem; margin-bottom:1.5rem; flex-wrap:wrap;}
-  .search-box input { flex:1; min-width:250px; padding:0.9rem 1.2rem; border:2px solid #9FD93B; border-radius:14px; font-size:1rem; outline:none;}
-  .search-box input:focus { border-color:#00C853;}
-  .btn-search { background:linear-gradient(135deg, #00C853, #7ED321); color:white; border:none; padding:0.9rem 1.8rem; border-radius:14px; font-weight:700; font-size:1rem; cursor:pointer; box-shadow:0 4px 12px rgba(0,200,83,0.3);}
-  .btn-search:hover { transform:translateY(-2px);}
+/* ── ANIMATIONS ── */
+@keyframes fadeInUp {
+  from { opacity:0; transform:translateY(30px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+@keyframes floatSearch {
+  0%,100% { transform:translateY(0px) rotate(-5deg); }
+  50%      { transform:translateY(-10px) rotate(5deg); }
+}
+@keyframes dotBounce {
+  0%,80%,100% { transform:scale(0); opacity:0; }
+  40%          { transform:scale(1); opacity:1; }
+}
+@keyframes slideInLeft {
+  from { opacity:0; transform:translateX(-20px); }
+  to   { opacity:1; transform:translateX(0); }
+}
+@keyframes pulseGreen {
+  0%,100% { box-shadow:0 0 0 0 rgba(0,200,83,0.4); }
+  50%      { box-shadow:0 0 0 12px rgba(0,200,83,0); }
+}
 
-  .spinner-mini { width:40px; height:40px; border:4px solid #BBF7D0; border-top:4px solid #00C853; border-radius:50%; animation:spin 1s linear infinite; margin:0 auto;}
-  @keyframes spin { to { transform:rotate(360deg);}}
+/* ── CONTAINER ── */
+.rch-container {
+  padding:1.5rem;
+  max-width:1000px;
+  margin:0 auto;
+  animation:fadeInUp 0.5s ease;
+}
 
-  .badge-resultats { background:#D1FAE5; color:#065F46; font-weight:700; padding:0.6rem 1.2rem; border-radius:20px; display:inline-block; margin-bottom:1rem;}
+/* ── HEADER ── */
+.rch-header {
+  position:relative; overflow:hidden;
+  background:linear-gradient(135deg,#00C853 0%,#7ED321 50%,#FFD93D 100%);
+  border-radius:28px; padding:2rem;
+  margin-bottom:1.5rem;
+  display:flex; align-items:center; gap:1.2rem; flex-wrap:wrap;
+  box-shadow:0 8px 32px rgba(0,200,83,0.35);
+}
+.rch-header-bg-emoji {
+  position:absolute; right:-10px; top:-20px;
+  font-size:9rem; opacity:0.12; pointer-events:none;
+  animation:floatSearch 4s ease-in-out infinite;
+}
+.rch-header-icon {
+  width:72px; height:72px;
+  background:rgba(255,255,255,0.2);
+  border-radius:20px;
+  display:flex; align-items:center; justify-content:center;
+  font-size:2.2rem; flex-shrink:0;
+  backdrop-filter:blur(10px);
+  border:2px solid rgba(255,255,255,0.3);
+}
+.rch-header-text { flex:1; }
+.rch-header-title {
+  font-size:1.8rem; font-weight:900;
+  color:white; margin:0;
+  text-shadow:0 2px 10px rgba(0,0,0,0.2);
+}
+.rch-header-sub {
+  color:rgba(255,255,255,0.85);
+  margin:0.3rem 0 0; font-size:0.95rem;
+}
+.rch-header-badge {
+  background:rgba(255,255,255,0.2);
+  color:white; padding:0.5rem 1.2rem;
+  border-radius:50px; font-weight:700; font-size:0.85rem;
+  display:flex; align-items:center; gap:0.5rem;
+  backdrop-filter:blur(10px);
+  border:1px solid rgba(255,255,255,0.3);
+  white-space:nowrap;
+}
 
-  .resultat-card { background:white; border-radius:16px; padding:1.3rem; margin-bottom:1rem; box-shadow:0 4px 15px rgba(0,0,0,0.06); border-left:5px solid #00C853; transition:transform 0.2s;}
-  .resultat-card:hover { transform:translateX(4px);}
-  .resultat-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem; flex-wrap:wrap; gap:0.5rem;}
-  .resultat-nom { font-weight:700; color:#14532D; font-size:1.05rem;}
-  .resultat-matiere { background:#BBF7D0; color:#14532D; font-weight:600; font-size:0.75rem; padding:0.3rem 0.8rem; border-radius:20px;}
-  .resultat-occurrences { background:#00C853; color:white; font-weight:700; font-size:0.75rem; padding:0.3rem 0.8rem; border-radius:20px;}
-  .resultat-extrait { color:#374151; font-size:0.92rem; line-height:1.6; background:#F0FDF4; padding:0.8rem; border-radius:10px; border-left:3px solid #00C853;}
-  .resultat-extrait mark { background:#FFD93D; padding:0 4px; border-radius:4px; font-weight:700;}
-  .resultat-date { color:#9CA3AF; font-size:0.8rem; margin-top:0.5rem;}
+/* ── SEARCH CARD ── */
+.rch-search-card {
+  background:white; border-radius:24px;
+  padding:1.5rem; margin-bottom:1.5rem;
+  box-shadow:0 4px 24px rgba(0,200,83,0.15);
+  border-top:5px solid #00C853;
+  display:flex; gap:1rem; flex-wrap:wrap;
+  animation:fadeInUp 0.5s ease 0.1s both;
+}
+.rch-search-wrap {
+  flex:1; min-width:250px;
+  display:flex; align-items:center; gap:0.8rem;
+  background:#F0FDF4; border:2px solid #BBF7D0;
+  border-radius:50px; padding:0.8rem 1.4rem;
+  transition:border-color 0.2s;
+}
+.rch-search-wrap:focus-within { border-color:#00C853; }
+.rch-search-icon { font-size:1.2rem; flex-shrink:0; }
+.rch-input {
+  flex:1; border:none; background:transparent;
+  font-size:1rem; font-weight:600; color:#1A1D2E;
+  outline:none;
+}
+.rch-input::placeholder { color:#9CA3AF; font-weight:400; }
 
-  .empty-state { text-align:center; padding:4rem 2rem; background:white; border-radius:20px; box-shadow:0 4px 20px rgba(0,0,0,0.05);}
-  .empty-state h2 { color:#374151; margin:1rem 0 0.5rem;}
-  .empty-state p { color:#9CA3AF;}
+.rch-btn-search {
+  display:flex; align-items:center; gap:0.7rem;
+  padding:0.9rem 1.8rem;
+  background:linear-gradient(135deg,#00C853,#7ED321);
+  color:white; border:none; border-radius:50px;
+  font-weight:800; font-size:1rem; cursor:pointer;
+  box-shadow:0 6px 20px rgba(0,200,83,0.4);
+  transition:all 0.3s; position:relative; overflow:hidden;
+  animation:pulseGreen 2s infinite;
+}
+.rch-btn-search::before {
+  content:'';
+  position:absolute; top:0; left:-100%;
+  width:100%; height:100%;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,0.2),transparent);
+  transition:left 0.5s;
+}
+.rch-btn-search:hover::before { left:100%; }
+.rch-btn-search:hover {
+  transform:translateY(-3px);
+  box-shadow:0 10px 28px rgba(0,200,83,0.5);
+}
+.rch-btn-circle {
+  width:32px; height:32px;
+  background:rgba(255,255,255,0.25);
+  border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  font-size:1rem; flex-shrink:0;
+}
+
+/* ── LOADING ── */
+.rch-loading {
+  text-align:center; padding:2.5rem;
+  background:linear-gradient(135deg,#F0FDF4,#DCFCE7);
+  border:2px solid #86EFAC; border-radius:20px;
+  margin-bottom:1.5rem;
+}
+.rch-loading-dots {
+  display:flex; justify-content:center; gap:8px; margin-bottom:1rem;
+}
+.rch-loading-dots span {
+  width:12px; height:12px; border-radius:50%;
+  background:#00C853;
+  animation:dotBounce 1.4s ease-in-out infinite;
+}
+.rch-loading-dots span:nth-child(2) { animation-delay:0.2s; }
+.rch-loading-dots span:nth-child(3) { animation-delay:0.4s; }
+.rch-loading-text {
+  color:#14532D; font-weight:800; font-size:1rem; margin:0;
+}
+
+/* ── BADGE RÉSULTATS ── */
+.rch-badge-resultats {
+  display:inline-flex; align-items:center; gap:0.5rem;
+  padding:0.6rem 1.4rem; border-radius:50px;
+  font-weight:800; font-size:0.9rem;
+  margin-bottom:1.2rem;
+  box-shadow:0 4px 12px rgba(0,0,0,0.1);
+}
+.rch-badge-ok {
+  background:linear-gradient(135deg,#DCFCE7,#BBF7D0);
+  color:#14532D; border:2px solid #86EFAC;
+}
+.rch-badge-vide {
+  background:linear-gradient(135deg,#FEE2E2,#FECACA);
+  color:#EF4444; border:2px solid #FCA5A5;
+}
+
+/* ── RÉSULTAT CARD ── */
+.rch-result-card {
+  background:white; border-radius:20px;
+  padding:1.4rem; margin-bottom:1rem;
+  box-shadow:0 4px 20px rgba(0,0,0,0.07);
+  border-left:5px solid #00C853;
+  transition:all 0.3s;
+  animation:slideInLeft 0.4s ease both;
+}
+.rch-result-card:hover {
+  transform:translateX(6px);
+  box-shadow:0 8px 28px rgba(0,200,83,0.15);
+}
+.rch-result-header {
+  display:flex; justify-content:space-between;
+  align-items:center; margin-bottom:0.8rem;
+  flex-wrap:wrap; gap:0.5rem;
+}
+.rch-result-nom {
+  font-weight:800; color:#14532D; font-size:1rem;
+  display:flex; align-items:center; gap:0.5rem;
+}
+.rch-result-badges {
+  display:flex; gap:0.4rem; align-items:center;
+}
+.rch-result-matiere {
+  background:#DCFCE7; color:#14532D;
+  font-weight:700; font-size:0.72rem;
+  padding:0.25rem 0.7rem; border-radius:50px;
+  border:1px solid #86EFAC;
+}
+.rch-result-occ {
+  background:linear-gradient(135deg,#00C853,#7ED321);
+  color:white; font-weight:800; font-size:0.72rem;
+  padding:0.25rem 0.7rem; border-radius:50px;
+  box-shadow:0 2px 8px rgba(0,200,83,0.3);
+}
+.rch-result-extrait {
+  background:linear-gradient(135deg,#F0FDF4,#DCFCE7);
+  border-left:4px solid #00C853;
+  border-radius:0 12px 12px 0;
+  padding:0.9rem 1rem;
+  color:#374151; font-size:0.9rem; line-height:1.65;
+}
+.rch-result-extrait mark {
+  background:#FFD93D; padding:0 4px;
+  border-radius:4px; font-weight:800; color:#1A1D2E;
+}
+.rch-result-date {
+  color:#9CA3AF; font-size:0.75rem;
+  margin-top:0.6rem; font-weight:600;
+}
+
+/* ── EMPTY ── */
+.rch-empty {
+  text-align:center; padding:3rem 2rem;
+  background:white; border-radius:24px;
+  box-shadow:0 4px 24px rgba(0,0,0,0.06);
+  animation:fadeInUp 0.5s ease;
+}
+.rch-empty-icon { font-size:5rem; margin-bottom:1rem; }
+.rch-empty-title { color:#374151; font-size:1.3rem; font-weight:800; margin:0; }
+.rch-empty-sub { color:#9CA3AF; margin:0.5rem 0 1.5rem; }
+
+.rch-suggestions { margin-top:1rem; }
+.rch-suggestions-label {
+  color:#6B7280; font-size:0.85rem; font-weight:600;
+  margin-bottom:0.8rem;
+}
+.rch-tags {
+  display:flex; gap:0.5rem; flex-wrap:wrap; justify-content:center;
+}
+.rch-tags span {
+  background:#DCFCE7; color:#14532D;
+  padding:0.45rem 1rem; border-radius:50px;
+  font-size:0.85rem; font-weight:700;
+  cursor:pointer; transition:all 0.2s;
+  border:2px solid #86EFAC;
+}
+.rch-tags span:hover {
+  background:linear-gradient(135deg,#00C853,#7ED321);
+  color:white; border-color:transparent;
+  transform:translateY(-2px);
+  box-shadow:0 4px 12px rgba(0,200,83,0.3);
+}
+
+/* ══════════════════════════════════ */
+/* MODE SOMBRE */
+/* ══════════════════════════════════ */
+[data-theme="dark"] .rch-search-card { background:#1E2235; }
+[data-theme="dark"] .rch-search-wrap {
+  background:#252A40; border-color:#374151;
+}
+[data-theme="dark"] .rch-input { color:#F1F5F9; }
+[data-theme="dark"] .rch-result-card { background:#1E2235; }
+[data-theme="dark"] .rch-result-nom { color:#86EFAC; }
+[data-theme="dark"] .rch-result-extrait {
+  background:linear-gradient(135deg,#14532D,#166534);
+  color:#DCFCE7;
+}
+[data-theme="dark"] .rch-loading {
+  background:linear-gradient(135deg,#14532D,#1A3A20);
+  border-color:#15803D;
+}
+[data-theme="dark"] .rch-empty { background:#1E2235; }
+[data-theme="dark"] .rch-empty-title { color:#F1F5F9; }
+[data-theme="dark"] .rch-tags span {
+  background:#1A3A20; border-color:#15803D; color:#86EFAC;
+}
+
+/* ══════════════════════════════════ */
+/* RESPONSIVE */
+/* ══════════════════════════════════ */
+@media (max-width:640px) {
+  .rch-container { padding:1rem; }
+  .rch-header { padding:1.2rem; }
+  .rch-header-title { font-size:1.4rem; }
+  .rch-header-badge { display:none; }
+  .rch-search-card { flex-direction:column; }
+  .rch-btn-search { justify-content:center; }
+}
 </style>
 
 <script>
 let motActuel = '';
 
+/* ── TOAST ── */
+function toast(msg, type = 'info') {
+  const colors = {
+    succes : 'linear-gradient(135deg,#00C853,#7ED321)',
+    erreur : 'linear-gradient(135deg,#EF4444,#DC2626)',
+    info   : 'linear-gradient(135deg,#2962FF,#7B61FF)',
+    warning: 'linear-gradient(135deg,#F59E0B,#FFD93D)',
+  };
+  const t = document.getElementById('toast');
+  t.innerHTML = msg;
+  t.style.background = colors[type] || colors.info;
+  t.style.transform = 'translateX(0)';
+  setTimeout(() => { t.style.transform = 'translateX(120%)'; }, 3200);
+}
+
+/* ── RECHERCHE RAPIDE ── */
+function rechercheRapide(mot) {
+  document.getElementById('champ-recherche').value = mot;
+  rechercher();
+}
+
+/* ── RECHERCHER ── */
 function rechercher() {
   const mot = document.getElementById('champ-recherche').value.trim();
-  if (!mot) { alert('⚠️ Tape un mot-clé !'); return; }
+  if (!mot) { toast('⚠️ Tape un mot-clé !', 'warning'); return; }
   motActuel = mot;
 
-  document.getElementById('empty-state').style.display = 'none';
-  document.getElementById('resultats').innerHTML = '';
+  document.getElementById('empty-state').style.display  = 'none';
+  document.getElementById('resultats').innerHTML         = '';
   document.getElementById('nb-resultats').style.display = 'none';
-  document.getElementById('loading').style.display = 'block';
+  document.getElementById('loading').style.display      = 'block';
 
   fetch('/api/recherche', {
-    method:'POST', headers:{'Content-Type':'application/json'},
-    body: JSON.stringify({mot: mot})
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ mot })
   })
-  .then(r=>r.json())
-  .then(d=>{
+  .then(r => r.json())
+  .then(d => {
     document.getElementById('loading').style.display = 'none';
     if (d.succes) afficher(d.resultats);
-    else alert('❌ ' + d.erreur);
+    else toast('❌ ' + (d.erreur || 'Erreur'), 'erreur');
+  })
+  .catch(() => {
+    document.getElementById('loading').style.display = 'none';
+    toast('❌ Erreur réseau', 'erreur');
   });
 }
 
+/* ── AFFICHER ── */
 function afficher(res) {
-  const c = document.getElementById('resultats');
+  const c  = document.getElementById('resultats');
   const nb = document.getElementById('nb-resultats');
+  nb.style.display = 'inline-flex';
 
   if (!res || res.length === 0) {
-    nb.textContent = '😔 Aucun résultat trouvé';
-    nb.style.display = 'inline-block';
-    nb.style.background = '#FEE2E2';
-    nb.style.color = '#EF4444';
+    nb.className = 'rch-badge-resultats rch-badge-vide';
+    nb.textContent = '😔 Aucun résultat pour "' + motActuel + '"';
     return;
   }
 
-  nb.textContent = `✅ ${res.length} résultat(s) trouvé(s)`;
-  nb.style.display = 'inline-block';
-  nb.style.background = '#D1FAE5';
-  nb.style.color = '#065F46';
+  nb.className = 'rch-badge-resultats rch-badge-ok';
+  nb.textContent = '✅ ' + res.length + ' résultat(s) trouvé(s)';
+  toast('🔍 ' + res.length + ' résultat(s) !', 'succes');
 
-  res.forEach(r => {
+  res.forEach((r, i) => {
     const card = document.createElement('div');
-    card.className = 'resultat-card';
+    card.className = 'rch-result-card';
+    card.style.animationDelay = (i * 0.07) + 's';
     const extraitHL = surligner(r.extrait, motActuel);
     card.innerHTML = `
-      <div class="resultat-header">
-        <span class="resultat-nom">📄 ${esc(r.nom)}</span>
-        <div>
-          <span class="resultat-matiere">${esc(r.matiere || '📚')}</span>
-          <span class="resultat-occurrences">🎯 ${r.nb_occurrences} fois</span>
+      <div class="rch-result-header">
+        <span class="rch-result-nom">📄 ${esc(r.nom)}</span>
+        <div class="rch-result-badges">
+          <span class="rch-result-matiere">📚 ${esc(r.matiere || 'Général')}</span>
+          <span class="rch-result-occ">🎯 ${r.nb_occurrences}x</span>
         </div>
       </div>
-      <div class="resultat-extrait">${extraitHL}</div>
-      <div class="resultat-date">📅 ${esc(r.date_import || '')}</div>
+      <div class="rch-result-extrait">${extraitHL}</div>
+      <div class="rch-result-date">📅 ${esc(r.date_import || '')}</div>
     `;
     c.appendChild(card);
   });
 }
 
+/* ── SURLIGNER ── */
 function surligner(texte, mot) {
-  const safe = esc(texte);
-  const regex = new RegExp('(' + mot.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi');
+  const safe  = esc(texte);
+  const regex = new RegExp(
+    '(' + mot.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')',
+    'gi'
+  );
   return safe.replace(regex, '<mark>$1</mark>');
 }
 
-function esc(t) { const d = document.createElement('div'); d.textContent = t || ''; return d.innerHTML; }
+/* ── ESCAPE ── */
+function esc(t) {
+  const d = document.createElement('div');
+  d.textContent = t || '';
+  return d.innerHTML;
+}
 </script>
+
 {% endblock %}

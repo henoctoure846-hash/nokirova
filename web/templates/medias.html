@@ -1,90 +1,369 @@
 {% extends "base.html" %}
 {% block title %}Mes Médias - NOKIROVA{% endblock %}
 {% block contenu %}
-<div class="page-container">
 
-  <div class="page-header" style="background: linear-gradient(135deg, #9FD93B, #BBF7D0); border-left: 5px solid #00C853;">
-    <div class="page-header-icon" style="background: linear-gradient(135deg, #00C853, #7ED321);">🎵</div>
-    <div>
-      <h1 class="page-title" style="color: #14532D;">Mes Médias</h1>
-      <p class="page-subtitle" style="color: #166534;">Tous tes fichiers audio générés 🎧</p>
+<!-- TOAST -->
+<div id="toast" style="
+  position:fixed; top:20px; right:20px; z-index:9999;
+  background:#1A1D2E; color:white; padding:1rem 1.5rem;
+  border-radius:16px; font-weight:600; font-size:0.95rem;
+  box-shadow:0 8px 30px rgba(0,0,0,0.3);
+  transform:translateX(120%); transition:transform 0.4s cubic-bezier(0.175,0.885,0.32,1.275);
+  display:flex; align-items:center; gap:0.8rem; max-width:320px;
+"></div>
+
+<div class="md-container">
+
+  <!-- ═══ HEADER ═══ -->
+  <div class="md-header">
+    <div class="md-header-bg-emoji">🎵</div>
+    <div class="md-header-icon">🎵</div>
+    <div class="md-header-text">
+      <h1 class="md-header-title">Mes Médias</h1>
+      <p class="md-header-sub">Tous tes fichiers audio générés 🎧</p>
+    </div>
+    <div class="md-header-badge" id="nb-medias-badge">
+      <span>🎧</span> 0 fichiers
     </div>
   </div>
 
-  <div id="liste-medias" class="medias-grid"></div>
+  <!-- ═══ LISTE ═══ -->
+  <div id="liste-medias" class="md-grid"></div>
 
-  <div id="empty-state" class="empty-state" style="display:none;">
-    <div style="font-size:4rem;">🎵</div>
-    <h2>Aucun fichier audio</h2>
-    <p>Génère ton premier audio depuis la page Audio !</p>
-    <a href="/audio" class="btn-vert">🎧 Générer un audio</a>
+  <!-- ═══ EMPTY ═══ -->
+  <div id="empty-state" class="md-empty" style="display:none;">
+    <div class="md-empty-icon">🎵</div>
+    <h2 class="md-empty-title">Aucun fichier audio</h2>
+    <p class="md-empty-sub">Génère ton premier audio depuis la page Audio !</p>
+    <a href="/audio" class="md-btn-go">
+      <span class="md-btn-circle">🎧</span>
+      <span>Générer un audio</span>
+    </a>
   </div>
+
 </div>
 
 <style>
-  .page-container { padding:2rem; max-width:1100px; margin:0 auto;}
-  .page-header { display:flex; align-items:center; gap:1.2rem; border-radius:20px; padding:1.5rem 2rem; margin-bottom:1.5rem; box-shadow:0 4px 20px rgba(0,0,0,0.05);}
-  .page-header-icon { width:60px; height:60px; border-radius:16px; display:flex; align-items:center; justify-content:center; font-size:1.8rem; color:white;}
-  .page-title { font-size:1.6rem; font-weight:800; margin:0;}
-  .page-subtitle { margin:0.2rem 0 0; font-size:0.95rem;}
 
-  .medias-grid { display:grid; gap:1rem;}
-  .media-card { background:white; border-radius:18px; padding:1.3rem; box-shadow:0 4px 15px rgba(0,0,0,0.06); border-left:5px solid #00C853;}
-  .media-titre { font-weight:700; color:#14532D; font-size:1rem; margin-bottom:0.5rem; word-break:break-word;}
-  .media-meta { color:#9CA3AF; font-size:0.8rem; margin-bottom:0.8rem;}
-  .media-card audio { width:100%; margin:0.5rem 0;}
-  .media-actions { display:flex; gap:0.5rem; margin-top:0.5rem;}
-  .btn-media { padding:0.5rem 1rem; border-radius:10px; font-weight:600; font-size:0.85rem; cursor:pointer; border:2px solid transparent; text-decoration:none; display:inline-block; text-align:center;}
-  .btn-dl { background:#D1FAE5; color:#00C853; border-color:#00C853;}
-  .btn-dl:hover { background:#00C853; color:white;}
-  .btn-sup-m { background:#FEE2E2; color:#EF4444; border-color:#EF4444;}
-  .btn-sup-m:hover { background:#EF4444; color:white;}
+/* ── ANIMATIONS ── */
+@keyframes fadeInUp {
+  from { opacity:0; transform:translateY(30px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+@keyframes floatNote {
+  0%,100% { transform:translateY(0px) rotate(-5deg); }
+  50%      { transform:translateY(-10px) rotate(5deg); }
+}
+@keyframes bounceIn {
+  0%   { transform:scale(0.3); opacity:0; }
+  50%  { transform:scale(1.05); }
+  70%  { transform:scale(0.9); }
+  100% { transform:scale(1); opacity:1; }
+}
+@keyframes soundWave {
+  0%,100% { height:6px; }
+  50%      { height:24px; }
+}
+@keyframes pulseGreen {
+  0%,100% { box-shadow:0 0 0 0 rgba(0,200,83,0.4); }
+  50%      { box-shadow:0 0 0 12px rgba(0,200,83,0); }
+}
 
-  .empty-state { text-align:center; padding:4rem 2rem; background:white; border-radius:20px; box-shadow:0 4px 20px rgba(0,0,0,0.05);}
-  .empty-state h2 { color:#374151; margin:1rem 0 0.5rem;}
-  .empty-state p { color:#9CA3AF; margin-bottom:1.5rem;}
-  .btn-vert { background:linear-gradient(135deg, #00C853, #7ED321); color:white; padding:0.8rem 2rem; border-radius:14px; font-weight:700; text-decoration:none; display:inline-block;}
+/* ── CONTAINER ── */
+.md-container {
+  padding:1.5rem;
+  max-width:1000px;
+  margin:0 auto;
+  animation:fadeInUp 0.5s ease;
+}
+
+/* ── HEADER ── */
+.md-header {
+  position:relative; overflow:hidden;
+  background:linear-gradient(135deg,#00C853 0%,#7ED321 50%,#FFD93D 100%);
+  border-radius:28px; padding:2rem;
+  margin-bottom:1.5rem;
+  display:flex; align-items:center; gap:1.2rem; flex-wrap:wrap;
+  box-shadow:0 8px 32px rgba(0,200,83,0.35);
+}
+.md-header-bg-emoji {
+  position:absolute; right:-10px; top:-20px;
+  font-size:9rem; opacity:0.12; pointer-events:none;
+  animation:floatNote 4s ease-in-out infinite;
+}
+.md-header-icon {
+  width:72px; height:72px;
+  background:rgba(255,255,255,0.2);
+  border-radius:20px;
+  display:flex; align-items:center; justify-content:center;
+  font-size:2.2rem; flex-shrink:0;
+  backdrop-filter:blur(10px);
+  border:2px solid rgba(255,255,255,0.3);
+}
+.md-header-text { flex:1; }
+.md-header-title {
+  font-size:1.8rem; font-weight:900;
+  color:white; margin:0;
+  text-shadow:0 2px 10px rgba(0,0,0,0.2);
+}
+.md-header-sub {
+  color:rgba(255,255,255,0.85);
+  margin:0.3rem 0 0; font-size:0.95rem;
+}
+.md-header-badge {
+  background:rgba(255,255,255,0.2);
+  color:white; padding:0.5rem 1.2rem;
+  border-radius:50px; font-weight:700; font-size:0.85rem;
+  display:flex; align-items:center; gap:0.5rem;
+  backdrop-filter:blur(10px);
+  border:1px solid rgba(255,255,255,0.3);
+  white-space:nowrap;
+}
+
+/* ── GRID ── */
+.md-grid {
+  display:grid; gap:1rem;
+}
+
+/* ── MEDIA CARD ── */
+.md-card {
+  background:white; border-radius:24px;
+  padding:1.5rem;
+  box-shadow:0 4px 24px rgba(0,200,83,0.1);
+  border-left:5px solid #00C853;
+  transition:all 0.3s;
+  animation:bounceIn 0.5s ease both;
+}
+.md-card:hover {
+  transform:translateX(6px);
+  box-shadow:0 8px 28px rgba(0,200,83,0.2);
+}
+
+.md-card-top {
+  display:flex; align-items:center; gap:1rem;
+  margin-bottom:1rem;
+}
+.md-card-icon {
+  width:52px; height:52px;
+  background:linear-gradient(135deg,#00C853,#7ED321);
+  border-radius:14px;
+  display:flex; align-items:center; justify-content:center;
+  font-size:1.5rem; flex-shrink:0;
+  box-shadow:0 4px 12px rgba(0,200,83,0.3);
+}
+.md-card-info { flex:1; min-width:0; }
+.md-card-titre {
+  font-weight:800; color:#14532D;
+  font-size:0.95rem; margin:0 0 0.3rem;
+  word-break:break-word;
+  white-space:nowrap; overflow:hidden;
+  text-overflow:ellipsis;
+}
+.md-card-meta {
+  display:flex; gap:0.6rem; flex-wrap:wrap;
+}
+.md-meta-pill {
+  background:#DCFCE7; color:#14532D;
+  padding:0.2rem 0.7rem; border-radius:50px;
+  font-size:0.72rem; font-weight:700;
+  border:1px solid #86EFAC;
+}
+
+/* Sound wave déco */
+.md-wave {
+  display:flex; align-items:flex-end;
+  gap:3px; height:28px; flex-shrink:0;
+}
+.md-wave span {
+  width:4px; background:linear-gradient(to top,#00C853,#7ED321);
+  border-radius:2px; height:6px;
+  animation:soundWave 0.8s ease-in-out infinite;
+}
+.md-wave span:nth-child(1) { animation-delay:0s; }
+.md-wave span:nth-child(2) { animation-delay:0.1s; }
+.md-wave span:nth-child(3) { animation-delay:0.2s; }
+.md-wave span:nth-child(4) { animation-delay:0.15s; }
+.md-wave span:nth-child(5) { animation-delay:0.05s; }
+
+/* Player */
+.md-player-wrap {
+  background:linear-gradient(135deg,#F0FDF4,#DCFCE7);
+  border-radius:14px; padding:0.8rem 1rem;
+  margin-bottom:1rem;
+  border:2px solid #BBF7D0;
+}
+.md-player-wrap audio { width:100%; outline:none; }
+
+/* Actions */
+.md-card-actions { display:flex; gap:0.6rem; flex-wrap:wrap; }
+.md-btn {
+  display:flex; align-items:center; gap:0.4rem;
+  padding:0.5rem 1.1rem; border-radius:50px;
+  font-weight:700; font-size:0.82rem;
+  cursor:pointer; border:2px solid transparent;
+  transition:all 0.2s; text-decoration:none;
+}
+.md-btn-dl {
+  background:#DCFCE7; color:#00C853; border-color:#86EFAC;
+}
+.md-btn-dl:hover { background:#00C853; color:white; border-color:#00C853; transform:translateY(-2px); }
+.md-btn-sup {
+  background:#FEE2E2; color:#EF4444; border-color:#FCA5A5;
+}
+.md-btn-sup:hover { background:#EF4444; color:white; border-color:#EF4444; transform:translateY(-2px); }
+
+/* ── EMPTY ── */
+.md-empty {
+  text-align:center; padding:4rem 2rem;
+  background:white; border-radius:24px;
+  box-shadow:0 4px 24px rgba(0,0,0,0.06);
+  animation:fadeInUp 0.5s ease;
+}
+.md-empty-icon { font-size:5rem; margin-bottom:1rem; }
+.md-empty-title { color:#374151; font-size:1.3rem; font-weight:800; margin:0; }
+.md-empty-sub { color:#9CA3AF; margin:0.5rem 0 1.5rem; }
+.md-btn-go {
+  display:inline-flex; align-items:center; gap:0.8rem;
+  background:linear-gradient(135deg,#00C853,#7ED321);
+  color:white; padding:0.9rem 2rem; border-radius:50px;
+  font-weight:800; text-decoration:none;
+  box-shadow:0 6px 20px rgba(0,200,83,0.4);
+  transition:all 0.3s;
+  animation:pulseGreen 2s infinite;
+}
+.md-btn-go:hover { transform:translateY(-3px); box-shadow:0 10px 28px rgba(0,200,83,0.5); }
+.md-btn-circle {
+  width:32px; height:32px;
+  background:rgba(255,255,255,0.25);
+  border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  font-size:1rem;
+}
+
+/* ══════════════════════════════════ */
+/* MODE SOMBRE */
+/* ══════════════════════════════════ */
+[data-theme="dark"] .md-card { background:#1E2235; }
+[data-theme="dark"] .md-card-titre { color:#86EFAC; }
+[data-theme="dark"] .md-player-wrap {
+  background:linear-gradient(135deg,#14532D,#166534);
+  border-color:#15803D;
+}
+[data-theme="dark"] .md-empty { background:#1E2235; }
+[data-theme="dark"] .md-empty-title { color:#F1F5F9; }
+
+/* ══════════════════════════════════ */
+/* RESPONSIVE */
+/* ══════════════════════════════════ */
+@media (max-width:640px) {
+  .md-container { padding:1rem; }
+  .md-header { padding:1.2rem; }
+  .md-header-title { font-size:1.4rem; }
+  .md-header-badge { display:none; }
+  .md-card-actions { flex-direction:column; }
+  .md-btn { justify-content:center; }
+}
 </style>
 
 <script>
 document.addEventListener('DOMContentLoaded', charger);
 
+/* ── TOAST ── */
+function toast(msg, type = 'info') {
+  const colors = {
+    succes : 'linear-gradient(135deg,#00C853,#7ED321)',
+    erreur : 'linear-gradient(135deg,#EF4444,#DC2626)',
+    info   : 'linear-gradient(135deg,#2962FF,#7B61FF)',
+    warning: 'linear-gradient(135deg,#F59E0B,#FFD93D)',
+  };
+  const t = document.getElementById('toast');
+  t.innerHTML = msg;
+  t.style.background = colors[type] || colors.info;
+  t.style.transform = 'translateX(0)';
+  setTimeout(() => { t.style.transform = 'translateX(120%)'; }, 3200);
+}
+
+/* ── CHARGER ── */
 function charger() {
-  fetch('/api/medias/liste').then(r=>r.json()).then(d=>{
-    const c = document.getElementById('liste-medias');
+  fetch('/api/medias/liste').then(r => r.json()).then(d => {
+    const c     = document.getElementById('liste-medias');
     const empty = document.getElementById('empty-state');
     c.innerHTML = '';
+
     const fichiers = d.fichiers || [];
-    if (fichiers.length === 0) { empty.style.display = 'block'; return; }
+    document.getElementById('nb-medias-badge').innerHTML =
+      '<span>🎧</span> ' + fichiers.length + ' fichier' + (fichiers.length > 1 ? 's' : '');
+
+    if (fichiers.length === 0) {
+      empty.style.display = 'block';
+      return;
+    }
     empty.style.display = 'none';
 
-    fichiers.forEach(f => {
+    fichiers.forEach((f, i) => {
       const div = document.createElement('div');
-      div.className = 'media-card';
+      div.className = 'md-card';
+      div.style.animationDelay = (i * 0.08) + 's';
       div.innerHTML = `
-        <div class="media-titre">🎵 ${esc(f.nom)}</div>
-        <div class="media-meta">💾 ${f.taille} Ko • 📅 ${esc(f.date)}</div>
-        <audio controls src="/audio_file/${encodeURIComponent(f.nom)}"></audio>
-        <div class="media-actions">
-          <a href="/audio_file/${encodeURIComponent(f.nom)}" download="${esc(f.nom)}" class="btn-media btn-dl">💾 Télécharger</a>
-          <button onclick="supprimer('${esc(f.nom)}')" class="btn-media btn-sup-m">🗑️ Supprimer</button>
+        <div class="md-card-top">
+          <div class="md-card-icon">🎵</div>
+          <div class="md-card-info">
+            <div class="md-card-titre">${esc(f.nom)}</div>
+            <div class="md-card-meta">
+              <span class="md-meta-pill">💾 ${f.taille} Ko</span>
+              <span class="md-meta-pill">📅 ${esc(f.date)}</span>
+            </div>
+          </div>
+          <div class="md-wave">
+            <span></span><span></span><span></span>
+            <span></span><span></span>
+          </div>
+        </div>
+        <div class="md-player-wrap">
+          <audio controls src="/audio_file/${encodeURIComponent(f.nom)}"></audio>
+        </div>
+        <div class="md-card-actions">
+          <a href="/audio_file/${encodeURIComponent(f.nom)}"
+             download="${esc(f.nom)}" class="md-btn md-btn-dl">
+            💾 Télécharger
+          </a>
+          <button onclick="supprimer('${esc(f.nom)}')"
+                  class="md-btn md-btn-sup">
+            🗑️ Supprimer
+          </button>
         </div>
       `;
       c.appendChild(div);
     });
-  });
+  }).catch(() => toast('❌ Erreur chargement médias', 'erreur'));
 }
 
+/* ── SUPPRIMER ── */
 function supprimer(nom) {
-  if (!confirm('🗑️ Supprimer ce fichier ?')) return;
+  if (!confirm('🗑️ Supprimer ce fichier audio ?\nIrréversible !')) return;
   fetch('/api/medias/supprimer', {
-    method:'POST', headers:{'Content-Type':'application/json'},
-    body: JSON.stringify({nom: nom})
-  }).then(r=>r.json()).then(d=>{
-    if (d.succes) charger();
-  });
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ nom })
+  })
+  .then(r => r.json())
+  .then(d => {
+    if (d.succes) {
+      toast('🗑️ Fichier supprimé', 'warning');
+      charger();
+    } else {
+      toast('❌ Erreur suppression', 'erreur');
+    }
+  })
+  .catch(() => toast('❌ Erreur réseau', 'erreur'));
 }
 
-function esc(t) { const d = document.createElement('div'); d.textContent = t || ''; return d.innerHTML; }
+/* ── ESCAPE ── */
+function esc(t) {
+  const d = document.createElement('div');
+  d.textContent = t || '';
+  return d.innerHTML;
+}
 </script>
+
 {% endblock %}

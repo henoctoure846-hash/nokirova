@@ -1,170 +1,764 @@
 {% extends "base.html" %}
 {% block title %}Flashcards - NOKIROVA{% endblock %}
 {% block contenu %}
-<div class="page-container">
 
-  <div class="page-header" style="background: linear-gradient(135deg, #A5D8FF, #D0EBFF); border-left: 5px solid #2962FF;">
-    <div class="page-header-icon" style="background: linear-gradient(135deg, #2962FF, #7EC8FF);">🃏</div>
-    <div>
-      <h1 class="page-title" style="color: #1E40AF;">Flashcards</h1>
-      <p class="page-subtitle" style="color: #2962FF;">Mémorise avec des cartes recto/verso interactives</p>
+<!-- TOAST -->
+<div id="toast" style="
+  position:fixed; top:20px; right:20px; z-index:9999;
+  background:#1A1D2E; color:white; padding:1rem 1.5rem;
+  border-radius:16px; font-weight:600; font-size:0.95rem;
+  box-shadow:0 8px 30px rgba(0,0,0,0.3);
+  transform:translateX(120%); transition:transform 0.4s cubic-bezier(0.175,0.885,0.32,1.275);
+  display:flex; align-items:center; gap:0.8rem; max-width:320px;
+"></div>
+
+<div class="fc-container">
+
+  <!-- ═══ HEADER ═══ -->
+  <div class="fc-header">
+    <div class="fc-header-bg-emoji">🃏</div>
+    <div class="fc-header-icon">🃏</div>
+    <div class="fc-header-text">
+      <h1 class="fc-header-title">Flashcards</h1>
+      <p class="fc-header-sub">Mémorise avec des cartes recto/verso interactives</p>
+    </div>
+    <div class="fc-header-badge">
+      <span>⚡</span> Mémorisation Active
     </div>
   </div>
 
-  <!-- ÉCRAN PRINCIPAL -->
+  <!-- ═══ ÉCRAN MENU ═══ -->
   <div id="ecran-menu">
 
-    <div id="alerte-cours" class="alerte-warning" style="display:none;">
-      <span>⚠️</span>
-      <div>
+    <!-- Alerte cours -->
+    <div id="alerte-cours" class="fc-alerte" style="display:none;">
+      <div class="fc-alerte-icon">⚠️</div>
+      <div class="fc-alerte-body">
         <strong>Aucun cours chargé !</strong>
         <p>Pour générer des flashcards depuis un cours, importe-le d'abord.</p>
-        <a href="/import" class="btn-alerte">📥 Importer un cours</a>
+        <a href="/import" class="fc-btn-alerte">📥 Importer un cours</a>
       </div>
     </div>
 
-    <div id="statut-cours" class="statut-cours-card" style="display:none;">
-      <span style="font-size:1.5rem;">📚</span>
-      <div><strong>Cours chargé :</strong> <span id="nom-cours-affiche" style="color:#1E40AF; font-weight:700;"></span></div>
-      <span class="badge-ok">✅</span>
-    </div>
-
-    <!-- GÉNÉRER AUTOMATIQUEMENT -->
-    <div class="control-panel">
-      <h2 style="color:#1E40AF;">🤖 Générer avec l'IA</h2>
-      <div class="slider-container">
-        <label class="slider-label">
-          🃏 Nombre de flashcards :
-          <span id="valeur-slider" class="slider-value">10</span>
-        </label>
-        <input type="range" id="slider-nb" min="5" max="30" value="10" oninput="majSlider(this.value)"/>
+    <!-- Statut cours -->
+    <div id="statut-cours" class="fc-statut-card" style="display:none;">
+      <div class="fc-statut-icon">📚</div>
+      <div class="fc-statut-text">
+        <span class="fc-statut-label">Cours chargé</span>
+        <span id="nom-cours-affiche" class="fc-statut-nom"></span>
       </div>
-      <button id="btn-generer" onclick="genererIA()" class="btn-bleu">🤖 Générer depuis le cours</button>
+      <div class="fc-badge-ok">✅ Prêt</div>
     </div>
 
-    <!-- LISTE DES DECKS -->
-    <div class="control-panel">
-      <h2 style="color:#1E40AF;">📚 Mes Decks</h2>
+    <!-- ═══ GÉNÉRER IA ═══ -->
+    <div class="fc-card fc-card-bleu">
+      <div class="fc-card-header">
+        <div class="fc-card-icon-wrap" style="background:linear-gradient(135deg,#2962FF,#7EC8FF);">
+          🤖
+        </div>
+        <div>
+          <h2 class="fc-card-title">Générer avec l'IA</h2>
+          <p class="fc-card-subtitle">L'IA crée des flashcards depuis ton cours</p>
+        </div>
+      </div>
+
+      <div class="fc-slider-wrap">
+        <div class="fc-slider-top">
+          <span class="fc-slider-label">🃏 Nombre de flashcards</span>
+          <span id="valeur-slider" class="fc-slider-value">10</span>
+        </div>
+        <input type="range" id="slider-nb" min="5" max="30" value="10"
+               oninput="majSlider(this.value)" class="fc-slider"/>
+        <div class="fc-slider-marks">
+          <span>5</span><span>10</span><span>15</span><span>20</span><span>25</span><span>30</span>
+        </div>
+      </div>
+
+      <button id="btn-generer" onclick="genererIA()" class="fc-btn-generer">
+        <span class="fc-btn-circle">🤖</span>
+        <span>Générer depuis le cours</span>
+      </button>
+    </div>
+
+    <!-- ═══ MES DECKS ═══ -->
+    <div class="fc-card fc-card-violet">
+      <div class="fc-card-header">
+        <div class="fc-card-icon-wrap" style="background:linear-gradient(135deg,#7B61FF,#A855F7);">
+          📚
+        </div>
+        <div>
+          <h2 class="fc-card-title">Mes Decks</h2>
+          <p class="fc-card-subtitle">Tous tes decks de flashcards</p>
+        </div>
+      </div>
+
       <div id="liste-decks"></div>
-      <div id="aucun-deck" class="empty-mini" style="display:none;">
-        <p>📭 Aucun deck pour l'instant. Génère ton premier deck ci-dessus !</p>
+
+      <div id="aucun-deck" class="fc-empty" style="display:none;">
+        <div class="fc-empty-icon">📭</div>
+        <p class="fc-empty-text">Aucun deck pour l'instant</p>
+        <p class="fc-empty-sub">Génère ton premier deck ci-dessus !</p>
       </div>
     </div>
-  </div>
 
-  <!-- ÉCRAN RÉVISION -->
+  </div>
+  <!-- fin écran-menu -->
+
+  <!-- ═══ ÉCRAN RÉVISION ═══ -->
   <div id="ecran-revision" style="display:none;">
-    <div class="revision-header">
-      <button onclick="retourMenu()" class="btn-retour">← Retour</button>
-      <h2 id="deck-titre" style="color:#1E40AF;">Deck</h2>
-      <span id="progression" class="progression">1 / 10</span>
+
+    <!-- Header révision -->
+    <div class="fc-rev-header">
+      <button onclick="retourMenu()" class="fc-btn-retour">
+        <span>←</span> Retour
+      </button>
+      <h2 id="deck-titre" class="fc-rev-titre">Deck</h2>
+      <span id="progression" class="fc-progression">1 / 10</span>
     </div>
 
-    <div class="flashcard-container" onclick="flipCard()">
-      <div class="flashcard" id="flashcard">
-        <div class="flashcard-face recto">
-          <div class="face-label">🃏 RECTO</div>
-          <div class="face-content" id="recto-content">Question</div>
-          <div class="face-hint">👆 Clique pour retourner</div>
+    <!-- Barre de progression -->
+    <div class="fc-progress-bar-wrap">
+      <div class="fc-progress-bar" id="progress-bar" style="width:10%"></div>
+    </div>
+
+    <!-- Flashcard -->
+    <div class="fc-card-3d-wrap" onclick="flipCard()">
+      <div class="fc-card-3d" id="flashcard">
+
+        <!-- RECTO -->
+        <div class="fc-face fc-recto">
+          <div class="fc-face-deco">🃏</div>
+          <div class="fc-face-label">QUESTION</div>
+          <div class="fc-face-content" id="recto-content">Question</div>
+          <div class="fc-face-hint">👆 Clique pour voir la réponse</div>
         </div>
-        <div class="flashcard-face verso">
-          <div class="face-label">💡 VERSO</div>
-          <div class="face-content" id="verso-content">Réponse</div>
+
+        <!-- VERSO -->
+        <div class="fc-face fc-verso">
+          <div class="fc-face-deco">💡</div>
+          <div class="fc-face-label">RÉPONSE</div>
+          <div class="fc-face-content" id="verso-content">Réponse</div>
+          <div class="fc-face-hint">✨ Tu avais la bonne réponse ?</div>
         </div>
+
       </div>
     </div>
 
-    <div class="revision-actions">
-      <button onclick="reponse(false)" class="btn-rate">❌ Difficile</button>
-      <button onclick="reponse(true)" class="btn-reussi">✅ Réussi</button>
+    <!-- Actions -->
+    <div class="fc-rev-actions">
+      <button onclick="reponse(false)" class="fc-btn-difficile">
+        <span class="fc-btn-circle-sm">❌</span>
+        <span>Difficile</span>
+      </button>
+      <button onclick="flipCard()" class="fc-btn-flip">
+        <span class="fc-btn-circle-sm">🔄</span>
+        <span>Retourner</span>
+      </button>
+      <button onclick="reponse(true)" class="fc-btn-reussi">
+        <span class="fc-btn-circle-sm">✅</span>
+        <span>Réussi !</span>
+      </button>
     </div>
 
-    <div class="revision-stats">
-      <span>✅ Réussis : <strong id="nb-ok">0</strong></span>
-      <span>❌ Ratés : <strong id="nb-ko">0</strong></span>
+    <!-- Stats révision -->
+    <div class="fc-rev-stats">
+      <div class="fc-stat-item fc-stat-ok">
+        <span class="fc-stat-emoji">✅</span>
+        <span class="fc-stat-label">Réussis</span>
+        <strong id="nb-ok" class="fc-stat-num">0</strong>
+      </div>
+      <div class="fc-stat-item fc-stat-ko">
+        <span class="fc-stat-emoji">❌</span>
+        <span class="fc-stat-label">Difficiles</span>
+        <strong id="nb-ko" class="fc-stat-num">0</strong>
+      </div>
+      <div class="fc-stat-item fc-stat-total">
+        <span class="fc-stat-emoji">🃏</span>
+        <span class="fc-stat-label">Restantes</span>
+        <strong id="nb-reste" class="fc-stat-num">0</strong>
+      </div>
     </div>
+
   </div>
+  <!-- fin écran-revision -->
 
 </div>
 
+<!-- ══════════════════════════════════════════ -->
+<!-- STYLES -->
+<!-- ══════════════════════════════════════════ -->
 <style>
-  .page-container { padding:2rem; max-width:1100px; margin:0 auto;}
-  .page-header { display:flex; align-items:center; gap:1.2rem; border-radius:20px; padding:1.5rem 2rem; margin-bottom:1.5rem; box-shadow:0 4px 20px rgba(0,0,0,0.05);}
-  .page-header-icon { width:60px; height:60px; border-radius:16px; display:flex; align-items:center; justify-content:center; font-size:1.8rem; color:white;}
-  .page-title { font-size:1.6rem; font-weight:800; margin:0;}
-  .page-subtitle { margin:0.2rem 0 0; font-size:0.95rem;}
 
-  .alerte-warning { display:flex; align-items:flex-start; gap:1rem; background:#FFF3CD; border:2px solid #FFD93D; border-radius:16px; padding:1.2rem 1.5rem; margin-bottom:1.5rem;}
-  .alerte-warning span { font-size:1.5rem;}
-  .alerte-warning p { margin:0.2rem 0 0.5rem; color:#6B7280; font-size:0.9rem;}
-  .btn-alerte { display:inline-block; background:#FFD93D; color:#374151; font-weight:700; padding:0.4rem 1rem; border-radius:20px; text-decoration:none; font-size:0.85rem;}
-  .statut-cours-card { display:flex; align-items:center; gap:1rem; background:#D0EBFF; border:2px solid #A5D8FF; border-radius:16px; padding:1rem 1.5rem; margin-bottom:1.5rem;}
-  .badge-ok { margin-left:auto; background:#00C853; color:white; font-weight:700; padding:0.3rem 0.8rem; border-radius:20px;}
+/* ── ANIMATIONS ── */
+@keyframes fadeInUp {
+  from { opacity:0; transform:translateY(30px); }
+  to   { opacity:1; transform:translateY(0);    }
+}
+@keyframes slideInRight {
+  from { opacity:0; transform:translateX(40px); }
+  to   { opacity:1; transform:translateX(0);    }
+}
+@keyframes pulseGlow {
+  0%,100% { box-shadow:0 0 0 0 rgba(41,98,255,0.4); }
+  50%      { box-shadow:0 0 0 12px rgba(41,98,255,0); }
+}
+@keyframes floatCard {
+  0%,100% { transform:translateY(0px); }
+  50%      { transform:translateY(-8px); }
+}
+@keyframes shimmer {
+  0%   { background-position:-200% center; }
+  100% { background-position:200% center;  }
+}
+@keyframes bounceIn {
+  0%   { transform:scale(0.3); opacity:0; }
+  50%  { transform:scale(1.05); }
+  70%  { transform:scale(0.9); }
+  100% { transform:scale(1); opacity:1; }
+}
 
-  .control-panel { background:white; border-radius:20px; padding:2rem; margin-bottom:1.5rem; box-shadow:0 4px 20px rgba(0,0,0,0.08); border-top:4px solid #2962FF;}
-  .control-panel h2 { font-size:1.1rem; margin-bottom:1rem; font-weight:700;}
-  .slider-container { margin-bottom:1.5rem;}
-  .slider-label { display:flex; align-items:center; gap:0.5rem; font-weight:600; color:#374151; margin-bottom:0.8rem;}
-  .slider-value { background:#2962FF; color:white; padding:0.2rem 0.7rem; border-radius:20px; font-size:1rem; font-weight:700; min-width:35px; text-align:center;}
-  input[type="range"] { width:100%; height:8px; border-radius:10px; background:#D0EBFF; outline:none; -webkit-appearance:none;}
-  input[type="range"]::-webkit-slider-thumb { -webkit-appearance:none; width:24px; height:24px; border-radius:50%; background:#2962FF; cursor:pointer; box-shadow:0 2px 8px rgba(41,98,255,0.4);}
-  .btn-bleu { width:100%; padding:1rem; background:linear-gradient(135deg, #2962FF, #1E40AF); color:white; border:none; border-radius:14px; font-weight:700; font-size:1rem; cursor:pointer; box-shadow:0 4px 15px rgba(41,98,255,0.4);}
-  .btn-bleu:hover { transform:translateY(-2px);}
-  .btn-bleu:disabled { background:#D1D5DB; cursor:not-allowed;}
+/* ── CONTAINER ── */
+.fc-container {
+  padding: 1.5rem;
+  max-width: 900px;
+  margin: 0 auto;
+  animation: fadeInUp 0.5s ease;
+}
 
-  .empty-mini { text-align:center; color:#9CA3AF; padding:2rem;}
+/* ── HEADER ── */
+.fc-header {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, #2962FF 0%, #7B61FF 50%, #A855F7 100%);
+  border-radius: 28px;
+  padding: 2rem 2rem 2rem 2rem;
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+  flex-wrap: wrap;
+  box-shadow: 0 8px 32px rgba(41,98,255,0.35);
+}
+.fc-header-bg-emoji {
+  position: absolute;
+  right: -10px; top: -20px;
+  font-size: 9rem;
+  opacity: 0.1;
+  pointer-events: none;
+  animation: floatCard 4s ease-in-out infinite;
+}
+.fc-header-icon {
+  width: 72px; height: 72px;
+  background: rgba(255,255,255,0.2);
+  border-radius: 20px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 2.2rem;
+  backdrop-filter: blur(10px);
+  border: 2px solid rgba(255,255,255,0.3);
+  flex-shrink: 0;
+}
+.fc-header-text { flex: 1; }
+.fc-header-title {
+  font-size: 1.8rem; font-weight: 900;
+  color: white; margin: 0;
+  text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+}
+.fc-header-sub {
+  color: rgba(255,255,255,0.85);
+  margin: 0.3rem 0 0;
+  font-size: 0.95rem;
+}
+.fc-header-badge {
+  background: rgba(255,255,255,0.2);
+  color: white;
+  padding: 0.5rem 1.2rem;
+  border-radius: 50px;
+  font-weight: 700;
+  font-size: 0.85rem;
+  display: flex; align-items: center; gap: 0.5rem;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.3);
+  white-space: nowrap;
+}
 
-  .deck-card { background:linear-gradient(135deg, #D0EBFF, #A5D8FF); border-radius:14px; padding:1.2rem; margin-bottom:0.8rem; display:flex; align-items:center; gap:1rem; flex-wrap:wrap;}
-  .deck-info { flex:1; min-width:180px;}
-  .deck-nom { font-weight:700; color:#1E40AF; font-size:1rem;}
-  .deck-stats { font-size:0.85rem; color:#374151; margin-top:0.3rem;}
-  .deck-actions { display:flex; gap:0.5rem; flex-wrap:wrap;}
-  .btn-deck { padding:0.5rem 1rem; border-radius:10px; font-weight:600; font-size:0.85rem; cursor:pointer; border:none;}
-  .btn-reviser { background:#00C853; color:white;}
-  .btn-reviser:hover { transform:scale(1.05);}
-  .btn-sup-deck { background:#FEE2E2; color:#EF4444; border:2px solid #EF4444;}
-  .btn-sup-deck:hover { background:#EF4444; color:white;}
+/* ── ALERTE ── */
+.fc-alerte {
+  display: flex; align-items: flex-start; gap: 1rem;
+  background: linear-gradient(135deg, #FFFBEB, #FEF3C7);
+  border: 2px solid #FFD93D;
+  border-radius: 20px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  animation: slideInRight 0.4s ease;
+  box-shadow: 0 4px 20px rgba(255,217,61,0.2);
+}
+.fc-alerte-icon { font-size: 2rem; flex-shrink:0; }
+.fc-alerte-body strong { color: #92400E; font-size: 1rem; }
+.fc-alerte-body p { color: #6B7280; font-size: 0.9rem; margin: 0.3rem 0 0.8rem; }
+.fc-btn-alerte {
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  background: linear-gradient(135deg, #FFD93D, #F59E0B);
+  color: #374151; font-weight: 700;
+  padding: 0.5rem 1.2rem; border-radius: 50px;
+  text-decoration: none; font-size: 0.9rem;
+  box-shadow: 0 4px 12px rgba(245,158,11,0.3);
+  transition: transform 0.2s;
+}
+.fc-btn-alerte:hover { transform: translateY(-2px); }
 
-  /* RÉVISION */
-  .revision-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:1.5rem; flex-wrap:wrap; gap:0.5rem;}
-  .btn-retour { background:#D0EBFF; color:#1E40AF; padding:0.6rem 1.2rem; border:none; border-radius:10px; font-weight:600; cursor:pointer;}
-  .btn-retour:hover { background:#A5D8FF;}
-  .progression { background:#2962FF; color:white; padding:0.4rem 1rem; border-radius:20px; font-weight:700;}
+/* ── STATUT COURS ── */
+.fc-statut-card {
+  display: flex; align-items: center; gap: 1rem;
+  background: linear-gradient(135deg, #EFF6FF, #DBEAFE);
+  border: 2px solid #93C5FD;
+  border-radius: 20px;
+  padding: 1.2rem 1.5rem;
+  margin-bottom: 1.5rem;
+  animation: slideInRight 0.4s ease;
+  box-shadow: 0 4px 20px rgba(41,98,255,0.1);
+}
+.fc-statut-icon { font-size: 2rem; }
+.fc-statut-label {
+  font-size: 0.8rem; color: #6B7280;
+  text-transform: uppercase; letter-spacing: 1px;
+  display: block;
+}
+.fc-statut-nom {
+  font-weight: 800; color: #1E40AF;
+  font-size: 1rem; display: block;
+}
+.fc-badge-ok {
+  margin-left: auto;
+  background: linear-gradient(135deg, #00C853, #7ED321);
+  color: white; font-weight: 700;
+  padding: 0.4rem 1rem; border-radius: 50px;
+  font-size: 0.85rem;
+  box-shadow: 0 4px 12px rgba(0,200,83,0.3);
+}
 
-  .flashcard-container { perspective:1000px; margin:2rem auto; max-width:600px; height:340px; cursor:pointer;}
-  .flashcard { width:100%; height:100%; position:relative; transition:transform 0.6s; transform-style:preserve-3d;}
-  .flashcard.flipped { transform:rotateY(180deg);}
-  .flashcard-face { position:absolute; width:100%; height:100%; backface-visibility:hidden; border-radius:24px; padding:2rem; display:flex; flex-direction:column; align-items:center; justify-content:center; box-shadow:0 8px 30px rgba(0,0,0,0.15); text-align:center;}
-  .recto { background:linear-gradient(135deg, #2962FF, #7EC8FF); color:white;}
-  .verso { background:linear-gradient(135deg, #00C853, #7ED321); color:white; transform:rotateY(180deg);}
-  .face-label { font-weight:700; font-size:0.9rem; opacity:0.9; margin-bottom:1rem; letter-spacing:2px;}
-  .face-content { font-size:1.4rem; font-weight:700; line-height:1.5; flex:1; display:flex; align-items:center; justify-content:center; word-break:break-word; padding:0 1rem;}
-  .face-hint { font-size:0.85rem; opacity:0.8; margin-top:1rem;}
+/* ── CARDS ── */
+.fc-card {
+  background: white;
+  border-radius: 24px;
+  padding: 1.8rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+  animation: fadeInUp 0.5s ease both;
+}
+.fc-card-bleu  { border-top: 5px solid #2962FF; }
+.fc-card-violet{ border-top: 5px solid #7B61FF; }
 
-  .revision-actions { display:flex; gap:1rem; justify-content:center; margin:1.5rem 0;}
-  .btn-rate, .btn-reussi { padding:1rem 2.5rem; border:none; border-radius:14px; font-weight:700; font-size:1rem; cursor:pointer; transition:0.2s;}
-  .btn-rate { background:linear-gradient(135deg, #EF4444, #DC2626); color:white; box-shadow:0 4px 15px rgba(239,68,68,0.4);}
-  .btn-rate:hover { transform:translateY(-2px);}
-  .btn-reussi { background:linear-gradient(135deg, #00C853, #7ED321); color:white; box-shadow:0 4px 15px rgba(0,200,83,0.4);}
-  .btn-reussi:hover { transform:translateY(-2px);}
+.fc-card-header {
+  display: flex; align-items: center; gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+.fc-card-icon-wrap {
+  width: 54px; height: 54px;
+  border-radius: 16px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.6rem; flex-shrink: 0;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+}
+.fc-card-title {
+  font-size: 1.1rem; font-weight: 800;
+  color: #1A1D2E; margin: 0;
+}
+.fc-card-subtitle {
+  font-size: 0.85rem; color: #6B7280;
+  margin: 0.2rem 0 0;
+}
 
-  .revision-stats { display:flex; justify-content:center; gap:2rem; background:white; padding:1rem; border-radius:14px; box-shadow:0 4px 15px rgba(0,0,0,0.05); font-size:0.95rem;}
+/* ── SLIDER ── */
+.fc-slider-wrap { margin-bottom: 1.5rem; }
+.fc-slider-top {
+  display: flex; align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.8rem;
+}
+.fc-slider-label {
+  font-weight: 700; color: #374151; font-size: 0.95rem;
+}
+.fc-slider-value {
+  background: linear-gradient(135deg, #2962FF, #7B61FF);
+  color: white; padding: 0.3rem 1rem;
+  border-radius: 50px; font-size: 1.1rem;
+  font-weight: 800; min-width: 50px; text-align: center;
+  box-shadow: 0 4px 12px rgba(41,98,255,0.3);
+  animation: pulseGlow 2s infinite;
+}
+.fc-slider {
+  width: 100%; height: 10px;
+  border-radius: 10px;
+  background: linear-gradient(to right, #2962FF, #A5D8FF);
+  outline: none; -webkit-appearance: none;
+  cursor: pointer;
+}
+.fc-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #2962FF, #7B61FF);
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(41,98,255,0.5);
+  border: 3px solid white;
+}
+.fc-slider-marks {
+  display: flex; justify-content: space-between;
+  font-size: 0.75rem; color: #9CA3AF;
+  margin-top: 0.5rem; padding: 0 2px;
+}
+
+/* ── BOUTON GÉNÉRER ── */
+.fc-btn-generer {
+  width: 100%;
+  display: flex; align-items: center; justify-content: center; gap: 1rem;
+  padding: 1.1rem;
+  background: linear-gradient(135deg, #2962FF, #7B61FF);
+  color: white; border: none;
+  border-radius: 50px;
+  font-weight: 800; font-size: 1.05rem;
+  cursor: pointer;
+  box-shadow: 0 6px 20px rgba(41,98,255,0.4);
+  transition: all 0.3s;
+  position: relative; overflow: hidden;
+}
+.fc-btn-generer::before {
+  content: '';
+  position: absolute; top:0; left:-100%;
+  width: 100%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  transition: left 0.5s;
+}
+.fc-btn-generer:hover::before { left: 100%; }
+.fc-btn-generer:hover { transform: translateY(-3px); box-shadow: 0 10px 28px rgba(41,98,255,0.5); }
+.fc-btn-generer:disabled {
+  background: linear-gradient(135deg, #D1D5DB, #9CA3AF);
+  box-shadow: none; cursor: not-allowed; transform: none;
+}
+.fc-btn-circle {
+  width: 36px; height: 36px;
+  background: rgba(255,255,255,0.25);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.1rem; flex-shrink: 0;
+}
+
+/* ── DECK CARDS ── */
+.fc-deck-item {
+  background: linear-gradient(135deg, #F0F4FF, #EDE9FF);
+  border: 2px solid #C7D2FE;
+  border-radius: 18px;
+  padding: 1.2rem 1.5rem;
+  margin-bottom: 0.8rem;
+  display: flex; align-items: center; gap: 1rem;
+  flex-wrap: wrap;
+  transition: all 0.3s;
+  animation: fadeInUp 0.4s ease both;
+}
+.fc-deck-item:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(123,97,255,0.2);
+  border-color: #7B61FF;
+}
+.fc-deck-emoji {
+  width: 48px; height: 48px;
+  background: linear-gradient(135deg, #7B61FF, #A855F7);
+  border-radius: 14px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.5rem; flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(123,97,255,0.3);
+}
+.fc-deck-info { flex: 1; min-width: 160px; }
+.fc-deck-nom {
+  font-weight: 800; color: #1A1D2E; font-size: 1rem;
+}
+.fc-deck-stats {
+  font-size: 0.82rem; color: #6B7280; margin-top: 0.3rem;
+  display: flex; gap: 0.8rem; flex-wrap: wrap;
+}
+.fc-deck-stat-pill {
+  background: white; padding: 0.2rem 0.6rem;
+  border-radius: 50px; font-weight: 600;
+  border: 1px solid #E5E7EB;
+}
+.fc-deck-actions { display: flex; gap: 0.6rem; }
+.fc-btn-reviser {
+  display: flex; align-items: center; gap: 0.5rem;
+  padding: 0.6rem 1.2rem;
+  background: linear-gradient(135deg, #00C853, #7ED321);
+  color: white; border: none; border-radius: 50px;
+  font-weight: 700; font-size: 0.85rem; cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0,200,83,0.3);
+  transition: all 0.2s;
+}
+.fc-btn-reviser:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(0,200,83,0.4); }
+.fc-btn-sup {
+  width: 38px; height: 38px;
+  background: #FEE2E2; color: #EF4444;
+  border: 2px solid #FCA5A5;
+  border-radius: 50%; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1rem; transition: all 0.2s;
+}
+.fc-btn-sup:hover { background: #EF4444; color: white; border-color: #EF4444; transform: scale(1.1); }
+
+/* ── EMPTY ── */
+.fc-empty {
+  text-align: center; padding: 3rem 2rem;
+}
+.fc-empty-icon { font-size: 4rem; margin-bottom: 1rem; }
+.fc-empty-text {
+  font-size: 1.1rem; font-weight: 700; color: #374151;
+  margin: 0;
+}
+.fc-empty-sub { color: #9CA3AF; font-size: 0.9rem; margin: 0.5rem 0 0; }
+
+/* ══════════════════════════════════ */
+/* ÉCRAN RÉVISION */
+/* ══════════════════════════════════ */
+
+.fc-rev-header {
+  display: flex; align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem; flex-wrap: wrap; gap: 0.8rem;
+}
+.fc-btn-retour {
+  display: flex; align-items: center; gap: 0.5rem;
+  background: linear-gradient(135deg, #F0F4FF, #EDE9FF);
+  color: #7B61FF; padding: 0.7rem 1.4rem;
+  border: 2px solid #C7D2FE; border-radius: 50px;
+  font-weight: 700; cursor: pointer;
+  transition: all 0.2s;
+}
+.fc-btn-retour:hover {
+  background: linear-gradient(135deg, #7B61FF, #A855F7);
+  color: white; border-color: transparent;
+  transform: translateX(-3px);
+}
+.fc-rev-titre {
+  font-size: 1.2rem; font-weight: 800; color: #1A1D2E; margin: 0;
+}
+.fc-progression {
+  background: linear-gradient(135deg, #2962FF, #7B61FF);
+  color: white; padding: 0.5rem 1.2rem;
+  border-radius: 50px; font-weight: 800;
+  box-shadow: 0 4px 12px rgba(41,98,255,0.3);
+}
+
+/* Barre de progression */
+.fc-progress-bar-wrap {
+  height: 8px; background: #E5E7EB;
+  border-radius: 10px; overflow: hidden;
+  margin-bottom: 2rem;
+}
+.fc-progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #2962FF, #7B61FF, #A855F7);
+  border-radius: 10px;
+  transition: width 0.5s cubic-bezier(0.4,0,0.2,1);
+  background-size: 200% auto;
+  animation: shimmer 2s linear infinite;
+}
+
+/* ── FLASHCARD 3D ── */
+.fc-card-3d-wrap {
+  perspective: 1200px;
+  margin: 0 auto 2rem;
+  max-width: 580px; height: 320px;
+  cursor: pointer;
+}
+.fc-card-3d {
+  width: 100%; height: 100%;
+  position: relative;
+  transition: transform 0.7s cubic-bezier(0.4,0,0.2,1);
+  transform-style: preserve-3d;
+}
+.fc-card-3d.flipped { transform: rotateY(180deg); }
+
+.fc-face {
+  position: absolute; width: 100%; height: 100%;
+  backface-visibility: hidden;
+  border-radius: 28px;
+  padding: 2rem;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  text-align: center;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.2);
+}
+.fc-recto {
+  background: linear-gradient(135deg, #2962FF 0%, #7B61FF 60%, #A855F7 100%);
+  color: white;
+}
+.fc-verso {
+  background: linear-gradient(135deg, #00C853 0%, #7ED321 60%, #FFD93D 100%);
+  color: white;
+  transform: rotateY(180deg);
+}
+.fc-face-deco {
+  font-size: 2.5rem; margin-bottom: 0.5rem; opacity: 0.6;
+}
+.fc-face-label {
+  font-weight: 800; font-size: 0.75rem;
+  letter-spacing: 3px; opacity: 0.9;
+  background: rgba(255,255,255,0.2);
+  padding: 0.3rem 1rem; border-radius: 50px;
+  margin-bottom: 1rem;
+}
+.fc-face-content {
+  font-size: 1.35rem; font-weight: 700;
+  line-height: 1.5; flex: 1;
+  display: flex; align-items: center; justify-content: center;
+  word-break: break-word; padding: 0 0.5rem;
+}
+.fc-face-hint {
+  font-size: 0.82rem; opacity: 0.8;
+  margin-top: 1rem;
+  background: rgba(255,255,255,0.15);
+  padding: 0.4rem 1rem; border-radius: 50px;
+}
+
+/* ── ACTIONS RÉVISION ── */
+.fc-rev-actions {
+  display: flex; gap: 1rem;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+.fc-btn-difficile, .fc-btn-flip, .fc-btn-reussi {
+  display: flex; align-items: center; gap: 0.6rem;
+  padding: 0.9rem 1.6rem;
+  border: none; border-radius: 50px;
+  font-weight: 800; font-size: 0.95rem;
+  cursor: pointer; transition: all 0.3s;
+}
+.fc-btn-circle-sm {
+  width: 32px; height: 32px;
+  background: rgba(255,255,255,0.25);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1rem; flex-shrink: 0;
+}
+.fc-btn-difficile {
+  background: linear-gradient(135deg, #EF4444, #DC2626);
+  color: white;
+  box-shadow: 0 6px 20px rgba(239,68,68,0.4);
+}
+.fc-btn-difficile:hover { transform: translateY(-3px); box-shadow: 0 10px 28px rgba(239,68,68,0.5); }
+
+.fc-btn-flip {
+  background: linear-gradient(135deg, #F59E0B, #FFD93D);
+  color: white;
+  box-shadow: 0 6px 20px rgba(245,158,11,0.4);
+}
+.fc-btn-flip:hover { transform: translateY(-3px); box-shadow: 0 10px 28px rgba(245,158,11,0.5); }
+
+.fc-btn-reussi {
+  background: linear-gradient(135deg, #00C853, #7ED321);
+  color: white;
+  box-shadow: 0 6px 20px rgba(0,200,83,0.4);
+}
+.fc-btn-reussi:hover { transform: translateY(-3px); box-shadow: 0 10px 28px rgba(0,200,83,0.5); }
+
+/* ── STATS RÉVISION ── */
+.fc-rev-stats {
+  display: flex; justify-content: center; gap: 1rem;
+  flex-wrap: wrap;
+}
+.fc-stat-item {
+  display: flex; flex-direction: column; align-items: center;
+  padding: 1rem 2rem; border-radius: 20px;
+  min-width: 100px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+  animation: bounceIn 0.5s ease both;
+}
+.fc-stat-ok  { background: linear-gradient(135deg, #DCFCE7, #BBF7D0); border: 2px solid #86EFAC; }
+.fc-stat-ko  { background: linear-gradient(135deg, #FEE2E2, #FECACA); border: 2px solid #FCA5A5; }
+.fc-stat-total{ background: linear-gradient(135deg, #EDE9FF, #DDD6FE); border: 2px solid #C4B5FD; }
+.fc-stat-emoji { font-size: 1.5rem; margin-bottom: 0.3rem; }
+.fc-stat-label { font-size: 0.75rem; color: #6B7280; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
+.fc-stat-num { font-size: 1.8rem; font-weight: 900; color: #1A1D2E; }
+
+/* ══════════════════════════════════ */
+/* MODE SOMBRE */
+/* ══════════════════════════════════ */
+[data-theme="dark"] .fc-card {
+  background: #1E2235;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.3);
+}
+[data-theme="dark"] .fc-card-title { color: #F1F5F9; }
+[data-theme="dark"] .fc-card-subtitle { color: #94A3B8; }
+[data-theme="dark"] .fc-slider-label { color: #E2E8F0; }
+[data-theme="dark"] .fc-slider-marks span { color: #64748B; }
+[data-theme="dark"] .fc-slider { background: linear-gradient(to right, #7B61FF, #2962FF); }
+[data-theme="dark"] .fc-deck-item { background: linear-gradient(135deg, #1E2235, #252A40); border-color: #374151; }
+[data-theme="dark"] .fc-deck-nom { color: #F1F5F9; }
+[data-theme="dark"] .fc-deck-stat-pill { background: #2D3748; border-color: #4B5563; color: #D1D5DB; }
+[data-theme="dark"] .fc-empty-text { color: #D1D5DB; }
+[data-theme="dark"] .fc-rev-titre { color: #F1F5F9; }
+[data-theme="dark"] .fc-btn-retour { background: linear-gradient(135deg, #1E2235, #252A40); border-color: #4B5563; color: #A5B4FC; }
+[data-theme="dark"] .fc-progress-bar-wrap { background: #374151; }
+[data-theme="dark"] .fc-stat-ok  { background: linear-gradient(135deg, #14532D, #166534); border-color: #15803D; }
+[data-theme="dark"] .fc-stat-ko  { background: linear-gradient(135deg, #7F1D1D, #991B1B); border-color: #B91C1C; }
+[data-theme="dark"] .fc-stat-total{ background: linear-gradient(135deg, #2E1065, #3B0764); border-color: #6D28D9; }
+[data-theme="dark"] .fc-stat-label { color: #CBD5E1; }
+[data-theme="dark"] .fc-stat-num { color: #F8FAFC; }
+[data-theme="dark"] .fc-statut-card { background: linear-gradient(135deg, #1E2235, #1E3A5F); border-color: #2962FF; }
+[data-theme="dark"] .fc-alerte { background: linear-gradient(135deg, #1C1810, #27200A); border-color: #D97706; }
+
+/* ══════════════════════════════════ */
+/* RESPONSIVE */
+/* ══════════════════════════════════ */
+@media (max-width: 640px) {
+  .fc-container { padding: 1rem; }
+  .fc-header { padding: 1.2rem; gap: 0.8rem; }
+  .fc-header-title { font-size: 1.4rem; }
+  .fc-header-badge { display: none; }
+  .fc-card { padding: 1.2rem; }
+  .fc-card-3d-wrap { height: 260px; }
+  .fc-face-content { font-size: 1.1rem; }
+  .fc-rev-actions { gap: 0.6rem; }
+  .fc-btn-difficile, .fc-btn-flip, .fc-btn-reussi { padding: 0.8rem 1rem; font-size: 0.85rem; }
+  .fc-stat-item { padding: 0.8rem 1.2rem; min-width: 80px; }
+  .fc-stat-num { font-size: 1.4rem; }
+}
 </style>
 
+<!-- ══════════════════════════════════════════ -->
+<!-- JAVASCRIPT -->
+<!-- ══════════════════════════════════════════ -->
 <script>
 let deckActuel = [];
 let indexActuel = 0;
 let nbOk = 0, nbKo = 0;
 
-document.addEventListener('DOMContentLoaded', ()=>{
+document.addEventListener('DOMContentLoaded', () => {
   verifierCours();
   chargerDecks();
 });
 
-function majSlider(v) { document.getElementById('valeur-slider').textContent = v; }
+/* ── TOAST ── */
+function toast(msg, type = 'info') {
+  const colors = {
+    succes : 'linear-gradient(135deg,#00C853,#7ED321)',
+    erreur : 'linear-gradient(135deg,#EF4444,#DC2626)',
+    info   : 'linear-gradient(135deg,#2962FF,#7B61FF)',
+    warning: 'linear-gradient(135deg,#F59E0B,#FFD93D)',
+  };
+  const t = document.getElementById('toast');
+  t.innerHTML = msg;
+  t.style.background = colors[type] || colors.info;
+  t.style.transform = 'translateX(0)';
+  setTimeout(() => { t.style.transform = 'translateX(120%)'; }, 3200);
+}
 
+/* ── SLIDER ── */
+function majSlider(v) {
+  document.getElementById('valeur-slider').textContent = v;
+}
+
+/* ── VÉRIFIER COURS ── */
 function verifierCours() {
-  fetch('/api/statut-cours').then(r=>r.json()).then(d=>{
+  fetch('/api/statut-cours').then(r => r.json()).then(d => {
     if (d.cours_charge) {
       document.getElementById('nom-cours-affiche').textContent = d.nom_cours;
       document.getElementById('statut-cours').style.display = 'flex';
@@ -172,122 +766,188 @@ function verifierCours() {
       document.getElementById('btn-generer').disabled = false;
     } else {
       document.getElementById('alerte-cours').style.display = 'flex';
+      document.getElementById('statut-cours').style.display = 'none';
       document.getElementById('btn-generer').disabled = true;
     }
+  }).catch(() => {
+    document.getElementById('alerte-cours').style.display = 'flex';
+    document.getElementById('btn-generer').disabled = true;
   });
 }
 
+/* ── GÉNÉRER IA ── */
 function genererIA() {
   const nb = document.getElementById('slider-nb').value;
-  document.getElementById('btn-generer').disabled = true;
-  document.getElementById('btn-generer').textContent = '⏳ Génération en cours...';
+  const btn = document.getElementById('btn-generer');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="fc-btn-circle">⏳</span><span>Génération en cours...</span>';
 
   fetch('/api/flashcards/generer', {
-    method:'POST', headers:{'Content-Type':'application/json'},
-    body: JSON.stringify({nombre: parseInt(nb)})
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ nombre: parseInt(nb) })
   })
-  .then(r=>r.json())
-  .then(d=>{
-    document.getElementById('btn-generer').disabled = false;
-    document.getElementById('btn-generer').textContent = '🤖 Générer depuis le cours';
+  .then(r => r.json())
+  .then(d => {
+    btn.disabled = false;
+    btn.innerHTML = '<span class="fc-btn-circle">🤖</span><span>Générer depuis le cours</span>';
     if (d.succes) {
-      alert('✅ ' + d.nb + ' flashcards créées !');
+      toast('✅ ' + d.nb + ' flashcards créées avec succès !', 'succes');
       chargerDecks();
     } else {
-      alert('❌ ' + (d.erreur || 'Erreur'));
+      toast('❌ ' + (d.erreur || 'Erreur de génération'), 'erreur');
     }
+  })
+  .catch(() => {
+    btn.disabled = false;
+    btn.innerHTML = '<span class="fc-btn-circle">🤖</span><span>Générer depuis le cours</span>';
+    toast('❌ Erreur réseau. Réessaie !', 'erreur');
   });
 }
 
+/* ── CHARGER DECKS ── */
 function chargerDecks() {
-  fetch('/api/flashcards/decks').then(r=>r.json()).then(d=>{
-    const c = document.getElementById('liste-decks');
+  fetch('/api/flashcards/decks').then(r => r.json()).then(d => {
+    const container = document.getElementById('liste-decks');
     const empty = document.getElementById('aucun-deck');
-    c.innerHTML = '';
+    container.innerHTML = '';
     const decks = d.decks || [];
 
-    if (decks.length === 0) { empty.style.display = 'block'; return; }
+    if (decks.length === 0) {
+      empty.style.display = 'block';
+      return;
+    }
     empty.style.display = 'none';
 
-    decks.forEach(deck => {
+    decks.forEach((deck, i) => {
       const div = document.createElement('div');
-      div.className = 'deck-card';
+      div.className = 'fc-deck-item';
+      div.style.animationDelay = (i * 0.08) + 's';
       div.innerHTML = `
-        <div class="deck-info">
-          <div class="deck-nom">🃏 ${esc(deck.nom)}</div>
-          <div class="deck-stats">📚 ${esc(deck.matiere)} • ${deck.nb} cartes • ✅ ${deck.reussis}/${deck.vus}</div>
+        <div class="fc-deck-emoji">🃏</div>
+        <div class="fc-deck-info">
+          <div class="fc-deck-nom">${esc(deck.nom)}</div>
+          <div class="fc-deck-stats">
+            <span class="fc-deck-stat-pill">📚 ${esc(deck.matiere)}</span>
+            <span class="fc-deck-stat-pill">🃏 ${deck.nb} cartes</span>
+            <span class="fc-deck-stat-pill">✅ ${deck.reussis}/${deck.vus}</span>
+          </div>
         </div>
-        <div class="deck-actions">
-          <button class="btn-deck btn-reviser" onclick="lancerRevision('${esc(deck.nom)}')">▶️ Réviser</button>
-          <button class="btn-deck btn-sup-deck" onclick="supprimerDeck('${esc(deck.nom)}')">🗑️</button>
+        <div class="fc-deck-actions">
+          <button class="fc-btn-reviser" onclick="lancerRevision('${esc(deck.nom)}')">
+            ▶️ Réviser
+          </button>
+          <button class="fc-btn-sup" onclick="supprimerDeck('${esc(deck.nom)}')" title="Supprimer">
+            🗑️
+          </button>
         </div>
       `;
-      c.appendChild(div);
+      container.appendChild(div);
     });
+  }).catch(() => {
+    toast('❌ Erreur chargement des decks', 'erreur');
   });
 }
 
+/* ── LANCER RÉVISION ── */
 function lancerRevision(nomDeck) {
-  fetch('/api/flashcards/deck/' + encodeURIComponent(nomDeck)).then(r=>r.json()).then(d=>{
+  fetch('/api/flashcards/deck/' + encodeURIComponent(nomDeck))
+  .then(r => r.json())
+  .then(d => {
     if (!d.succes || !d.cards || d.cards.length === 0) {
-      alert('❌ Deck vide ou erreur');
+      toast('❌ Deck vide ou erreur', 'erreur');
       return;
     }
     deckActuel = d.cards;
     indexActuel = 0; nbOk = 0; nbKo = 0;
+
     document.getElementById('deck-titre').textContent = '🃏 ' + nomDeck;
     document.getElementById('ecran-menu').style.display = 'none';
     document.getElementById('ecran-revision').style.display = 'block';
     afficherCarte();
-  });
+    toast('▶️ Révision lancée ! ' + d.cards.length + ' cartes', 'info');
+  })
+  .catch(() => toast('❌ Erreur réseau', 'erreur'));
 }
 
+/* ── AFFICHER CARTE ── */
 function afficherCarte() {
   if (indexActuel >= deckActuel.length) {
-    alert('🎉 Deck terminé !\n✅ ' + nbOk + ' réussis\n❌ ' + nbKo + ' ratés');
-    retourMenu();
+    const pct = Math.round((nbOk / deckActuel.length) * 100);
+    toast('🎉 Deck terminé ! Score : ' + pct + '% (' + nbOk + '/' + deckActuel.length + ')', 'succes');
+    setTimeout(retourMenu, 2000);
     return;
   }
+
   const card = deckActuel[indexActuel];
-  document.getElementById('flashcard').classList.remove('flipped');
+  const fc = document.getElementById('flashcard');
+  fc.classList.remove('flipped');
   document.getElementById('recto-content').textContent = card.recto;
   document.getElementById('verso-content').textContent = card.verso;
-  document.getElementById('progression').textContent = (indexActuel+1) + ' / ' + deckActuel.length;
+
+  // Progression
+  const pct = Math.round(((indexActuel) / deckActuel.length) * 100);
+  document.getElementById('progress-bar').style.width = pct + '%';
+  document.getElementById('progression').textContent =
+    (indexActuel + 1) + ' / ' + deckActuel.length;
+
+  // Stats
   document.getElementById('nb-ok').textContent = nbOk;
   document.getElementById('nb-ko').textContent = nbKo;
+  document.getElementById('nb-reste').textContent = deckActuel.length - indexActuel;
 }
 
+/* ── FLIP ── */
 function flipCard() {
   document.getElementById('flashcard').classList.toggle('flipped');
 }
 
+/* ── RÉPONSE ── */
 function reponse(reussi) {
   const card = deckActuel[indexActuel];
   fetch('/api/flashcards/stats', {
-    method:'POST', headers:{'Content-Type':'application/json'},
-    body: JSON.stringify({id: card.id, reussi: reussi})
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ id: card.id, reussi: reussi })
   });
-  if (reussi) nbOk++; else nbKo++;
+  if (reussi) { nbOk++; toast('✅ Bien joué !', 'succes'); }
+  else         { nbKo++; toast('📚 À retravailler', 'warning'); }
   indexActuel++;
-  afficherCarte();
+  setTimeout(afficherCarte, 400);
 }
 
+/* ── RETOUR MENU ── */
 function retourMenu() {
   document.getElementById('ecran-menu').style.display = 'block';
   document.getElementById('ecran-revision').style.display = 'none';
   chargerDecks();
 }
 
+/* ── SUPPRIMER DECK ── */
 function supprimerDeck(nom) {
-  if (!confirm('🗑️ Supprimer le deck "' + nom + '" ?')) return;
+  if (!confirm('🗑️ Supprimer le deck "' + nom + '" ?\nCette action est irréversible !')) return;
   fetch('/api/flashcards/deck/supprimer', {
-    method:'POST', headers:{'Content-Type':'application/json'},
-    body: JSON.stringify({nom: nom})
-  }).then(r=>r.json()).then(d=>{
-    if (d.succes) chargerDecks();
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ nom: nom })
+  })
+  .then(r => r.json())
+  .then(d => {
+    if (d.succes) {
+      toast('🗑️ Deck supprimé', 'warning');
+      chargerDecks();
+    } else {
+      toast('❌ Erreur suppression', 'erreur');
+    }
   });
 }
 
-function esc(t) { const d = document.createElement('div'); d.textContent = t || ''; return d.innerHTML; }
+/* ── ESCAPE ── */
+function esc(t) {
+  const d = document.createElement('div');
+  d.textContent = t || '';
+  return d.innerHTML;
+}
 </script>
+
 {% endblock %}

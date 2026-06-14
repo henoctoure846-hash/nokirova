@@ -1,123 +1,528 @@
 {% extends "base.html" %}
 {% block title %}Exercices Examen - NOKIROVA{% endblock %}
 {% block contenu %}
-<div class="page-container">
 
-  <div class="page-header" style="background: linear-gradient(135deg, #FDBA74, #FED7AA); border-left: 5px solid #F59E0B;">
-    <div class="page-header-icon" style="background: linear-gradient(135deg, #F59E0B, #FB923C);">📚</div>
-    <div>
-      <h1 class="page-title" style="color: #92400E;">Exercices Examen</h1>
-      <p class="page-subtitle" style="color: #B45309;">Génère des exercices type examen avec corrigés détaillés</p>
+<!-- TOAST -->
+<div id="toast" style="
+  position:fixed; top:20px; right:20px; z-index:9999;
+  background:#1A1D2E; color:white; padding:1rem 1.5rem;
+  border-radius:16px; font-weight:600; font-size:0.95rem;
+  box-shadow:0 8px 30px rgba(0,0,0,0.3);
+  transform:translateX(120%); transition:transform 0.4s cubic-bezier(0.175,0.885,0.32,1.275);
+  display:flex; align-items:center; gap:0.8rem; max-width:320px;
+"></div>
+
+<div class="ex-container">
+
+  <!-- ═══ HEADER ═══ -->
+  <div class="ex-header">
+    <div class="ex-header-bg-emoji">📚</div>
+    <div class="ex-header-icon">📚</div>
+    <div class="ex-header-text">
+      <h1 class="ex-header-title">Exercices Examen</h1>
+      <p class="ex-header-sub">Génère des exercices type examen avec corrigés détaillés 🎯</p>
+    </div>
+    <div class="ex-header-badge">
+      <span>🤖</span> IA Powered
     </div>
   </div>
 
-  <div id="alerte-cours" class="alerte-warning" style="display:none;">
-    <span>⚠️</span>
-    <div>
+  <!-- ═══ ALERTE COURS ═══ -->
+  <div id="alerte-cours" class="ex-alerte" style="display:none;">
+    <div class="ex-alerte-icon">⚠️</div>
+    <div class="ex-alerte-body">
       <strong>Aucun cours chargé !</strong>
       <p>Importe un cours pour générer des exercices.</p>
-      <a href="/import" class="btn-alerte">📥 Importer un cours</a>
+      <a href="/import" class="ex-btn-alerte">📥 Importer un cours</a>
     </div>
   </div>
 
-  <div id="statut-cours" class="statut-cours-card" style="display:none; background:#FED7AA; border-color:#FDBA74;">
-    <span style="font-size:1.5rem;">📚</span>
-    <div>
-      <strong>Cours chargé :</strong>
-      <span id="nom-cours-affiche" style="color:#92400E; font-weight:700;"></span>
+  <!-- ═══ STATUT COURS ═══ -->
+  <div id="statut-cours" class="ex-statut-card" style="display:none;">
+    <div class="ex-statut-icon">📚</div>
+    <div class="ex-statut-text">
+      <span class="ex-statut-label">Cours chargé</span>
+      <span id="nom-cours-affiche" class="ex-statut-nom"></span>
     </div>
-    <span class="badge-ok">✅ Prêt</span>
+    <div class="ex-badge-ok">✅ Prêt</div>
   </div>
 
-  <div class="control-panel" style="border-top: 4px solid #F59E0B;">
-    <h2 class="control-title" style="color:#92400E;">⚙️ Paramètres</h2>
-
-    <div class="slider-container">
-      <label class="slider-label">
-        📝 Nombre d'exercices :
-        <span id="valeur-slider" class="slider-value" style="background:#F59E0B;">3</span>
-      </label>
-      <input type="range" id="slider-nb" min="1" max="10" value="3" class="slider-qcm" style="background:#FED7AA;" oninput="majSlider(this.value)"/>
-      <div class="slider-info">
-        <span>1 ⚡</span><span>5 📚</span><span>10 💎</span>
+  <!-- ═══ PARAMÈTRES ═══ -->
+  <div class="ex-card ex-card-orange">
+    <div class="ex-card-header">
+      <div class="ex-card-icon"
+           style="background:linear-gradient(135deg,#F59E0B,#FB923C);">
+        ⚙️
+      </div>
+      <div>
+        <h2 class="ex-card-title">Paramètres</h2>
+        <p class="ex-card-sub">Configure ta génération d'exercices</p>
       </div>
     </div>
 
-    <label class="slider-label" style="margin-bottom:0.5rem;">🎚️ Niveau de difficulté :</label>
-    <select id="niveau" style="width:100%; padding:0.7rem; border-radius:10px; border:2px solid #FDBA74; font-size:0.95rem; margin-bottom:1.5rem; background:#FFF7ED; color:#92400E; font-weight:600;">
-      <option value="facile">🟢 Facile</option>
-      <option value="moyen" selected>🟡 Moyen</option>
-      <option value="difficile">🔴 Difficile (niveau examen)</option>
-    </select>
+    <!-- Slider -->
+    <div class="ex-slider-wrap">
+      <div class="ex-slider-top">
+        <span class="ex-slider-label">📝 Nombre d'exercices</span>
+        <span id="valeur-slider" class="ex-slider-value">3</span>
+      </div>
+      <input type="range" id="slider-nb" min="1" max="10" value="3"
+             oninput="majSlider(this.value)" class="ex-slider"/>
+      <div class="ex-slider-marks">
+        <span>1 ⚡</span>
+        <span>5 📚</span>
+        <span>10 💎</span>
+      </div>
+    </div>
 
-    <button id="btn-generer" onclick="generer()" class="btn-primary btn-orange">📚 Générer les Exercices</button>
+    <!-- Niveau -->
+    <div class="ex-niveau-wrap">
+      <span class="ex-slider-label">🎚️ Niveau de difficulté</span>
+      <div class="ex-niveau-grid">
+        <button class="ex-btn-niveau" data-niveau="facile"
+                onclick="choisirNiveau('facile', this)">
+          <span>🟢</span> Facile
+        </button>
+        <button class="ex-btn-niveau ex-niveau-actif" data-niveau="moyen"
+                onclick="choisirNiveau('moyen', this)">
+          <span>🟡</span> Moyen
+        </button>
+        <button class="ex-btn-niveau" data-niveau="difficile"
+                onclick="choisirNiveau('difficile', this)">
+          <span>🔴</span> Difficile
+        </button>
+      </div>
+    </div>
+
+    <button id="btn-generer" onclick="generer()" class="ex-btn-generer">
+      <span class="ex-btn-circle">📚</span>
+      <span>Générer les Exercices</span>
+    </button>
   </div>
 
-  <div id="loading" class="loading-card" style="display:none; background:#FED7AA; border-color:#FDBA74;">
-    <div class="spinner" style="border-color:#FDBA74; border-top-color:#F59E0B;"></div>
+  <!-- ═══ LOADING ═══ -->
+  <div id="loading" class="ex-loading" style="display:none;">
+    <div class="ex-spinner"></div>
     <div>
-      <p style="font-weight:700; color:#92400E;">📚 Génération en cours...</p>
-      <p style="color:#9CA3AF; font-size:0.85rem;">L'IA prépare tes exercices 🤖</p>
+      <p class="ex-loading-title">Génération en cours...</p>
+      <p class="ex-loading-sub">L'IA prépare tes exercices 🤖</p>
     </div>
   </div>
 
+  <!-- ═══ RÉSULTAT ═══ -->
   <div id="zone-resultat" style="display:none;">
-    <div class="actions-bar" style="border-left: 4px solid #F59E0B; background:#FED7AA;">
-      <span style="font-weight:700; color:#92400E;">✅ Exercices générés !</span>
-      <div class="actions-buttons">
-        <button onclick="copier()" class="btn-action btn-copy">📋 Copier</button>
-        <button onclick="telecharger()" class="btn-action btn-download">💾 Télécharger</button>
-        <button onclick="generer()" class="btn-action btn-regen" style="border-color:#F59E0B; color:#92400E; background:#FED7AA;">🔄 Régénérer</button>
+
+    <div class="ex-actions-bar">
+      <div class="ex-actions-left">
+        <div class="ex-actions-icon">✅</div>
+        <span class="ex-actions-label">Exercices générés !</span>
+      </div>
+      <div class="ex-actions-btns">
+        <button onclick="copier()" class="ex-btn-action ex-btn-copy">
+          <span>📋</span> Copier
+        </button>
+        <button onclick="telecharger()" class="ex-btn-action ex-btn-download">
+          <span>💾</span> Télécharger
+        </button>
+        <button onclick="generer()" class="ex-btn-action ex-btn-regen">
+          <span>🔄</span> Régénérer
+        </button>
       </div>
     </div>
+
     <div id="display"></div>
     <textarea id="brut" style="display:none;"></textarea>
   </div>
+
 </div>
 
 <style>
-  .page-container { padding: 2rem; max-width: 1100px; margin: 0 auto; }
-  .page-header { display:flex; align-items:center; gap:1.2rem; border-radius:20px; padding:1.5rem 2rem; margin-bottom:1.5rem; box-shadow:0 4px 20px rgba(0,0,0,0.05);}
-  .page-header-icon { width:60px; height:60px; border-radius:16px; display:flex; align-items:center; justify-content:center; font-size:1.8rem; color:white; flex-shrink:0;}
-  .page-title { font-size:1.6rem; font-weight:800; margin:0 0 0.2rem;}
-  .page-subtitle { margin:0; font-size:0.95rem;}
-  .alerte-warning { display:flex; align-items:flex-start; gap:1rem; background:#FFF3CD; border:2px solid #FFD93D; border-radius:16px; padding:1.2rem 1.5rem; margin-bottom:1.5rem;}
-  .alerte-warning span { font-size:1.5rem;}
-  .alerte-warning p { margin:0.2rem 0 0.5rem; color:#6B7280; font-size:0.9rem;}
-  .btn-alerte { display:inline-block; background:#FFD93D; color:#374151; font-weight:700; padding:0.4rem 1rem; border-radius:20px; text-decoration:none; font-size:0.85rem;}
-  .statut-cours-card { display:flex; align-items:center; gap:1rem; border-radius:16px; padding:1rem 1.5rem; margin-bottom:1.5rem; border:2px solid;}
-  .badge-ok { margin-left:auto; background:#00C853; color:white; font-size:0.8rem; font-weight:700; padding:0.3rem 0.8rem; border-radius:20px;}
-  .control-panel { background:white; border-radius:20px; padding:2rem; margin-bottom:1.5rem; box-shadow:0 4px 20px rgba(0,0,0,0.08);}
-  .control-title { font-size:1.1rem; font-weight:700; margin-bottom:1.5rem;}
-  .slider-container { margin-bottom:1.5rem;}
-  .slider-label { display:flex; align-items:center; gap:0.5rem; font-weight:600; color:#374151; margin-bottom:0.8rem;}
-  .slider-value { color:white; font-weight:700; padding:0.2rem 0.7rem; border-radius:20px; font-size:1rem; min-width:35px; text-align:center;}
-  .slider-qcm { width:100%; height:8px; border-radius:10px; outline:none; cursor:pointer; -webkit-appearance:none;}
-  .slider-qcm::-webkit-slider-thumb { -webkit-appearance:none; width:24px; height:24px; border-radius:50%; background:#F59E0B; cursor:pointer; box-shadow:0 2px 8px rgba(245,158,11,0.4);}
-  .slider-info { display:flex; justify-content:space-between; font-size:0.78rem; color:#9CA3AF; margin-top:0.4rem;}
-  .btn-primary { width:100%; padding:1rem; border:none; border-radius:16px; font-size:1.1rem; font-weight:700; cursor:pointer; transition:all 0.3s;}
-  .btn-orange { background:linear-gradient(135deg, #F59E0B, #B45309); color:white; box-shadow:0 4px 15px rgba(245,158,11,0.4);}
-  .btn-orange:hover { transform:translateY(-2px); box-shadow:0 8px 25px rgba(245,158,11,0.5);}
-  .btn-orange:disabled { background:#D1D5DB; cursor:not-allowed;}
-  .loading-card { display:flex; align-items:center; gap:1.5rem; border-radius:20px; padding:2rem; margin-bottom:1.5rem; border:2px solid;}
-  .spinner { width:50px; height:50px; border:5px solid; border-radius:50%; animation:spin 1s linear infinite; flex-shrink:0;}
-  @keyframes spin { to { transform:rotate(360deg);}}
-  .actions-bar { display:flex; align-items:center; justify-content:space-between; border-radius:16px; padding:1rem 1.5rem; margin-bottom:1.5rem; flex-wrap:wrap; gap:0.8rem;}
-  .actions-buttons { display:flex; gap:0.6rem; flex-wrap:wrap;}
-  .btn-action { padding:0.5rem 1rem; border-radius:20px; font-weight:600; font-size:0.85rem; cursor:pointer; border:2px solid transparent;}
-  .btn-copy { background:#EDE9FE; color:#7B61FF; border-color:#7B61FF;}
-  .btn-copy:hover { background:#7B61FF; color:white;}
-  .btn-download { background:#D1FAE5; color:#00C853; border-color:#00C853;}
-  .btn-download:hover { background:#00C853; color:white;}
-  .examen-bloc { background:white; border-radius:20px; padding:1.5rem; margin-bottom:1.5rem; box-shadow:0 4px 20px rgba(245,158,11,0.08); border-left:5px solid #F59E0B; white-space:pre-wrap; font-size:0.95rem; line-height:1.7; color:#374151;}
+
+/* ── ANIMATIONS ── */
+@keyframes fadeInUp {
+  from { opacity:0; transform:translateY(30px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+@keyframes floatBook {
+  0%,100% { transform:translateY(0px) rotate(-2deg); }
+  50%      { transform:translateY(-10px) rotate(2deg); }
+}
+@keyframes spin {
+  to { transform:rotate(360deg); }
+}
+@keyframes pulseOrange {
+  0%,100% { box-shadow:0 0 0 0 rgba(245,158,11,0.4); }
+  50%      { box-shadow:0 0 0 12px rgba(245,158,11,0); }
+}
+@keyframes shimmer {
+  0%   { background-position:-200% center; }
+  100% { background-position:200% center; }
+}
+@keyframes slideInLeft {
+  from { opacity:0; transform:translateX(-20px); }
+  to   { opacity:1; transform:translateX(0); }
+}
+
+/* ── CONTAINER ── */
+.ex-container {
+  padding:1.5rem;
+  max-width:900px;
+  margin:0 auto;
+  animation:fadeInUp 0.5s ease;
+}
+
+/* ── HEADER ── */
+.ex-header {
+  position:relative; overflow:hidden;
+  background:linear-gradient(135deg,#F59E0B 0%,#FB923C 50%,#EF4444 100%);
+  border-radius:28px; padding:2rem;
+  margin-bottom:1.5rem;
+  display:flex; align-items:center; gap:1.2rem; flex-wrap:wrap;
+  box-shadow:0 8px 32px rgba(245,158,11,0.35);
+}
+.ex-header-bg-emoji {
+  position:absolute; right:-10px; top:-20px;
+  font-size:9rem; opacity:0.12; pointer-events:none;
+  animation:floatBook 4s ease-in-out infinite;
+}
+.ex-header-icon {
+  width:72px; height:72px;
+  background:rgba(255,255,255,0.2);
+  border-radius:20px;
+  display:flex; align-items:center; justify-content:center;
+  font-size:2.2rem; flex-shrink:0;
+  backdrop-filter:blur(10px);
+  border:2px solid rgba(255,255,255,0.3);
+}
+.ex-header-text { flex:1; }
+.ex-header-title {
+  font-size:1.8rem; font-weight:900;
+  color:white; margin:0;
+  text-shadow:0 2px 10px rgba(0,0,0,0.2);
+}
+.ex-header-sub {
+  color:rgba(255,255,255,0.85);
+  margin:0.3rem 0 0; font-size:0.95rem;
+}
+.ex-header-badge {
+  background:rgba(255,255,255,0.2);
+  color:white; padding:0.5rem 1.2rem;
+  border-radius:50px; font-weight:700; font-size:0.85rem;
+  display:flex; align-items:center; gap:0.5rem;
+  backdrop-filter:blur(10px);
+  border:1px solid rgba(255,255,255,0.3);
+  white-space:nowrap;
+}
+
+/* ── ALERTE ── */
+.ex-alerte {
+  display:flex; align-items:flex-start; gap:1rem;
+  background:linear-gradient(135deg,#FFFBEB,#FEF3C7);
+  border:2px solid #FFD93D; border-radius:20px;
+  padding:1.5rem; margin-bottom:1.5rem;
+  box-shadow:0 4px 20px rgba(255,217,61,0.2);
+}
+.ex-alerte-icon { font-size:2rem; flex-shrink:0; }
+.ex-alerte-body strong { color:#92400E; font-size:1rem; }
+.ex-alerte-body p { color:#6B7280; font-size:0.9rem; margin:0.3rem 0 0.8rem; }
+.ex-btn-alerte {
+  display:inline-flex; align-items:center; gap:0.5rem;
+  background:linear-gradient(135deg,#FFD93D,#F59E0B);
+  color:#374151; font-weight:700;
+  padding:0.5rem 1.2rem; border-radius:50px;
+  text-decoration:none; font-size:0.9rem;
+  box-shadow:0 4px 12px rgba(245,158,11,0.3);
+  transition:transform 0.2s;
+}
+.ex-btn-alerte:hover { transform:translateY(-2px); }
+
+/* ── STATUT COURS ── */
+.ex-statut-card {
+  display:flex; align-items:center; gap:1rem;
+  background:linear-gradient(135deg,#FFFBEB,#FEF3C7);
+  border:2px solid #FDE68A; border-radius:20px;
+  padding:1.2rem 1.5rem; margin-bottom:1.5rem;
+  box-shadow:0 4px 20px rgba(245,158,11,0.1);
+}
+.ex-statut-icon { font-size:2rem; }
+.ex-statut-label {
+  font-size:0.8rem; color:#6B7280;
+  text-transform:uppercase; letter-spacing:1px; display:block;
+}
+.ex-statut-nom {
+  font-weight:800; color:#92400E; font-size:1rem; display:block;
+}
+.ex-badge-ok {
+  margin-left:auto;
+  background:linear-gradient(135deg,#00C853,#7ED321);
+  color:white; font-weight:700;
+  padding:0.4rem 1rem; border-radius:50px;
+  font-size:0.85rem;
+  box-shadow:0 4px 12px rgba(0,200,83,0.3);
+}
+
+/* ── CARD ── */
+.ex-card {
+  background:white; border-radius:24px;
+  padding:1.8rem; margin-bottom:1.5rem;
+  box-shadow:0 4px 24px rgba(0,0,0,0.08);
+  animation:fadeInUp 0.5s ease 0.1s both;
+}
+.ex-card-orange { border-top:5px solid #F59E0B; }
+
+.ex-card-header {
+  display:flex; align-items:center; gap:1rem;
+  margin-bottom:1.5rem;
+}
+.ex-card-icon {
+  width:54px; height:54px; border-radius:16px;
+  display:flex; align-items:center; justify-content:center;
+  font-size:1.6rem; flex-shrink:0;
+  box-shadow:0 4px 16px rgba(0,0,0,0.15);
+}
+.ex-card-title {
+  font-size:1.1rem; font-weight:800; color:#1A1D2E; margin:0;
+}
+.ex-card-sub { font-size:0.85rem; color:#6B7280; margin:0.2rem 0 0; }
+
+/* ── SLIDER ── */
+.ex-slider-wrap { margin-bottom:1.5rem; }
+.ex-slider-top {
+  display:flex; align-items:center;
+  justify-content:space-between; margin-bottom:0.8rem;
+}
+.ex-slider-label { font-weight:700; color:#374151; font-size:0.95rem; }
+.ex-slider-value {
+  background:linear-gradient(135deg,#F59E0B,#FB923C);
+  color:white; padding:0.3rem 1rem;
+  border-radius:50px; font-size:1.1rem;
+  font-weight:800; min-width:50px; text-align:center;
+  box-shadow:0 4px 12px rgba(245,158,11,0.3);
+  animation:pulseOrange 2s infinite;
+}
+.ex-slider {
+  width:100%; height:10px; border-radius:10px;
+  background:linear-gradient(to right,#F59E0B,#FDE68A);
+  outline:none; -webkit-appearance:none; cursor:pointer;
+}
+.ex-slider::-webkit-slider-thumb {
+  -webkit-appearance:none;
+  width:28px; height:28px; border-radius:50%;
+  background:linear-gradient(135deg,#F59E0B,#FB923C);
+  cursor:pointer;
+  box-shadow:0 4px 12px rgba(245,158,11,0.5);
+  border:3px solid white;
+}
+.ex-slider-marks {
+  display:flex; justify-content:space-between;
+  font-size:0.75rem; color:#9CA3AF; margin-top:0.5rem;
+}
+
+/* ── NIVEAU ── */
+.ex-niveau-wrap { margin-bottom:1.5rem; }
+.ex-niveau-grid {
+  display:flex; gap:0.8rem; margin-top:0.8rem; flex-wrap:wrap;
+}
+.ex-btn-niveau {
+  flex:1; min-width:100px;
+  display:flex; align-items:center; justify-content:center; gap:0.5rem;
+  padding:0.7rem 1rem;
+  background:#F9FAFB; border:2px solid #E5E7EB;
+  border-radius:50px; font-weight:700; font-size:0.9rem;
+  cursor:pointer; transition:all 0.2s;
+}
+.ex-btn-niveau:hover {
+  background:#FEF3C7; border-color:#F59E0B;
+  transform:translateY(-2px);
+}
+.ex-btn-niveau.ex-niveau-actif {
+  background:linear-gradient(135deg,#F59E0B,#FB923C) !important;
+  color:white !important; border-color:transparent !important;
+  box-shadow:0 4px 12px rgba(245,158,11,0.4);
+}
+
+/* ── BTN GÉNÉRER ── */
+.ex-btn-generer {
+  width:100%;
+  display:flex; align-items:center; justify-content:center; gap:1rem;
+  padding:1.1rem;
+  background:linear-gradient(135deg,#F59E0B,#B45309);
+  color:white; border:none; border-radius:50px;
+  font-weight:800; font-size:1.05rem; cursor:pointer;
+  box-shadow:0 6px 20px rgba(245,158,11,0.4);
+  transition:all 0.3s; position:relative; overflow:hidden;
+}
+.ex-btn-generer::before {
+  content:'';
+  position:absolute; top:0; left:-100%;
+  width:100%; height:100%;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,0.2),transparent);
+  transition:left 0.5s;
+}
+.ex-btn-generer:hover::before { left:100%; }
+.ex-btn-generer:hover {
+  transform:translateY(-3px);
+  box-shadow:0 10px 28px rgba(245,158,11,0.5);
+}
+.ex-btn-generer:disabled {
+  background:linear-gradient(135deg,#D1D5DB,#9CA3AF);
+  box-shadow:none; cursor:not-allowed; transform:none;
+}
+.ex-btn-circle {
+  width:36px; height:36px;
+  background:rgba(255,255,255,0.25);
+  border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  font-size:1.1rem; flex-shrink:0;
+}
+
+/* ── LOADING ── */
+.ex-loading {
+  display:flex; align-items:center; gap:1.5rem;
+  background:linear-gradient(135deg,#FFFBEB,#FEF3C7);
+  border:2px solid #FDE68A; border-radius:20px;
+  padding:2rem; margin-bottom:1.5rem;
+}
+.ex-spinner {
+  width:52px; height:52px;
+  border:5px solid #FDE68A;
+  border-top-color:#F59E0B;
+  border-radius:50%;
+  animation:spin 0.8s linear infinite;
+  flex-shrink:0;
+}
+.ex-loading-title {
+  font-weight:800; color:#92400E; font-size:1rem; margin:0;
+}
+.ex-loading-sub { color:#6B7280; font-size:0.85rem; margin:0.3rem 0 0; }
+
+/* ── ACTIONS BAR ── */
+.ex-actions-bar {
+  display:flex; align-items:center; justify-content:space-between;
+  background:linear-gradient(135deg,#FFFBEB,#FEF3C7);
+  border:2px solid #FDE68A; border-radius:20px;
+  padding:1.2rem 1.5rem; margin-bottom:1.5rem;
+  flex-wrap:wrap; gap:1rem;
+  animation:fadeInUp 0.4s ease;
+}
+.ex-actions-left {
+  display:flex; align-items:center; gap:0.8rem;
+}
+.ex-actions-icon {
+  width:40px; height:40px;
+  background:linear-gradient(135deg,#00C853,#7ED321);
+  border-radius:12px;
+  display:flex; align-items:center; justify-content:center;
+  font-size:1.2rem;
+  box-shadow:0 4px 12px rgba(0,200,83,0.3);
+}
+.ex-actions-label { font-weight:800; color:#92400E; font-size:1rem; }
+.ex-actions-btns { display:flex; gap:0.6rem; flex-wrap:wrap; }
+.ex-btn-action {
+  display:flex; align-items:center; gap:0.4rem;
+  padding:0.55rem 1.1rem; border-radius:50px;
+  font-weight:700; font-size:0.85rem;
+  cursor:pointer; border:2px solid transparent;
+  transition:all 0.2s;
+}
+.ex-btn-copy {
+  background:#EDE9FE; color:#7B61FF; border-color:#C4B5FD;
+}
+.ex-btn-copy:hover { background:#7B61FF; color:white; transform:translateY(-2px); }
+.ex-btn-download {
+  background:#DCFCE7; color:#00C853; border-color:#86EFAC;
+}
+.ex-btn-download:hover { background:#00C853; color:white; transform:translateY(-2px); }
+.ex-btn-regen {
+  background:#FFFBEB; color:#F59E0B; border-color:#FDE68A;
+}
+.ex-btn-regen:hover { background:#F59E0B; color:white; transform:translateY(-2px); }
+
+/* ── EXERCICE BLOC ── */
+.ex-bloc {
+  background:white; border-radius:20px;
+  padding:1.8rem; margin-bottom:1.2rem;
+  box-shadow:0 4px 20px rgba(245,158,11,0.1);
+  border-left:5px solid #F59E0B;
+  white-space:pre-wrap; font-size:0.95rem;
+  line-height:1.8; color:#374151;
+  animation:slideInLeft 0.4s ease both;
+  transition:all 0.3s;
+}
+.ex-bloc:hover {
+  transform:translateX(6px);
+  box-shadow:0 8px 28px rgba(245,158,11,0.2);
+}
+
+/* ══════════════════════════════════ */
+/* MODE SOMBRE */
+/* ══════════════════════════════════ */
+[data-theme="dark"] .ex-card { background:#1E2235; }
+[data-theme="dark"] .ex-card-title { color:#F1F5F9; }
+[data-theme="dark"] .ex-card-sub { color:#94A3B8; }
+[data-theme="dark"] .ex-slider-label { color:#E2E8F0; }
+[data-theme="dark"] .ex-slider-marks span { color:#64748B; }
+[data-theme="dark"] .ex-btn-niveau {
+  background:#252A40; border-color:#374151; color:#D1D5DB;
+}
+[data-theme="dark"] .ex-bloc {
+  background:#1E2235; color:#CBD5E1; border-left-color:#F59E0B;
+}
+[data-theme="dark"] .ex-loading {
+  background:linear-gradient(135deg,#27200A,#1C1810);
+  border-color:#92400E;
+}
+[data-theme="dark"] .ex-statut-card {
+  background:linear-gradient(135deg,#27200A,#1C1810);
+  border-color:#92400E;
+}
+[data-theme="dark"] .ex-actions-bar {
+  background:linear-gradient(135deg,#27200A,#1C1810);
+  border-color:#92400E;
+}
+[data-theme="dark"] .ex-actions-label { color:#FDE68A; }
+
+/* ══════════════════════════════════ */
+/* RESPONSIVE */
+/* ══════════════════════════════════ */
+@media (max-width:640px) {
+  .ex-container { padding:1rem; }
+  .ex-header { padding:1.2rem; }
+  .ex-header-title { font-size:1.4rem; }
+  .ex-header-badge { display:none; }
+  .ex-card { padding:1.2rem; }
+  .ex-niveau-grid { flex-direction:column; }
+  .ex-btn-niveau { min-width:unset; }
+  .ex-actions-bar { flex-direction:column; align-items:flex-start; }
+  .ex-actions-btns { width:100%; }
+  .ex-btn-action { flex:1; justify-content:center; }
+}
 </style>
 
 <script>
 let brut = '';
+let niveauActuel = 'moyen';
+
 document.addEventListener('DOMContentLoaded', verifierCours);
 
+/* ── TOAST ── */
+function toast(msg, type = 'info') {
+  const colors = {
+    succes : 'linear-gradient(135deg,#00C853,#7ED321)',
+    erreur : 'linear-gradient(135deg,#EF4444,#DC2626)',
+    info   : 'linear-gradient(135deg,#2962FF,#7B61FF)',
+    warning: 'linear-gradient(135deg,#F59E0B,#FFD93D)',
+  };
+  const t = document.getElementById('toast');
+  t.innerHTML = msg;
+  t.style.background = colors[type] || colors.info;
+  t.style.transform = 'translateX(0)';
+  setTimeout(() => { t.style.transform = 'translateX(120%)'; }, 3200);
+}
+
+/* ── VÉRIFIER COURS ── */
 function verifierCours() {
-  fetch('/api/statut-cours').then(r=>r.json()).then(d=>{
+  fetch('/api/statut-cours').then(r => r.json()).then(d => {
     if (d.cours_charge) {
       document.getElementById('nom-cours-affiche').textContent = d.nom_cours;
       document.getElementById('statut-cours').style.display = 'flex';
@@ -125,64 +530,104 @@ function verifierCours() {
       document.getElementById('btn-generer').disabled = false;
     } else {
       document.getElementById('alerte-cours').style.display = 'flex';
+      document.getElementById('statut-cours').style.display = 'none';
       document.getElementById('btn-generer').disabled = true;
     }
+  }).catch(() => {
+    document.getElementById('alerte-cours').style.display = 'flex';
+    document.getElementById('btn-generer').disabled = true;
   });
 }
 
-function majSlider(v) { document.getElementById('valeur-slider').textContent = v; }
+/* ── SLIDER ── */
+function majSlider(v) {
+  document.getElementById('valeur-slider').textContent = v;
+}
 
+/* ── NIVEAU ── */
+function choisirNiveau(niveau, el) {
+  document.querySelectorAll('.ex-btn-niveau')
+    .forEach(b => b.classList.remove('ex-niveau-actif'));
+  el.classList.add('ex-niveau-actif');
+  niveauActuel = niveau;
+  const labels = {
+    facile   : '🟢 Niveau Facile sélectionné',
+    moyen    : '🟡 Niveau Moyen sélectionné',
+    difficile: '🔴 Niveau Difficile sélectionné'
+  };
+  toast(labels[niveau], 'info');
+}
+
+/* ── GÉNÉRER ── */
 function generer() {
-  const nb = document.getElementById('slider-nb').value;
-  const niv = document.getElementById('niveau').value;
+  const nb  = document.getElementById('slider-nb').value;
+  const btn = document.getElementById('btn-generer');
+
   document.getElementById('zone-resultat').style.display = 'none';
   document.getElementById('loading').style.display = 'flex';
-  document.getElementById('btn-generer').disabled = true;
+  btn.disabled = true;
+  btn.innerHTML = '<span class="ex-btn-circle">⏳</span><span>Génération en cours...</span>';
 
   fetch('/api/examen', {
-    method:'POST', headers:{'Content-Type':'application/json'},
-    body: JSON.stringify({nombre: parseInt(nb), niveau: niv})
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ nombre: parseInt(nb), niveau: niveauActuel })
   })
-  .then(r=>r.json())
-  .then(d=>{
+  .then(r => r.json())
+  .then(d => {
     document.getElementById('loading').style.display = 'none';
-    document.getElementById('btn-generer').disabled = false;
+    btn.disabled = false;
+    btn.innerHTML = '<span class="ex-btn-circle">📚</span><span>Générer les Exercices</span>';
+
     if (d.succes) {
       brut = d.texte;
       document.getElementById('brut').value = brut;
+
       const c = document.getElementById('display');
       c.innerHTML = '';
       const div = document.createElement('div');
-      div.className = 'examen-bloc';
+      div.className = 'ex-bloc';
       div.textContent = d.texte;
       c.appendChild(div);
+
       document.getElementById('zone-resultat').style.display = 'block';
-      document.getElementById('zone-resultat').scrollIntoView({behavior:'smooth'});
+      document.getElementById('zone-resultat')
+        .scrollIntoView({ behavior: 'smooth' });
+      toast('✅ ' + nb + ' exercice(s) générés !', 'succes');
     } else {
-      alert('❌ ' + (d.erreur || 'Erreur'));
+      toast('❌ ' + (d.erreur || 'Erreur génération'), 'erreur');
     }
   })
-  .catch(e=>{
+  .catch(e => {
     document.getElementById('loading').style.display = 'none';
-    document.getElementById('btn-generer').disabled = false;
-    alert('❌ ' + e.message);
+    btn.disabled = false;
+    btn.innerHTML = '<span class="ex-btn-circle">📚</span><span>Générer les Exercices</span>';
+    toast('❌ Erreur réseau : ' + e.message, 'erreur');
   });
 }
 
+/* ── COPIER ── */
 function copier() {
-  navigator.clipboard.writeText(document.getElementById('brut').value).then(()=>{
-    const b = document.querySelector('.btn-copy'); const o = b.textContent;
-    b.textContent = '✅ Copié !'; b.style.background='#00C853'; b.style.color='white';
-    setTimeout(()=>{ b.textContent=o; b.style.background='#EDE9FE'; b.style.color='#7B61FF';}, 2000);
-  });
+  navigator.clipboard.writeText(
+    document.getElementById('brut').value
+  ).then(() => {
+    toast('📋 Copié dans le presse-papier !', 'succes');
+  }).catch(() => toast('❌ Erreur copie', 'erreur'));
 }
 
+/* ── TÉLÉCHARGER ── */
 function telecharger() {
-  const blob = new Blob([document.getElementById('brut').value], {type:'text/plain;charset=utf-8'});
+  const blob = new Blob(
+    [document.getElementById('brut').value],
+    { type: 'text/plain;charset=utf-8' }
+  );
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = 'Examen_NOKIROVA_' + new Date().toLocaleDateString('fr-FR').replace(/\//g,'-') + '.txt';
+  a.download = 'Examen_NOKIROVA_' +
+    new Date().toLocaleDateString('fr-FR').replace(/\//g, '-') + '.txt';
   a.click();
+  toast('💾 Fichier téléchargé !', 'succes');
 }
 </script>
+
 {% endblock %}

@@ -1,4 +1,4 @@
-# web/app.py - NOKIROVA WEB 🌸 PHASE 4 COMPLÈTE (D4 Tuteur IA)
+# web/app.py - NOKIROVA WEB 🌸 VERSION FINALE CORRIGÉE
 from flask import Flask, render_template, request, jsonify, send_from_directory, url_for
 import sys
 import os
@@ -30,7 +30,6 @@ app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
 # ═══════════════════════════════════════════
 @app.before_request
 def detecter_utilisateur():
-    """Détecte le user_id à chaque requête via header ou cookie"""
     from db.base import set_user
     user_id = request.headers.get('X-User-Id')
     if not user_id:
@@ -45,11 +44,10 @@ session_data = {
 }
 
 # ═══════════════════════════════════════════
-# 🎨 PRÉFÉRENCES AUTO (injecté dans toutes les pages)
+# 🎨 PRÉFÉRENCES AUTO
 # ═══════════════════════════════════════════
 @app.context_processor
 def inject_preferences():
-    """Charge les préférences DB et les injecte automatiquement dans CHAQUE template"""
     try:
         from db.preferences import charger_preference
         return {
@@ -68,7 +66,7 @@ def get_stats_safe():
     try:
         return db.get_stats()
     except Exception:
-        return {"niveau": 1, "xp": 0, "streak_jours": 0, "cours_importes": 0}
+        return {"niveau": 1, "xp": 0, "streak": 0, "cours_importes": 0, "questions_posees": 0, "qcm_reussis": 0, "audios_crees": 0}
 
 def saluer():
     h = datetime.now().hour
@@ -310,6 +308,30 @@ def page_profil_v2():
                            stats=stats, profil=profil,
                            titre_niveau=titre_niveau,
                            nom_cours=session_data.get('nom_cours'))
+
+@app.route('/login')
+def page_login():
+    return render_template('login.html', page_active='login')
+
+@app.route('/register')
+def page_register():
+    return render_template('register.html', page_active='register')
+
+@app.route('/landing')
+def page_landing():
+    return render_template('landing.html')
+
+@app.route('/dashboard')
+def page_dashboard():
+    return render_template('dashboard.html', page_active='dashboard', nom_cours=session_data.get('nom_cours'))
+
+@app.route('/leaderboard')
+def page_leaderboard():
+    return render_template('leaderboard.html', page_active='leaderboard', nom_cours=session_data.get('nom_cours'))
+
+@app.route('/taches')
+def page_taches():
+    return render_template('taches.html', page_active='taches', nom_cours=session_data.get('nom_cours'))
 
 # ═══════════════════════════════════════════
 # 🔌 APIs DE BASE
@@ -1203,131 +1225,8 @@ def api_medias_supprimer():
         return jsonify({"succes": False, "erreur": str(e)})
 
 # ═══════════════════════════════════════════
-# 👤 PROFIL (API)
+# 🔐 AUTHENTIFICATION
 # ═══════════════════════════════════════════
-
-@app.route('/api/profil/info')
-def api_profil_info():
-    try:
-        stats = get_stats_safe()
-        try:
-            import profil_manager as pm
-            profil = pm.charger_profil()
-            try:
-                photo_path = pm.get_photo_path()
-                if photo_path and os.path.exists(photo_path):
-                    profil['photo_url'] = '/profil_photo'
-            except Exception:
-                pass
-        except Exception:
-            profil = {}
-        try:
-            from db.pomodoro import get_stats_pomodoro
-            pomo = get_stats_pomodoro()
-        except Exception:
-            pomo = {}
-        try:
-            badges_raw = db.lister_badges()
-            badges = [{"nom":b[0],"desc":b[1],"emoji":b[2],"date":b[3]} for b in badges_raw]
-        except Exception:
-            badges = []
-        return jsonify({"succes": True, "profil": profil, "stats": stats,
-                        "pomodoro": pomo, "badges": badges})
-    except Exception as e:
-        return jsonify({"succes": False, "erreur": str(e)})
-
-@app.route('/api/profil/save', methods=['POST'])
-def api_profil_save():
-    try:
-        d = request.get_json()
-        try:
-            import profil_manager as pm
-            profil = pm.charger_profil()
-            for k in ['nom_complet','email','numero','universite','annee_etude','date_naissance','bio']:
-                profil[k] = d.get(k, '')
-            if pm.sauvegarder_profil(profil):
-                return jsonify({"succes": True})
-        except Exception as e:
-            return jsonify({"succes": False, "erreur": str(e)})
-        return jsonify({"succes": False, "erreur": "profil_manager indisponible"})
-    except Exception as e:
-        return jsonify({"succes": False, "erreur": str(e)})
-
-@app.route('/profil_photo')
-def profil_photo():
-    try:
-        import profil_manager as pm
-        chemin = pm.get_photo_path()
-        if chemin and os.path.exists(chemin):
-            from flask import send_file
-            return send_file(chemin)
-    except Exception:
-        pass
-    return '', 404
-
-# ═══════════════════════════════════════════
-# 🧠 TUTEUR IA PERSONNALISÉ - PHASE D4
-# ═══════════════════════════════════════════
-
-@app.route('/api/tuteur/dashboard')
-def api_tuteur_dashboard():
-    try:
-        from db.tuteur_ia import get_tuteur_dashboard
-        data = get_tuteur_dashboard()
-        return jsonify({"succes": True, "data": data})
-    except Exception as e:
-        return jsonify({"succes": False, "erreur": str(e)})
-
-@app.route('/api/tuteur/conseil')
-def api_tuteur_conseil():
-    try:
-        from db.tuteur_ia import generer_conseil_motivant
-        conseil = generer_conseil_motivant()
-        return jsonify({"succes": True, "conseil": conseil})
-    except Exception as e:
-        return jsonify({"succes": False, "erreur": str(e)})
-
-@app.route('/api/tuteur/recommandations')
-def api_tuteur_recommandations():
-    try:
-        from db.tuteur_ia import get_recommandations_jour
-        recos = get_recommandations_jour()
-        return jsonify({"succes": True, "recommandations": recos})
-    except Exception as e:
-        return jsonify({"succes": False, "erreur": str(e)})
-
-@app.route('/api/tuteur/points-faibles')
-def api_tuteur_points_faibles():
-    try:
-        from db.tuteur_ia import get_points_faibles
-        faibles = get_points_faibles()
-        return jsonify({"succes": True, "points_faibles": faibles})
-    except Exception as e:
-        return jsonify({"succes": False, "erreur": str(e)})
-
-# ═══════════════════════════════════════════
-# 🖼️ LOGO
-# ═══════════════════════════════════════════
-
-@app.route('/logo')
-def logo():
-    dossier = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'frontend')
-    return send_from_directory(dossier, 'icon-512.png')
-
-
-# ═══════════════════════════════════════════
-# 🔐 AUTHENTIFICATION - PHASE A
-# ═══════════════════════════════════════════
-
-@app.route('/login')
-def page_login():
-    return render_template('login.html', page_active='login')
-
-
-@app.route('/register')
-def page_register():
-    return render_template('register.html', page_active='register')
-
 
 @app.route('/api/login', methods=['POST'])
 def api_login():
@@ -1335,13 +1234,10 @@ def api_login():
         data = request.get_json()
         email = data.get('email', '').strip()
         password = data.get('password', '')
-
         if not email or not password:
             return jsonify({"succes": False, "erreur": "Email et mot de passe requis"})
-
         from db.base import verifier_utilisateur
         result = verifier_utilisateur(email, password)
-
         if result["succes"]:
             response = jsonify({
                 "succes": True,
@@ -1357,7 +1253,6 @@ def api_login():
     except Exception as e:
         return jsonify({"succes": False, "erreur": str(e)})
 
-
 @app.route('/api/register', methods=['POST'])
 def api_register():
     try:
@@ -1366,16 +1261,12 @@ def api_register():
         prenom = data.get('prenom', '').strip()
         nom = data.get('nom', '').strip()
         password = data.get('password', '')
-
         if not email or not password:
             return jsonify({"succes": False, "erreur": "Email et mot de passe requis"})
-
         if len(password) < 6:
             return jsonify({"succes": False, "erreur": "Mot de passe trop court (min 6 caractères)"})
-
         from db.base import creer_utilisateur
         result = creer_utilisateur(email, password, nom, prenom)
-
         if result["succes"]:
             return jsonify({"succes": True, "user_id": result["user_id"], "email": result["email"]})
         else:
@@ -1383,13 +1274,11 @@ def api_register():
     except Exception as e:
         return jsonify({"succes": False, "erreur": str(e)})
 
-
 @app.route('/api/logout', methods=['POST'])
 def api_logout():
     response = jsonify({"succes": True})
     response.set_cookie('nokirova_user_id', '', expires=0, path='/')
     return response
-
 
 @app.route('/api/check-auth')
 def api_check_auth():
@@ -1399,17 +1288,125 @@ def api_check_auth():
         return jsonify({"succes": True, "logged_in": True, "user": user_info})
     return jsonify({"succes": True, "logged_in": False})
 
+# ═══════════════════════════════════════════
+# 👤 PROFIL API (CORRIGÉE)
+# ═══════════════════════════════════════════
 
-@app.route('/landing')
-def page_landing():
-    return render_template('landing.html')
+@app.route('/api/profil/info')
+def api_profil_info_corrige():
+    try:
+        stats = get_stats_safe()
+        user_info = {}
+        user_id = request.cookies.get('nokirova_user_id')
+        if user_id:
+            from db.base import get_user_info
+            user_info = get_user_info(int(user_id)) or {}
+        profil = {
+            "nom_complet": f"{user_info.get('prenom', '')} {user_info.get('nom', '')}".strip() or 'Étudiant NOKIROVA',
+            "email": user_info.get('email', ''),
+            "numero": "",
+            "universite": "",
+            "annee_etude": "",
+            "date_naissance": "",
+            "bio": "",
+            "photo_url": ""
+        }
+        try:
+            import json
+            profil_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'profil.json')
+            if os.path.exists(profil_path):
+                with open(profil_path, 'r', encoding='utf-8') as f:
+                    saved_profil = json.load(f)
+                    profil.update(saved_profil)
+        except Exception:
+            pass
+        try:
+            from db.pomodoro import get_stats_pomodoro
+            pomo = get_stats_pomodoro()
+        except Exception:
+            pomo = {}
+        try:
+            badges_raw = db.lister_badges()
+            badges = [{"nom": b[0], "desc": b[1], "emoji": b[2], "date": b[3]} for b in badges_raw]
+        except Exception:
+            badges = []
+        return jsonify({"succes": True, "profil": profil, "stats": stats, "pomodoro": pomo, "badges": badges})
+    except Exception as e:
+        return jsonify({"succes": False, "erreur": str(e)})
+
+@app.route('/api/profil/save', methods=['POST'])
+def api_profil_save_corrige():
+    try:
+        data = request.get_json()
+        import json
+        profil_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'profil.json')
+        profil_data = {}
+        if os.path.exists(profil_path):
+            with open(profil_path, 'r', encoding='utf-8') as f:
+                try:
+                    profil_data = json.load(f)
+                except:
+                    profil_data = {}
+        for key in ['nom_complet', 'email', 'numero', 'universite', 'annee_etude', 'date_naissance', 'bio']:
+            if key in data:
+                profil_data[key] = data[key]
+        with open(profil_path, 'w', encoding='utf-8') as f:
+            json.dump(profil_data, f, ensure_ascii=False, indent=2)
+        user_id = request.cookies.get('nokirova_user_id')
+        if user_id and data.get('nom_complet'):
+            parts = data['nom_complet'].strip().split(' ', 1)
+            prenom = parts[0]
+            nom = parts[1] if len(parts) > 1 else ''
+            from db.base import get_connexion
+            conn = get_connexion()
+            cur = conn.cursor()
+            cur.execute("UPDATE users SET prenom = ?, nom = ?, email = ? WHERE id = ?",
+                       (prenom, nom, data.get('email', ''), int(user_id)))
+            conn.commit()
+            conn.close()
+        return jsonify({"succes": True, "message": "Profil sauvegardé"})
+    except Exception as e:
+        return jsonify({"succes": False, "erreur": str(e)})
 
 # ═══════════════════════════════════════════
-# ✅ TO-DO LIST API - PHASE G
+# 📊 DASHBOARD STATS API
+# ═══════════════════════════════════════════
+
+@app.route('/api/dashboard/stats')
+def api_dashboard_stats():
+    try:
+        stats = get_stats_safe()
+        from db.flashcards import compter_flashcards
+        flashcards = compter_flashcards() if hasattr(db, 'flashcards') else 0
+        from db.pomodoro import get_stats_pomodoro
+        pomo = get_stats_pomodoro()
+        return jsonify({
+            "succes": True,
+            "pomodoro": pomo.get('total_sessions', 0),
+            "flashcards": flashcards,
+            "streak": stats.get('streak', 0)
+        })
+    except Exception as e:
+        return jsonify({"succes": False, "erreur": str(e), "pomodoro": 0, "flashcards": 0, "streak": 0})
+
+@app.route('/api/share/stats')
+def api_share_stats():
+    try:
+        from db.base import get_connexion
+        conn = get_connexion()
+        cur = conn.cursor()
+        cur.execute("SELECT COUNT(*) FROM users")
+        total_users = cur.fetchone()[0]
+        conn.close()
+        return jsonify({"succes": True, "total_users": total_users})
+    except Exception as e:
+        return jsonify({"succes": False, "erreur": str(e), "total_users": 1})
+
+# ═══════════════════════════════════════════
+# ✅ TODO LIST API
 # ═══════════════════════════════════════════
 
 def init_todo_table():
-    """Crée la table des tâches si elle n'existe pas"""
     conn = db.get_connexion()
     cur = conn.cursor()
     cur.execute("""
@@ -1417,8 +1414,7 @@ def init_todo_table():
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             texte TEXT NOT NULL,
             terminee INTEGER DEFAULT 0,
-            date_creation TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            user_id TEXT
+            date_creation TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     """)
     conn.commit()
@@ -1480,287 +1476,56 @@ def api_todo_supprimer(id_t):
         return jsonify({"succes": False, "erreur": str(e)})
 
 # ═══════════════════════════════════════════
-# 📊 DASHBOARD STATS API
+# 📄 EXPORT PDF
 # ═══════════════════════════════════════════
 
-@app.route('/api/dashboard/stats')
-def api_dashboard_stats():
+@app.route('/api/export-pdf-qcm', methods=['POST'])
+def api_export_pdf_qcm():
     try:
-        stats = get_stats_safe()
-        # Récupérer nombre flashcards
-        from db.flashcards import compter_flashcards
-        flashcards = compter_flashcards() if hasattr(db, 'flashcards') else 0
-        return jsonify({
-            "succes": True,
-            "pomodoro": stats.get('sessions_pomodoro', 0),
-            "flashcards": flashcards,
-            "streak": stats.get('streak', 0)
-        })
+        data = request.get_json()
+        qcm_texte = data.get('qcm_texte', '')
+        titre = data.get('titre', 'QCM NOKIROVA')
+        if not qcm_texte:
+            return jsonify({"succes": False, "erreur": "Aucun QCM à exporter"})
+        from export_pdf import exporter_en_pdf
+        import uuid
+        nom_cours = session_data.get('nom_cours', 'QCM')
+        matiere = session_data.get('matiere_detectee', '📚 Général')
+        user = request.cookies.get('nokirova_user_id')
+        from db.base import get_user_info
+        etudiant = "Étudiant NOKIROVA"
+        if user:
+            user_info = get_user_info(int(user))
+            if user_info:
+                etudiant = f"{user_info.get('prenom', '')} {user_info.get('nom', '')}".strip() or etudiant
+        contenu_formate = f"**{titre}**\n\n{qcm_texte}\n\n---\n📅 Généré par NOKIROVA"
+        nom_fichier = f"qcm_{datetime.now().strftime('%Y%m%d_%H%M%S')}_{uuid.uuid4().hex[:6]}.pdf"
+        resultat = exporter_en_pdf(
+            contenu=contenu_formate,
+            titre=titre,
+            nom_fichier=nom_fichier,
+            nom_cours=nom_cours,
+            matiere=matiere,
+            etudiant=etudiant
+        )
+        if "Erreur" in resultat:
+            return jsonify({"succes": False, "erreur": resultat})
+        return jsonify({"succes": True, "url": f"/download-pdf/{nom_fichier}", "message": "QCM exporté en PDF"})
     except Exception as e:
-        return jsonify({"succes": False, "erreur": str(e), "pomodoro": 0, "flashcards": 0, "streak": 0})
+        return jsonify({"succes": False, "erreur": str(e)})
 
-    @app.route('/api/share/stats')
-    def api_share_stats():
-        try:
-            from db.base import get_connexion
-            conn = get_connexion()
-            cur = conn.cursor()
-            cur.execute("SELECT COUNT(*) FROM users")
-            total_users = cur.fetchone()[0]
-            conn.close()
-            return jsonify({"succes": True, "total_users": total_users})
-        except Exception as e:
-            return jsonify({"succes": False, "erreur": str(e), "total_users": 1})
-
-        # ═══════════════════════════════════════════
-        # 👤 PROFIL COMPLET (API) - VERSION CORRIGÉE
-        # ═══════════════════════════════════════════
-
-        @app.route('/api/profil/info')
-        def api_profil_info():
-            try:
-                stats = get_stats_safe()
-                user_info = {}
-
-                user_id = request.cookies.get('nokirova_user_id')
-
-                if user_id:
-                    from db.base import get_user_info
-                    user_info = get_user_info(int(user_id)) or {}
-
-                profil = {
-                    "nom_complet": user_info.get('prenom', '') + ' ' + user_info.get('nom', '') if user_info.get(
-                        'prenom') else 'Étudiant NOKIROVA',
-                    "email": user_info.get('email', ''),
-                    "numero": "",
-                    "universite": "",
-                    "annee_etude": "",
-                    "date_naissance": "",
-                    "bio": "",
-                    "photo_url": ""
-                }
-
-                try:
-                    import json
-                    profil_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
-                                               'profil.json')
-                    if os.path.exists(profil_path):
-                        with open(profil_path, 'r', encoding='utf-8') as f:
-                            saved_profil = json.load(f)
-                            profil.update(saved_profil)
-                except Exception:
-                    pass
-
-                try:
-                    from db.pomodoro import get_stats_pomodoro
-                    pomo = get_stats_pomodoro()
-                except Exception:
-                    pomo = {}
-
-                try:
-                    badges_raw = db.lister_badges()
-                    badges = [{"nom": b[0], "desc": b[1], "emoji": b[2], "date": b[3]} for b in badges_raw]
-                except Exception:
-                    badges = []
-
-                return jsonify({
-                    "succes": True,
-                    "profil": profil,
-                    "stats": stats,
-                    "pomodoro": pomo,
-                    "badges": badges
-                })
-            except Exception as e:
-                return jsonify({"succes": False, "erreur": str(e)})
-
-        @app.route('/api/profil/save', methods=['POST'])
-        def api_profil_save():
-            try:
-                data = request.get_json()
-
-                import json
-                profil_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'profil.json')
-
-                profil_data = {}
-                if os.path.exists(profil_path):
-                    with open(profil_path, 'r', encoding='utf-8') as f:
-                        try:
-                            profil_data = json.load(f)
-                        except:
-                            profil_data = {}
-
-                for key in ['nom_complet', 'email', 'numero', 'universite', 'annee_etude', 'date_naissance', 'bio']:
-                    if key in data:
-                        profil_data[key] = data[key]
-
-                with open(profil_path, 'w', encoding='utf-8') as f:
-                    json.dump(profil_data, f, ensure_ascii=False, indent=2)
-
-                user_id = request.cookies.get('nokirova_user_id')
-                if user_id and data.get('nom_complet'):
-                    parts = data['nom_complet'].strip().split(' ', 1)
-                    prenom = parts[0]
-                    nom = parts[1] if len(parts) > 1 else ''
-
-                    from db.base import get_connexion
-                    conn = get_connexion()
-                    cur = conn.cursor()
-                    cur.execute("UPDATE users SET prenom = ?, nom = ?, email = ? WHERE id = ?",
-                                (prenom, nom, data.get('email', ''), int(user_id)))
-                    conn.commit()
-                    conn.close()
-
-                return jsonify({"succes": True, "message": "Profil sauvegardé"})
-
-            except Exception as e:
-                return jsonify({"succes": False, "erreur": str(e)})
-
-            # ═══════════════════════════════════════════
-            # 📄 EXPORT PDF PROFESSIONNEL
-            # ═══════════════════════════════════════════
-
-            @app.route('/api/export-pdf', methods=['POST'])
-            def api_export_pdf():
-                try:
-                    data = request.get_json()
-                    contenu = data.get('contenu', '')
-                    titre = data.get('titre', 'Document NOKIROVA')
-                    type_doc = data.get('type', 'document')  # exercice, resume, explication, qcm, examen
-
-                    if not contenu:
-                        return jsonify({"succes": False, "erreur": "Aucun contenu à exporter"})
-
-                    from export_pdf import exporter_en_pdf
-                    import uuid
-
-                    # Récupérer les infos du cours et utilisateur
-                    nom_cours = session_data.get('nom_cours', 'Sans titre')
-                    matiere = session_data.get('matiere_detectee', '📚 Général')
-
-                    user = request.cookies.get('nokirova_user_id')
-                    from db.base import get_user_info
-                    etudiant = "Étudiant NOKIROVA"
-                    if user:
-                        user_info = get_user_info(int(user))
-                        if user_info:
-                            etudiant = f"{user_info.get('prenom', '')} {user_info.get('nom', '')}".strip() or etudiant
-
-                    # Générer un nom de fichier unique
-                    nom_fichier = f"{type_doc}_{datetime.now().strftime('%Y%m%d_%H%M%S')}_{uuid.uuid4().hex[:6]}.pdf"
-
-                    resultat = exporter_en_pdf(
-                        contenu=contenu,
-                        titre=titre,
-                        nom_fichier=nom_fichier,
-                        nom_cours=nom_cours,
-                        matiere=matiere,
-                        etudiant=etudiant
-                    )
-
-                    if "Erreur" in resultat:
-                        return jsonify({"succes": False, "erreur": resultat})
-
-                    # Retourner les URLs des PDFs générés
-                    import os
-                    outputs_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'outputs')
-
-                    if "2 PDFs" in resultat:
-                        # Deux fichiers ont été générés (exercices + correction)
-                        base_name = nom_fichier.replace('.pdf', '')
-                        url_exos = f"/download-pdf/{base_name}_EXERCICES.pdf"
-                        url_corr = f"/download-pdf/{base_name}_CORRECTION.pdf"
-                        return jsonify({
-                            "succes": True,
-                            "pdfs": [
-                                {"nom": f"{titre} - Exercices", "url": url_exos},
-                                {"nom": f"{titre} - Corrigé", "url": url_corr}
-                            ],
-                            "message": "2 PDFs générés : exercices et corrigé"
-                        })
-                    else:
-                        # Un seul fichier
-                        url_pdf = f"/download-pdf/{nom_fichier}"
-                        return jsonify({
-                            "succes": True,
-                            "pdfs": [{"nom": titre, "url": url_pdf}],
-                            "message": "PDF généré avec succès"
-                        })
-
-                except Exception as e:
-                    return jsonify({"succes": False, "erreur": str(e)})
-
-            @app.route('/download-pdf/<nom_fichier>')
-            def download_pdf(nom_fichier):
-                """Télécharger un PDF généré"""
-                import os
-                from flask import send_file
-                dossier = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'outputs')
-                chemin = os.path.join(dossier, nom_fichier)
-                if os.path.exists(chemin):
-                    return send_file(chemin, as_attachment=True, download_name=nom_fichier)
-                return "Fichier non trouvé", 404
-
-            @app.route('/api/export-pdf-qcm', methods=['POST'])
-            def api_export_pdf_qcm():
-                """Export spécial pour QCM avec formatage"""
-                try:
-                    data = request.get_json()
-                    qcm_texte = data.get('qcm_texte', '')
-                    titre = data.get('titre', 'QCM NOKIROVA')
-
-                    if not qcm_texte:
-                        return jsonify({"succes": False, "erreur": "Aucun QCM à exporter"})
-
-                    # Formater le QCM pour le PDF
-                    contenu_formate = f"""
-            **{titre}**
-
-            {qcm_texte}
-
-            ---
-            📅 Généré par NOKIROVA - Ton professeur IA
-                    """
-
-                    from export_pdf import exporter_en_pdf
-                    import uuid
-
-                    nom_cours = session_data.get('nom_cours', 'QCM')
-                    matiere = session_data.get('matiere_detectee', '📚 Général')
-
-                    user = request.cookies.get('nokirova_user_id')
-                    from db.base import get_user_info
-                    etudiant = "Étudiant NOKIROVA"
-                    if user:
-                        user_info = get_user_info(int(user))
-                        if user_info:
-                            etudiant = f"{user_info.get('prenom', '')} {user_info.get('nom', '')}".strip() or etudiant
-
-                    nom_fichier = f"qcm_{datetime.now().strftime('%Y%m%d_%H%M%S')}_{uuid.uuid4().hex[:6]}.pdf"
-
-                    resultat = exporter_en_pdf(
-                        contenu=contenu_formate,
-                        titre=titre,
-                        nom_fichier=nom_fichier,
-                        nom_cours=nom_cours,
-                        matiere=matiere,
-                        etudiant=etudiant
-                    )
-
-                    if "Erreur" in resultat:
-                        return jsonify({"succes": False, "erreur": resultat})
-
-                    return jsonify({
-                        "succes": True,
-                        "url": f"/download-pdf/{nom_fichier}",
-                        "message": "QCM exporté en PDF"
-                    })
-
-                except Exception as e:
-                    return jsonify({"succes": False, "erreur": str(e)})
-
+@app.route('/download-pdf/<nom_fichier>')
+def download_pdf(nom_fichier):
+    import os
+    from flask import send_file
+    dossier = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'outputs')
+    chemin = os.path.join(dossier, nom_fichier)
+    if os.path.exists(chemin):
+        return send_file(chemin, as_attachment=True, download_name=nom_fichier)
+    return "Fichier non trouvé", 404
 
 # ═══════════════════════════════════════════
-# 🎬 GÉNÉRATION VIDÉO ÉDUCATIVE
+# 🎬 VIDÉO API
 # ═══════════════════════════════════════════
 
 @app.route('/api/video/generer', methods=['POST'])
@@ -1769,56 +1534,24 @@ def api_video_generer():
         data = request.get_json()
         style = data.get('style', 'animation')
         vitesse = data.get('vitesse', 'normal')
-
         cours = session_data.get('cours_actuel', '')
         if not cours:
             return jsonify({"succes": False, "erreur": "Aucun cours chargé"})
-
-        # Générer un script vidéo à partir du cours
         from ia_handler import demander_ia_brut
-
         prompt_video = f"""Transforme ce cours en script vidéo éducatif.
-
-Style demandé : {style}
-Vitesse : {vitesse}
-
-📋 FORMAT OBLIGATOIRE :
-- Durée approximative : 3-5 minutes
-- Structure : Introduction → Développement → Conclusion
-- Inclure des indications visuelles [VISUEL: ...]
-- Inclure des indications audio [AUDIO: ...]
-
-📄 CONTENU DU COURS :
-{cours[:4000]}
-
-🎬 SCRIPT VIDÉO :"""
-
+Style: {style}, Vitesse: {vitesse}
+Cours: {cours[:4000]}
+Génère un script structuré pour une vidéo éducative de 3-5 minutes."""
         script = demander_ia_brut(prompt_video, temperature=0.7, rapide=False)
-
-        # Sauvegarder le script
-        import os
-        import json
-        from datetime import datetime
-
         outputs_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'outputs')
         os.makedirs(outputs_dir, exist_ok=True)
-
         timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
         script_file = os.path.join(outputs_dir, f"video_script_{timestamp}.txt")
-
         with open(script_file, 'w', encoding='utf-8') as f:
             f.write(script)
-
-        return jsonify({
-            "succes": True,
-            "message": "Script vidéo généré",
-            "script": script,
-            "url": f"/download-script/{timestamp}"
-        })
-
+        return jsonify({"succes": True, "message": "Script vidéo généré", "url": f"/download-script/{timestamp}"})
     except Exception as e:
         return jsonify({"succes": False, "erreur": str(e)})
-
 
 @app.route('/download-script/<timestamp>')
 def download_script(timestamp):
@@ -1831,6 +1564,28 @@ def download_script(timestamp):
     return "Fichier non trouvé", 404
 
 # ═══════════════════════════════════════════
+# 🧠 TUTEUR IA
+# ═══════════════════════════════════════════
+
+@app.route('/api/tuteur/dashboard')
+def api_tuteur_dashboard():
+    try:
+        from db.tuteur_ia import get_tuteur_dashboard
+        data = get_tuteur_dashboard()
+        return jsonify({"succes": True, "data": data})
+    except Exception as e:
+        return jsonify({"succes": False, "erreur": str(e)})
+
+# ═══════════════════════════════════════════
+# 🖼️ LOGO
+# ═══════════════════════════════════════════
+
+@app.route('/logo')
+def logo():
+    dossier = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'frontend')
+    return send_from_directory(dossier, 'icon-512.png')
+
+# ═══════════════════════════════════════════
 # 🚀 LANCEMENT
 # ═══════════════════════════════════════════
 
@@ -1838,7 +1593,7 @@ if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
     debug = os.environ.get('FLASK_ENV') != 'production'
     print("\n" + "=" * 60)
-    print("🌸 NOKIROVA WEB - PHASE 4 COMPLÈTE (D4 Tuteur IA)")
+    print("🌸 NOKIROVA WEB - VERSION FINALE CORRIGÉE")
     print(f"🚀 Port : {port}")
     print("=" * 60 + "\n")
     app.run(host='0.0.0.0', port=port, debug=debug)

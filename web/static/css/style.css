@@ -1,6 +1,7 @@
 /* ═══════════════════════════════════════════
-   🌸 NOKIROVA WEB - DESIGN MODERNE PARIS SUSHI v4
+   🌸 NOKIROVA WEB - DESIGN MODERNE PARIS SUSHI v5
    Sidebar hamburger partout + Cartes capsules multicolores
+   VERSION PROFESSIONNELLE CORRIGÉE
    ═══════════════════════════════════════════ */
 
 :root {
@@ -27,20 +28,16 @@
     --txt-principal: #1A1D2E;
     --txt-doux: #6B7280;
     --gris-leger: #E5E7EB;
-
-    --primaire: #7ED321;
-    --primaire-foncee: #5BA819;
-
     --ombre-douce: 0 4px 15px rgba(0,0,0,0.08);
     --ombre-medium: 0 6px 25px rgba(0,0,0,0.12);
     --ombre-forte: 0 10px 35px rgba(0,0,0,0.18);
-
     --rayon: 18px;
     --rayon-sm: 12px;
     --rayon-lg: 28px;
     --rayon-pill: 50px;
 }
 
+/* Thèmes */
 html[data-theme="printemps"] { --primaire:#7ED321; --primaire-foncee:#5BA819; }
 html[data-theme="ocean"]     { --primaire:#2962FF; --primaire-foncee:#1E40AF; }
 html[data-theme="sakura"]    { --primaire:#FF6B9D; --primaire-foncee:#C2185B; }
@@ -48,6 +45,7 @@ html[data-theme="lavande"]   { --primaire:#7B61FF; --primaire-foncee:#5B21B6; }
 html[data-theme="coucher"]   { --primaire:#F59E0B; --primaire-foncee:#B45309; }
 html[data-theme="foret"]     { --primaire:#00C853; --primaire-foncee:#14532D; }
 
+/* Mode sombre */
 html[data-mode="sombre"] {
     --bg-app: #0F1117;
     --bg-carte: #1A1D2E;
@@ -61,12 +59,10 @@ html[data-mode="sombre"] .zone-principale { background: #0F1117 !important; }
 html[data-mode="sombre"] .carte-stat,
 html[data-mode="sombre"] .header-accueil,
 html[data-mode="sombre"] .banniere-date,
-html[data-mode="sombre"] .objectif {
-    background: #1A1D2E !important;
-    color: #F1F5F9 !important;
-}
-html[data-mode="sombre"] .sidebar { background: #1A1D2E !important; }
+html[data-mode="sombre"] .objectif,
+html[data-mode="sombre"] .sidebar { background: #1A1D2E !important; color: #F1F5F9 !important; }
 
+/* Tailles de texte */
 html[data-taille="petit"]  body { font-size: 0.88rem; }
 html[data-taille="normal"] body { font-size: 1rem; }
 html[data-taille="grand"]  body { font-size: 1.15rem; }
@@ -92,7 +88,7 @@ body {
     display: flex; align-items: center; justify-content: center;
     transition: opacity 0.6s ease;
 }
-#splash-screen.fade-out { opacity: 0; }
+#splash-screen.fade-out { opacity: 0; pointer-events: none; }
 .splash-content { text-align: center; color: white; animation: splashIn 0.8s ease; }
 .splash-logo {
     width: 130px; height: 130px; border-radius: 30px;
@@ -113,7 +109,7 @@ body {
 .app-container { display: flex; min-height: 100vh; width: 100%; position: relative; }
 
 /* ═══════════════════════════════════════════
-   🍔 HAMBURGER FIXE EN HAUT (PARTOUT)
+   🍔 HAMBURGER
    ═══════════════════════════════════════════ */
 .hamburger {
     display: flex;
@@ -145,12 +141,12 @@ body {
 .sidebar-overlay.actif { display: block; }
 
 /* ═══════════════════════════════════════════
-   🌿 SIDEBAR STYLE PARIS SUSHI (slide partout)
+   🌿 SIDEBAR
    ═══════════════════════════════════════════ */
 .sidebar {
     position: fixed;
     top: 0; left: -320px;
-    width: 300px; min-width: 300px;
+    width: 300px;
     height: 100vh;
     background: var(--bg-sidebar);
     padding: 20px 0;
@@ -185,8 +181,9 @@ body {
     border: 1px solid var(--gris-leger);
     padding: 8px 12px;
     border-radius: 12px;
-    font-weight: 600; font-size: 14px;
-    cursor: pointer; transition: 0.2s;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.2s;
     margin-left: auto;
 }
 .bouton-mode:hover { background: var(--gris-leger); }
@@ -196,40 +193,28 @@ body {
     font-weight: 800;
     padding: 18px 22px 6px 22px;
     font-size: 10px;
-    text-align: left;
     letter-spacing: 1.5px;
     text-transform: uppercase;
-    background: transparent;
-    box-shadow: none;
-    margin: 0;
-    border-radius: 0;
 }
 
-/* ═══════════════════════════════════════════
-   💊 BOUTONS CAPSULES SIDEBAR (MULTI-COULEURS)
-   ═══════════════════════════════════════════ */
+/* Boutons sidebar */
 .bouton-sidebar {
     display: flex;
     align-items: center;
     gap: 12px;
     background: var(--bg-app);
     color: var(--txt-principal);
-    border: none;
     border-radius: var(--rayon-pill);
     padding: 10px 16px 10px 8px;
     width: calc(100% - 24px);
     margin: 4px 12px;
-    font-weight: 600; font-size: 13px;
+    font-weight: 600;
+    font-size: 13px;
     cursor: pointer;
     transition: all 0.25s;
     text-decoration: none;
-    min-height: 46px;
     box-shadow: 0 2px 6px rgba(0,0,0,0.04);
-    position: relative;
-    overflow: hidden;
 }
-
-/* Cercle blanc à gauche avec emoji */
 .bouton-sidebar::before {
     content: attr(data-emoji);
     width: 36px; height: 36px;
@@ -242,30 +227,18 @@ body {
     box-shadow: 0 2px 6px rgba(0,0,0,0.1);
     flex-shrink: 0;
 }
+.bouton-sidebar:hover { transform: translateX(4px); box-shadow: var(--ombre-medium); }
+.bouton-sidebar.actif { color: white; font-weight: 700; box-shadow: var(--ombre-medium); }
 
-/* Hover & actif */
-.bouton-sidebar:hover {
-    transform: translateX(4px);
-    box-shadow: var(--ombre-medium);
-}
-.bouton-sidebar.actif {
-    color: white;
-    font-weight: 700;
-    box-shadow: var(--ombre-medium);
-}
-
-/* COULEURS DIFFÉRENTES POUR CHAQUE BOUTON */
+/* Couleurs des boutons */
 .bouton-sidebar[data-color="vert"]    { background: linear-gradient(135deg, #7ED321, #5BA819); color:white; }
 .bouton-sidebar[data-color="jaune"]   { background: linear-gradient(135deg, #FFD93D, #F59E0B); color:#1A1D2E; }
 .bouton-sidebar[data-color="rose"]    { background: linear-gradient(135deg, #FF6B9D, #C2185B); color:white; }
 .bouton-sidebar[data-color="violet"]  { background: linear-gradient(135deg, #7B61FF, #5B21B6); color:white; }
 .bouton-sidebar[data-color="bleu"]    { background: linear-gradient(135deg, #4FC3F7, #2962FF); color:white; }
 .bouton-sidebar[data-color="orange"]  { background: linear-gradient(135deg, #FF7043, #F4511E); color:white; }
-.bouton-sidebar[data-color="cyan"]    { background: linear-gradient(135deg, #26C6DA, #00838F); color:white; }
 .bouton-sidebar[data-color="rouge"]   { background: linear-gradient(135deg, #FF5252, #C62828); color:white; }
 .bouton-sidebar[data-color="emeraude"]{ background: linear-gradient(135deg, #00C853, #2E7D32); color:white; }
-.bouton-sidebar[data-color="indigo"]  { background: linear-gradient(135deg, #5C6BC0, #303F9F); color:white; }
-.bouton-sidebar[data-color="turquoise"]{ background: linear-gradient(135deg, #1ABC9C, #16A085); color:white; }
 .bouton-sidebar[data-color="lavande"] { background: linear-gradient(135deg, #A855F7, #7E22CE); color:white; }
 
 .statut-cours {
@@ -276,11 +249,7 @@ body {
     color: white;
     box-shadow: var(--ombre-douce);
 }
-.statut-titre {
-    font-size: 9px; font-weight: 800;
-    text-transform: uppercase; letter-spacing: 1.5px;
-    margin-bottom: 4px; opacity: 0.9;
-}
+.statut-titre { font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 4px; opacity: 0.9; }
 .statut-nom { font-size: 12px; font-weight: 700; word-wrap: break-word; }
 
 .signature {
@@ -300,183 +269,8 @@ body {
     flex: 1; padding: 80px 24px 24px 24px;
     overflow-y: auto;
     background: var(--bg-app);
-    min-height: 100vh; width: 100%;
-}
-
-/* ═══════════════════════════════════════════
-   🎨 ACCUEIL - HEADER
-   ═══════════════════════════════════════════ */
-.header-accueil {
-    background: linear-gradient(135deg, var(--primaire), var(--primaire-foncee));
-    padding: 30px 30px;
-    border-radius: var(--rayon-lg);
-    margin-bottom: 20px;
-    display: flex; align-items: center; gap: 20px;
-    box-shadow: var(--ombre-medium);
-    color: white;
-    position: relative;
-    overflow: hidden;
-}
-.header-accueil::before {
-    content: '🌸'; font-size: 200px;
-    position: absolute; top: -40px; right: -40px;
-    opacity: 0.12; transform: rotate(15deg);
-}
-.header-logo {
-    width: 70px; height: 70px; border-radius: 18px;
-    background: white; padding: 6px;
-    box-shadow: 0 6px 20px rgba(0,0,0,0.2);
-    z-index: 1;
-}
-.header-texte h1 {
-    color: white; font-size: 26px; font-weight: 900;
-    margin: 0; letter-spacing: -0.5px;
-    text-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-.header-texte p {
-    color: rgba(255,255,255,0.92); font-size: 14px;
-    margin-top: 4px; font-weight: 500;
-}
-
-/* BANNIÈRE */
-.banniere-date {
-    background: var(--bg-carte);
-    padding: 18px 22px;
-    border-radius: var(--rayon);
-    margin-bottom: 20px;
-    color: var(--txt-principal);
-    font-weight: 700;
-    font-size: 15px;
-    box-shadow: var(--ombre-douce);
-    border-left: 5px solid var(--primaire);
-}
-.banniere-sous-texte {
-    margin-top: 6px; font-size: 13px;
-    font-weight: 400; opacity: 0.75;
-    line-height: 1.6;
-}
-
-/* CARTES STATS */
-.cartes-stats {
-    display: grid; grid-template-columns: 1fr 1fr 1fr;
-    gap: 16px; margin-bottom: 20px;
-}
-.carte-stat {
-    padding: 22px 20px; border-radius: var(--rayon);
-    text-align: center; box-shadow: var(--ombre-douce);
-    transition: all 0.3s; cursor: default;
-    color: white;
-    position: relative; overflow: hidden;
-}
-.carte-stat:hover { transform: translateY(-4px); box-shadow: var(--ombre-medium); }
-.carte-niveau { background: linear-gradient(135deg, #FFD93D, #F59E0B); color: #1A1D2E; }
-.carte-streak { background: linear-gradient(135deg, #FF7043, #F4511E); }
-.carte-cours  { background: linear-gradient(135deg, #00C853, #2E7D32); }
-.stat-icone { font-size: 38px; margin-bottom: 5px; }
-.stat-valeur { font-size: 26px; font-weight: 900; margin: 4px 0; letter-spacing: -0.5px; }
-.stat-label { font-size: 12px; opacity: 0.95; font-weight: 500; }
-
-/* ═══════════════════════════════════════════
-   💊 CARTES CAPSULES MULTICOLORES (GRAND FORMAT)
-   ═══════════════════════════════════════════ */
-.cartes-rapides {
-    display: flex; flex-direction: column;
-    gap: 14px; margin-bottom: 20px;
-}
-.carte-rapide {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    padding: 16px 22px 16px 12px;
-    border-radius: var(--rayon-pill);
-    text-decoration: none;
-    color: white;
-    box-shadow: var(--ombre-douce);
-    transition: all 0.3s;
-    position: relative; overflow: hidden;
-    min-height: 70px;
-}
-.carte-rapide::after {
-    content: '→';
-    margin-left: auto;
-    font-size: 24px; font-weight: 900;
-    color: white;
-    transition: transform 0.3s;
-}
-.carte-rapide:hover {
-    transform: translateX(8px);
-    box-shadow: var(--ombre-forte);
-}
-.carte-rapide:hover::after { transform: translateX(5px); }
-
-/* Cercle blanc géant à gauche */
-.carte-rapide-icone {
-    width: 56px; height: 56px;
-    background: white;
-    border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 28px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-    flex-shrink: 0;
-}
-.carte-rapide-contenu { flex: 1; }
-.carte-rapide-titre {
-    font-weight: 800; font-size: 17px;
-    margin-bottom: 2px;
-    letter-spacing: -0.3px;
-}
-.carte-rapide-desc {
-    font-size: 12px; opacity: 0.92;
-    font-weight: 500;
-}
-
-/* COULEURS DES CAPSULES */
-.carte-bibli  { background: linear-gradient(135deg, #FFD93D, #F59E0B); color: #1A1D2E; }
-.carte-bibli::after { color: #1A1D2E; }
-.carte-plani  { background: linear-gradient(135deg, #A855F7, #7E22CE); }
-.carte-scan   { background: linear-gradient(135deg, #00C853, #2E7D32); }
-.carte-qcm    { background: linear-gradient(135deg, #FF6B9D, #C2185B); }
-.carte-flash  { background: linear-gradient(135deg, #4FC3F7, #2962FF); }
-.carte-pomo   { background: linear-gradient(135deg, #FF7043, #F4511E); }
-
-/* OBJECTIF */
-.objectif {
-    background: var(--bg-carte);
-    padding: 22px 24px;
-    border-radius: var(--rayon);
-    text-align: center;
-    margin: 20px 0;
-    box-shadow: var(--ombre-douce);
-    border: 2px dashed var(--orange-dore);
-}
-.objectif-titre {
-    color: var(--orange-dore);
-    font-size: 16px; font-weight: 800;
-    margin-bottom: 8px;
-}
-.objectif-texte {
-    color: var(--txt-doux); font-size: 14px;
-    line-height: 1.7; font-weight: 500;
-}
-
-/* BOUTON COMMENCER */
-.btn-commencer {
+    min-height: 100vh;
     width: 100%;
-    background: linear-gradient(135deg, var(--primaire), var(--primaire-foncee));
-    color: white;
-    padding: 20px;
-    border-radius: var(--rayon-pill);
-    text-align: center;
-    font-weight: 900; font-size: 18px;
-    margin: 20px 0; cursor: pointer; border: none;
-    box-shadow: 0 8px 25px rgba(126,211,33,0.4);
-    transition: all 0.3s;
-    text-decoration: none; display: block;
-    letter-spacing: 1px; text-transform: uppercase;
-}
-.btn-commencer:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 12px 35px rgba(126,211,33,0.55);
 }
 
 /* ═══════════════════════════════════════════
@@ -484,32 +278,29 @@ body {
    ═══════════════════════════════════════════ */
 @media (max-width: 768px) {
     .zone-principale { padding: 75px 16px 24px 16px; }
-    .cartes-stats { grid-template-columns: 1fr; gap: 12px; }
-    .header-accueil { flex-direction: column; text-align: center; padding: 24px; }
-    .header-texte h1 { font-size: 22px; }
-    .carte-rapide { padding: 14px 18px 14px 10px; }
-    .carte-rapide-icone { width: 48px; height: 48px; font-size: 22px; }
-    .carte-rapide-titre { font-size: 15px; }
-    .carte-rapide-desc { font-size: 11px; }
-    .btn-commencer { font-size: 16px; padding: 18px; }
 }
-
 @media (max-width: 480px) {
     .zone-principale { padding: 70px 12px 20px 12px; }
-    .header-texte h1 { font-size: 20px; }
-    .stat-valeur { font-size: 22px; }
-    .stat-icone { font-size: 32px; }
 }
 
-.btn-scan {
-    background: linear-gradient(135deg, #F59E0B, #D97706);
+/* ═══════════════════════════════════════════
+   💬 TOAST NOTIFICATION
+   ═══════════════════════════════════════════ */
+.toast-notif, .toast-nokirova {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    background: #1A1D2E;
     color: white;
-    border: none;
-    width: 46px; height: 46px;
-    border-radius: 50%;
-    cursor: pointer;
-    font-size: 18px;
-    flex-shrink: 0;
-    transition: all 0.3s;
+    padding: 14px 22px;
+    border-radius: 50px;
+    font-weight: 700;
+    font-size: 14px;
+    z-index: 99999;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.4s ease;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.25);
+    pointer-events: none;
 }
-.btn-scan:hover { transform: scale(1.1); }
+.toast-notif.show, .toast-nokirova.show { opacity: 1; transform: translateY(0); }

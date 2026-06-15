@@ -63,7 +63,7 @@
       <form id="formChat">
         <div class="input-wrapper">
           <textarea id="inputMessage"
-                    placeholder="💬 Pose ta question ou 🎨 'génère une image de...' "
+                    placeholder="💬 Pose ta question ou 🎨 'génère une image de...' ou 📷 scan copie"
                     rows="1"></textarea>
 
           <button type="button" id="btnStop" class="btn-stop" title="Arrêter la lecture" style="display:none;">
@@ -74,6 +74,10 @@
             🎤
           </button>
 
+          <button type="button" id="btnScan" class="btn-scan" title="Scanner une copie manuscrite">
+            📷
+          </button>
+
           <button type="submit" class="btn-envoyer" title="Envoyer">
             <span class="btn-envoyer-icone">🚀</span>
           </button>
@@ -82,6 +86,8 @@
           <span>💡 Entrée pour envoyer</span>
           <span>•</span>
           <span>🎨 "génère une image de..."</span>
+          <span>•</span>
+          <span>📷 Scanner copie manuscrite</span>
           <span>•</span>
           <span id="microInfo">🎤 Clic micro pour parler</span>
         </div>
@@ -94,7 +100,7 @@
 <style>
 /* ═══════════════════════════════════════════
    💬 CHAT PAGE - NOKIROVA
-   Phase D1 : Chat Vocal + D2 : Génération Images
+   Phase D1 : Chat Vocal + D2 : Images + D3 : Scan Copie
    ═══════════════════════════════════════════ */
 .chat-page {
   max-width: 1100px;
@@ -332,7 +338,7 @@
   40% { transform: scale(1); opacity: 1; }
 }
 
-/* MESSAGE D'ECOUTE DANS LE CHAT */
+/* MESSAGE D'ECOUTE */
 .message-ecoute .message-bulle {
   background: linear-gradient(135deg, #FEF3C7, #FDE68A) !important;
   color: #92400E !important;
@@ -351,9 +357,7 @@
   50% { transform: scale(1.3); }
 }
 
-/* ═══════════════════════════════════════
-   🎨 BULLE IMAGE GÉNÉRÉE — Phase D2
-   ═══════════════════════════════════════ */
+/* IMAGES */
 .message-image .message-bulle {
   padding: 10px !important;
   background: white !important;
@@ -410,11 +414,6 @@
 .btn-image-action.telecharger {
   background: linear-gradient(135deg, #00C853, #059669);
 }
-.btn-image-action.telecharger:hover {
-  box-shadow: 0 4px 12px rgba(0,200,83,0.4);
-}
-
-/* CHARGEMENT IMAGE */
 .chargement-image {
   display: flex;
   flex-direction: column;
@@ -433,12 +432,6 @@
   0%   { transform: rotate(0deg) scale(1); }
   50%  { transform: rotate(180deg) scale(1.2); }
   100% { transform: rotate(360deg) scale(1); }
-}
-.chargement-image-texte {
-  font-size: 13px;
-  font-weight: 700;
-  color: #7B61FF;
-  text-align: center;
 }
 .chargement-image-barre {
   width: 160px;
@@ -459,7 +452,7 @@
   100% { width: 95%; }
 }
 
-/* MODAL ZOOM IMAGE */
+/* MODAL ZOOM */
 .modal-image {
   display: none;
   position: fixed;
@@ -559,7 +552,6 @@
   box-shadow: none;
   transform: none;
 }
-.btn-envoyer-icone { font-size: 18px; }
 
 /* BOUTON MICRO */
 .btn-micro {
@@ -578,19 +570,31 @@
   transition: all 0.3s;
 }
 .btn-micro:hover { transform: scale(1.1); }
-.btn-micro:disabled {
-  background: #D1D5DB;
-  cursor: not-allowed;
-  box-shadow: none;
-  transform: none;
-}
 .btn-micro.ecoute {
   animation: pulseMicro 1s infinite;
 }
 @keyframes pulseMicro {
-  0%   { transform: scale(1);    box-shadow: 0 0 0 0   rgba(239,68,68,0.7); }
+  0%   { transform: scale(1);    box-shadow: 0 0 0 0 rgba(239,68,68,0.7); }
   50%  { transform: scale(1.15); box-shadow: 0 0 0 10px rgba(239,68,68,0); }
-  100% { transform: scale(1);    box-shadow: 0 0 0 0   rgba(239,68,68,0); }
+  100% { transform: scale(1);    box-shadow: 0 0 0 0 rgba(239,68,68,0); }
+}
+
+/* BOUTON SCAN */
+.btn-scan {
+  background: linear-gradient(135deg, #F59E0B, #D97706);
+  color: white;
+  border: none;
+  width: 46px; height: 46px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 18px;
+  flex-shrink: 0;
+  transition: all 0.3s;
+  box-shadow: 0 4px 12px rgba(245,158,11,0.4);
+}
+.btn-scan:hover {
+  transform: scale(1.1);
+  box-shadow: 0 6px 18px rgba(245,158,11,0.5);
 }
 
 /* BOUTON STOP */
@@ -645,7 +649,6 @@ html[data-mode="sombre"] .message-bienvenue {
   background: linear-gradient(135deg, #2A1D4E, #4A1D3E) !important;
 }
 html[data-mode="sombre"] .message-bienvenue h2 { color: #C4A5FF; }
-html[data-mode="sombre"] .message-bienvenue p  { color: #94A3B8; }
 html[data-mode="sombre"] .suggestion-card {
   background: #2A2D3E !important;
   border-color: #3A3D4E !important;
@@ -673,15 +676,8 @@ html[data-mode="sombre"] #inputMessage { color: #F1F5F9 !important; }
   .chat-box { height: calc(100vh - 250px); }
   .message-bulle { max-width: 85%; font-size: 13px; }
   .suggestions-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
-  .suggestion-icone { font-size: 24px; }
-  .suggestion-titre { font-size: 12px; }
   .input-zone { padding: 14px; }
-  .image-generee { max-width: 100%; }
-}
-@media (max-width: 480px) {
-  .suggestions-grid { grid-template-columns: 1fr 1fr; }
-  .avatar { width: 36px; height: 36px; font-size: 18px; }
-  .input-info { font-size: 10px; }
+  .btn-micro, .btn-scan, .btn-envoyer, .btn-stop { width: 40px; height: 40px; font-size: 16px; }
 }
 </style>
 
@@ -695,19 +691,20 @@ html[data-mode="sombre"] #inputMessage { color: #F1F5F9 !important; }
 
 <script>
 // ═══════════════════════════════════════════
-// 💬 NOKIROVA — CHAT + D1 VOCAL + D2 IMAGES
+// 💬 NOKIROVA — CHAT + D1 VOCAL + D2 IMAGES + D3 SCAN
 // ═══════════════════════════════════════════
 
-// --- ÉLÉMENTS DOM ---
+// ÉLÉMENTS DOM
 const formChat     = document.getElementById('formChat');
 const inputMessage = document.getElementById('inputMessage');
 const messagesZone = document.getElementById('messagesZone');
 const btnEnvoyer   = document.querySelector('.btn-envoyer');
 const btnMicro     = document.getElementById('btnMicro');
+const btnScan      = document.getElementById('btnScan');
 const btnStop      = document.getElementById('btnStop');
 const microInfo    = document.getElementById('microInfo');
 
-// --- PERSONNALISATION USER ---
+// PERSONNALISATION USER
 const user = JSON.parse(localStorage.getItem('nokirova_user') || 'null');
 if (user) {
   document.getElementById('userPrenom').textContent   = user.prenom;
@@ -715,10 +712,9 @@ if (user) {
 }
 
 // ═══════════════════════════════════════════
-// 🎨 PHASE D2 — DÉTECTION ET GÉNÉRATION IMAGE
+// 🎨 PHASE D2 — GÉNÉRATION IMAGE
 // ═══════════════════════════════════════════
 
-// Mots-clés qui déclenchent la génération d'image
 const MOTS_IMAGE = [
   'génère une image', 'generé une image', 'génere une image',
   'crée une image',   'cree une image',   'créé une image',
@@ -733,31 +729,25 @@ function estDemandeImage(texte) {
 }
 
 function extrairePromptImage(texte) {
-  const t = texte.toLowerCase();
-  // On retire le mot-clé pour garder seulement la description
   let prompt = texte;
   MOTS_IMAGE.forEach(mot => {
     const regex = new RegExp(mot, 'gi');
     prompt = prompt.replace(regex, '').trim();
   });
-  // Nettoyer ponctuation en début
   prompt = prompt.replace(/^[^a-zA-ZÀ-ÿ0-9]+/, '').trim();
   return prompt || texte;
 }
 
 function construireUrlImage(prompt) {
-  // Pollinations.ai — gratuit, sans clé API
   const promptEncode = encodeURIComponent(prompt);
   const seed = Math.floor(Math.random() * 99999);
-  return `[image.pollinations.ai](https://image.pollinations.ai/prompt/${promptEncode}?width=512&height=512&seed=${seed}&nologo=true)`;
+  return `https://image.pollinations.ai/prompt/${promptEncode}?width=512&height=512&seed=${seed}&nologo=true`;
 }
 
 async function genererImage(prompt) {
-  // 1. Retirer la bienvenue si présente
   const bienvenue = document.querySelector('.message-bienvenue');
   if (bienvenue) bienvenue.remove();
 
-  // 2. Afficher le chargement image
   const loadDiv = document.createElement('div');
   loadDiv.id = 'chargementImage';
   loadDiv.className = 'message message-ia';
@@ -765,77 +755,51 @@ async function genererImage(prompt) {
     <div class="avatar avatar-ia">🌸</div>
     <div class="message-bulle chargement-image">
       <span class="chargement-image-icone">🎨</span>
-      <span class="chargement-image-texte">Génération en cours...<br><small style="font-weight:400;color:#A78BFA">"${prompt}"</small></span>
-      <div class="chargement-image-barre">
-        <div class="chargement-image-progress"></div>
-      </div>
+      <span class="chargement-image-texte">Génération en cours...<br><small>"${prompt}"</small></span>
+      <div class="chargement-image-barre"><div class="chargement-image-progress"></div></div>
     </div>
   `;
   messagesZone.appendChild(loadDiv);
   messagesZone.scrollTop = messagesZone.scrollHeight;
 
-  // 3. Construire l'URL et charger l'image
   const url = construireUrlImage(prompt);
-
   try {
     await new Promise((resolve, reject) => {
       const img = new Image();
       img.onload  = resolve;
       img.onerror = reject;
       img.src = url;
-      // Timeout 30 secondes
       setTimeout(() => reject(new Error('timeout')), 30000);
     });
-
-    // 4. Retirer le chargement
     loadDiv.remove();
-
-    // 5. Afficher l'image dans une bulle
     const imgDiv = document.createElement('div');
     imgDiv.className = 'message message-ia message-image';
     imgDiv.innerHTML = `
       <div class="avatar avatar-ia">🌸</div>
       <div class="message-bulle">
         <div class="image-generee-wrapper">
-          <div class="image-generee-label">🎨 Image générée pour : <em>"${prompt}"</em></div>
-          <img class="image-generee"
-               src="${url}"
-               alt="${prompt}"
-               onclick="zoomImage('${url}')"
-               title="Clic pour agrandir">
+          <div class="image-generee-label">🎨 Image générée : "${prompt}"</div>
+          <img class="image-generee" src="${url}" alt="${prompt}" onclick="zoomImage('${url}')">
           <div class="image-generee-actions">
             <button class="btn-image-action" onclick="zoomImage('${url}')">🔍 Agrandir</button>
-            <a class="btn-image-action telecharger"
-               href="${url}"
-               download="nokirova-image.jpg"
-               target="_blank">⬇️ Télécharger</a>
+            <a class="btn-image-action telecharger" href="${url}" download="nokirova-image.jpg">⬇️ Télécharger</a>
             <button class="btn-image-action" onclick="poserQuestion('génère une autre image de ${prompt}')">🔄 Regénérer</button>
           </div>
         </div>
       </div>
     `;
     messagesZone.appendChild(imgDiv);
-    messagesZone.scrollTop = messagesZone.scrollHeight;
-
-    // Pas de TTS pour les images
-    lireVoix(`Voilà ! J'ai généré une image de ${prompt}`);
-
+    lireVoix(`Voilà, j'ai généré une image de ${prompt}`);
   } catch(e) {
     loadDiv.remove();
     const errDiv = document.createElement('div');
     errDiv.className = 'message message-ia';
-    errDiv.innerHTML = `
-      <div class="avatar avatar-ia">🌸</div>
-      <div class="message-bulle" style="background:#FEF3C7;color:#92400E;border:1px solid #F59E0B;">
-        ⚠️ Impossible de générer l'image. Vérifie ta connexion et réessaie !
-      </div>
-    `;
+    errDiv.innerHTML = `<div class="avatar avatar-ia">🌸</div><div class="message-bulle" style="background:#FEF3C7;color:#92400E;">⚠️ Erreur génération d'image</div></div>`;
     messagesZone.appendChild(errDiv);
-    messagesZone.scrollTop = messagesZone.scrollHeight;
   }
+  messagesZone.scrollTop = messagesZone.scrollHeight;
 }
 
-// --- MODAL ZOOM ---
 function zoomImage(src) {
   document.getElementById('modalImageSrc').src = src;
   document.getElementById('modalImage').classList.add('open');
@@ -843,54 +807,23 @@ function zoomImage(src) {
 function fermerModal() {
   document.getElementById('modalImage').classList.remove('open');
 }
-// Fermer avec Echap
-document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') fermerModal();
-});
+document.addEventListener('keydown', e => { if (e.key === 'Escape') fermerModal(); });
 
 // ═══════════════════════════════════════════
-// 🔊 SYNTHÈSE VOCALE (TTS) — D1
+// 🔊 SYNTHÈSE VOCALE (TTS)
 // ═══════════════════════════════════════════
 let iaSpeaking = false;
 
 function lireVoix(texte) {
   if (!('speechSynthesis' in window)) return;
   speechSynthesis.cancel();
-
-  const textePropre = texte
-    .replace(/[\u{1F000}-\u{1FFFF}]/gu, '')
-    .replace(/[⚠️✅❌💡🔥🎯📚]/g, '')
-    .trim();
-
+  const textePropre = texte.replace(/[\u{1F000}-\u{1FFFF}]/gu, '').replace(/[⚠️✅❌💡🔥🎯📚]/g, '').trim();
   if (!textePropre) return;
-
   const u = new SpeechSynthesisUtterance(textePropre);
-  u.lang  = 'fr-FR';
-  u.rate  = 1.0;
-  u.pitch = 1.0;
-
-  u.onstart = () => {
-    iaSpeaking = true;
-    btnStop.style.display = 'flex';
-    btnMicro.disabled = true;
-    microInfo.textContent = '🔊 NOKIROVA parle...';
-    microInfo.classList.add('lecture');
-  };
-  u.onend = () => {
-    iaSpeaking = false;
-    btnStop.style.display = 'none';
-    btnMicro.disabled = false;
-    microInfo.textContent = '🎤 Clic micro pour parler';
-    microInfo.classList.remove('lecture');
-  };
-  u.onerror = () => {
-    iaSpeaking = false;
-    btnStop.style.display = 'none';
-    btnMicro.disabled = false;
-    microInfo.textContent = '🎤 Clic micro pour parler';
-    microInfo.classList.remove('lecture');
-  };
-
+  u.lang = 'fr-FR'; u.rate = 1.0; u.pitch = 1.0;
+  u.onstart = () => { iaSpeaking = true; btnStop.style.display = 'flex'; btnMicro.disabled = true; btnScan.disabled = true; microInfo.textContent = '🔊 NOKIROVA parle...'; microInfo.classList.add('lecture'); };
+  u.onend = () => { iaSpeaking = false; btnStop.style.display = 'none'; btnMicro.disabled = false; btnScan.disabled = false; microInfo.textContent = '🎤 Clic micro pour parler'; microInfo.classList.remove('lecture'); };
+  u.onerror = () => { iaSpeaking = false; btnStop.style.display = 'none'; btnMicro.disabled = false; btnScan.disabled = false; microInfo.textContent = '🎤 Clic micro pour parler'; microInfo.classList.remove('lecture'); };
   speechSynthesis.speak(u);
 }
 
@@ -898,89 +831,123 @@ btnStop.addEventListener('click', () => {
   speechSynthesis.cancel();
   btnStop.style.display = 'none';
   btnMicro.disabled = false;
+  btnScan.disabled = false;
   microInfo.textContent = '🎤 Clic micro pour parler';
   microInfo.classList.remove('lecture');
 });
 
 // ═══════════════════════════════════════════
-// 🎤 RECONNAISSANCE VOCALE (STT) — D1
+// 🎤 RECONNAISSANCE VOCALE (STT)
 // ═══════════════════════════════════════════
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 let msgEcouteDiv = null;
 
 if (SpeechRecognition && btnMicro) {
   const recognition = new SpeechRecognition();
-  recognition.lang           = 'fr-FR';
-  recognition.continuous     = false;
-  recognition.interimResults = false;
-
+  recognition.lang = 'fr-FR'; recognition.continuous = false; recognition.interimResults = false;
   btnMicro.addEventListener('click', () => {
     if (iaSpeaking) speechSynthesis.cancel();
     try { recognition.start(); } catch(e) {}
   });
-
   recognition.onstart = () => {
     btnMicro.classList.add('ecoute');
     microInfo.textContent = '🎤 J\'écoute... parle !';
-
     const bienvenue = document.querySelector('.message-bienvenue');
     if (bienvenue) bienvenue.remove();
-
     msgEcouteDiv = document.createElement('div');
     msgEcouteDiv.className = 'message message-user message-ecoute';
-    msgEcouteDiv.innerHTML = `
-      <div class="avatar avatar-user">👤</div>
-      <div class="message-bulle">
-        <span class="ecoute-icon">🎤</span>
-        <span>J'écoute... parle !</span>
-      </div>
-    `;
+    msgEcouteDiv.innerHTML = `<div class="avatar avatar-user">👤</div><div class="message-bulle"><span class="ecoute-icon">🎤</span><span>J'écoute... parle !</span></div>`;
     messagesZone.appendChild(msgEcouteDiv);
     messagesZone.scrollTop = messagesZone.scrollHeight;
   };
-
   recognition.onresult = (e) => {
     const texteSaisi = e.results[0][0].transcript;
     if (msgEcouteDiv) { msgEcouteDiv.remove(); msgEcouteDiv = null; }
     inputMessage.value = texteSaisi;
     envoyerMessage(texteSaisi);
   };
-
   recognition.onend = () => {
     btnMicro.classList.remove('ecoute');
     microInfo.textContent = '🎤 Clic micro pour parler';
     if (msgEcouteDiv) { msgEcouteDiv.remove(); msgEcouteDiv = null; }
   };
-
-  recognition.onerror = (e) => {
+  recognition.onerror = () => {
     btnMicro.classList.remove('ecoute');
     if (msgEcouteDiv) { msgEcouteDiv.remove(); msgEcouteDiv = null; }
-
-    let msg = '';
-    switch(e.error) {
-      case 'not-allowed': msg = '⚠️ Micro bloqué. Autorise le micro dans ton navigateur.'; break;
-      case 'no-speech':   msg = '🤫 Rien entendu. Réessaie !'; break;
-      case 'network':     msg = '⚠️ Erreur réseau. Vérifie ta connexion.'; break;
-      default:            msg = `⚠️ Erreur micro : ${e.error}`;
-    }
-
     const errDiv = document.createElement('div');
     errDiv.className = 'message message-ia';
-    errDiv.innerHTML = `
-      <div class="avatar avatar-ia">🌸</div>
-      <div class="message-bulle" style="background:#FEF3C7;color:#92400E;border:1px solid #F59E0B;">
-        ${msg}
-      </div>
-    `;
+    errDiv.innerHTML = `<div class="avatar avatar-ia">🌸</div><div class="message-bulle" style="background:#FEF3C7;color:#92400E;">⚠️ Micro inaccessible</div></div>`;
     messagesZone.appendChild(errDiv);
-    messagesZone.scrollTop = messagesZone.scrollHeight;
-    setTimeout(() => errDiv.remove(), 4000);
     microInfo.textContent = '🎤 Clic micro pour parler';
   };
-
 } else if (btnMicro) {
   btnMicro.style.display = 'none';
-  document.getElementById('microInfo').style.display = 'none';
+}
+
+// ═══════════════════════════════════════════
+// 📷 SCANNER COPIE MANUSCRITE - PHASE D3
+// ═══════════════════════════════════════════
+if (btnScan) {
+  btnScan.addEventListener('click', () => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.capture = 'environment'; // Ouvre camera direct sur mobile
+
+    input.onchange = async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const bienvenue = document.querySelector('.message-bienvenue');
+      if (bienvenue) bienvenue.remove();
+
+      ajouterMessage("📷 J'envoie ma copie à scanner...", 'user');
+
+      const formData = new FormData();
+      formData.append('fichier', file);
+      formData.append('langue', 'fra');
+      formData.append('expliquer', 'true');
+
+      // Message chargement IA
+      const loadingId = 'loading_' + Date.now();
+      const loadDiv = document.createElement('div');
+      loadDiv.id = loadingId;
+      loadDiv.className = 'message message-ia';
+      loadDiv.innerHTML = `<div class="avatar avatar-ia">🌸</div><div class="message-bulle chargement"><span></span><span></span><span></span></div>`;
+      messagesZone.appendChild(loadDiv);
+      messagesZone.scrollTop = messagesZone.scrollHeight;
+
+      try {
+        const response = await fetch('/api/ocr', {
+          method: 'POST',
+          body: formData
+        });
+        const data = await response.json();
+        document.getElementById(loadingId)?.remove();
+
+        if (data.succes && data.texte) {
+          let texteOCR = data.texte;
+          if (texteOCR.length > 800) texteOCR = texteOCR.substring(0, 800) + '...';
+          ajouterMessage(`📄 **Texte extrait :**\n\n${texteOCR}`, 'ia');
+
+          if (data.explication) {
+            ajouterMessage(`💡 **Explication IA :**\n\n${data.explication}`, 'ia');
+            lireVoix(data.explication);
+          } else {
+            // Envoyer à l'IA pour correction
+            envoyerMessage(`Voici une copie manuscrite à corriger :\n\n${data.texte}\n\nCorrige cette copie en donnant une note sur 20 et des conseils.`);
+          }
+        } else {
+          ajouterMessage(`❌ Erreur OCR : ${data.erreur || 'Impossible de lire l\'image'}`, 'ia');
+        }
+      } catch (err) {
+        document.getElementById(loadingId)?.remove();
+        ajouterMessage(`❌ Erreur : ${err.message}`, 'ia');
+      }
+    };
+
+    input.click();
+  });
 }
 
 // ═══════════════════════════════════════════
@@ -989,16 +956,11 @@ if (SpeechRecognition && btnMicro) {
 function ajouterMessage(contenu, type) {
   const bienvenue = document.querySelector('.message-bienvenue');
   if (bienvenue) bienvenue.remove();
-
   const msgDiv = document.createElement('div');
   msgDiv.className = `message message-${type}`;
-  const avatar      = type === 'user' ? '👤' : '🌸';
+  const avatar = type === 'user' ? '👤' : '🌸';
   const avatarClass = type === 'user' ? 'avatar-user' : 'avatar-ia';
-
-  msgDiv.innerHTML = `
-    <div class="avatar ${avatarClass}">${avatar}</div>
-    <div class="message-bulle">${contenu}</div>
-  `;
+  msgDiv.innerHTML = `<div class="avatar ${avatarClass}">${avatar}</div><div class="message-bulle">${contenu.replace(/\n/g, '<br>')}</div>`;
   messagesZone.appendChild(msgDiv);
   messagesZone.scrollTop = messagesZone.scrollHeight;
 }
@@ -1007,12 +969,7 @@ function afficherChargement() {
   const div = document.createElement('div');
   div.id = 'chargementDiv';
   div.className = 'message message-ia';
-  div.innerHTML = `
-    <div class="avatar avatar-ia">🌸</div>
-    <div class="message-bulle chargement">
-      <span></span><span></span><span></span>
-    </div>
-  `;
+  div.innerHTML = `<div class="avatar avatar-ia">🌸</div><div class="message-bulle chargement"><span></span><span></span><span></span></div>`;
   messagesZone.appendChild(div);
   messagesZone.scrollTop = messagesZone.scrollHeight;
 }
@@ -1023,23 +980,20 @@ function retirerChargement() {
 }
 
 // ═══════════════════════════════════════════
-// 🚀 ENVOI MESSAGE — ROUTAGE IA ou IMAGE
+// 🚀 ENVOI MESSAGE
 // ═══════════════════════════════════════════
 async function envoyerMessage(q) {
   if (!q.trim()) return;
-
   ajouterMessage(q, 'user');
   inputMessage.value = '';
   inputMessage.style.height = 'auto';
   btnEnvoyer.disabled = true;
-  btnMicro.disabled   = true;
+  btnMicro.disabled = true;
+  if (btnScan) btnScan.disabled = true;
 
-  // 🎨 ROUTAGE : image ou IA ?
   if (estDemandeImage(q)) {
-    const prompt = extrairePromptImage(q);
-    await genererImage(prompt);
+    await genererImage(extrairePromptImage(q));
   } else {
-    // Réponse IA classique
     afficherChargement();
     try {
       const r = await fetch('/api/chat', {
@@ -1049,7 +1003,6 @@ async function envoyerMessage(q) {
       });
       const data = await r.json();
       retirerChargement();
-
       if (data.succes) {
         ajouterMessage(data.reponse, 'ia');
         lireVoix(data.reponse);
@@ -1063,32 +1016,18 @@ async function envoyerMessage(q) {
   }
 
   btnEnvoyer.disabled = false;
-  if (!iaSpeaking) btnMicro.disabled = false;
+  if (!iaSpeaking) {
+    btnMicro.disabled = false;
+    if (btnScan) btnScan.disabled = false;
+  }
   inputMessage.focus();
 }
 
-// ═══════════════════════════════════════════
-// ⌨️ ÉVÉNEMENTS
-// ═══════════════════════════════════════════
-formChat.addEventListener('submit', e => {
-  e.preventDefault();
-  envoyerMessage(inputMessage.value);
-});
-
-inputMessage.addEventListener('keydown', e => {
-  if (e.key === 'Enter' && !e.shiftKey) {
-    e.preventDefault();
-    envoyerMessage(inputMessage.value);
-  }
-});
-
-inputMessage.addEventListener('input', function() {
-  this.style.height = 'auto';
-  this.style.height = Math.min(this.scrollHeight, 120) + 'px';
-});
-
+// ÉVÉNEMENTS
+formChat.addEventListener('submit', e => { e.preventDefault(); envoyerMessage(inputMessage.value); });
+inputMessage.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); envoyerMessage(inputMessage.value); } });
+inputMessage.addEventListener('input', function() { this.style.height = 'auto'; this.style.height = Math.min(this.scrollHeight, 120) + 'px'; });
 function poserQuestion(q) { envoyerMessage(q); }
-
 inputMessage.focus();
 </script>
 

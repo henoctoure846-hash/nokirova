@@ -341,7 +341,57 @@ function afficherToast(message, type = 'info') {
         setTimeout(() => toast.remove(), 400);
     }, 3500);
 }
+ // 📷 SCANNER COPIE MANUSCRITE - Phase D3
+const btnScan = document.getElementById('btnScan');
+if (btnScan) {
+    btnScan.addEventListener('click', () => {
+        // Créer input file caché
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = 'image/*';
+        input.capture = 'environment'; // Ouvre camera sur mobile
 
+        input.onchange = async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            // Afficher message utilisateur
+            ajouterMessage("📷 J'envoie ma copie à scanner...", 'user');
+
+            // Formulaire pour OCR
+            const formData = new FormData();
+            formData.append('fichier', file);
+            formData.append('langue', 'fra');
+            formData.append('expliquer', 'true');
+
+            try {
+                const response = await fetch('/api/ocr', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await response.json();
+
+                if (data.succes && data.texte) {
+                    ajouterMessage(`📄 Texte extrait :\n\n${data.texte.substring(0, 500)}${data.texte.length > 500 ? '...' : ''}`, 'ia');
+
+                    if (data.explication) {
+                        ajouterMessage(`💡 Explication IA :\n\n${data.explication}`, 'ia');
+                        lireVoix(data.explication);
+                    } else {
+                        // Envoyer à l'IA pour correction
+                        envoyerMessage(`Corrige cette copie :\n${data.texte}`);
+                    }
+                } else {
+                    ajouterMessage(`❌ Erreur OCR : ${data.erreur || 'Inconnue'}`, 'ia');
+                }
+            } catch (err) {
+                ajouterMessage(`❌ Erreur : ${err.message}`, 'ia');
+            }
+        };
+
+        input.click();
+    });
+}
 // ═══════════════════════════════════════════
 // 🎯 LOG DE BIENVENUE
 // ═══════════════════════════════════════════

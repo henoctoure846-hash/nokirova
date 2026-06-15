@@ -500,3 +500,16 @@ body {
     .stat-valeur { font-size: 22px; }
     .stat-icone { font-size: 32px; }
 }
+
+.btn-scan {
+    background: linear-gradient(135deg, #F59E0B, #D97706);
+    color: white;
+    border: none;
+    width: 46px; height: 46px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 18px;
+    flex-shrink: 0;
+    transition: all 0.3s;
+}
+.btn-scan:hover { transform: scale(1.1); }

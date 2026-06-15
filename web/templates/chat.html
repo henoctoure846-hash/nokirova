@@ -100,7 +100,6 @@
 <style>
 /* ═══════════════════════════════════════════
    💬 CHAT PAGE - NOKIROVA
-   Phase D1 : Chat Vocal + D2 : Images + D3 : Scan Copie
    ═══════════════════════════════════════════ */
 .chat-page {
   max-width: 1100px;
@@ -112,7 +111,6 @@
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* HEADER */
 .chat-header {
   position: relative;
   background: linear-gradient(135deg, #7B61FF, #5B21B6);
@@ -159,7 +157,6 @@
   font-weight: 500;
 }
 
-/* CHAT BOX */
 .chat-box {
   background: white;
   border-radius: 28px;
@@ -172,7 +169,6 @@
   border-top: 5px solid #7B61FF;
 }
 
-/* MESSAGES ZONE */
 .messages-zone {
   flex: 1;
   padding: 24px;
@@ -186,7 +182,6 @@
   border-radius: 4px;
 }
 
-/* BIENVENUE */
 .message-bienvenue {
   text-align: center;
   padding: 30px 20px;
@@ -223,7 +218,6 @@
   margin-bottom: 24px;
 }
 
-/* SUGGESTIONS */
 .suggestions-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -264,7 +258,6 @@
   transition: color 0.3s;
 }
 
-/* MESSAGES */
 .message {
   margin-bottom: 16px;
   display: flex;
@@ -318,7 +311,6 @@
   border-bottom-left-radius: 6px;
 }
 
-/* CHARGEMENT */
 .chargement {
   display: flex;
   gap: 6px;
@@ -338,7 +330,6 @@
   40% { transform: scale(1); opacity: 1; }
 }
 
-/* MESSAGE D'ECOUTE */
 .message-ecoute .message-bulle {
   background: linear-gradient(135deg, #FEF3C7, #FDE68A) !important;
   color: #92400E !important;
@@ -357,7 +348,6 @@
   50% { transform: scale(1.3); }
 }
 
-/* IMAGES */
 .message-image .message-bulle {
   padding: 10px !important;
   background: white !important;
@@ -452,7 +442,6 @@
   100% { width: 95%; }
 }
 
-/* MODAL ZOOM */
 .modal-image {
   display: none;
   position: fixed;
@@ -492,7 +481,6 @@
   box-shadow: 0 4px 12px rgba(239,68,68,0.4);
 }
 
-/* INPUT ZONE */
 .input-zone {
   padding: 18px 22px;
   background: white;
@@ -527,7 +515,6 @@
   max-height: 120px;
 }
 
-/* BOUTON ENVOYER */
 .btn-envoyer {
   background: linear-gradient(135deg, #7B61FF, #5B21B6);
   color: white;
@@ -553,7 +540,6 @@
   transform: none;
 }
 
-/* BOUTON MICRO */
 .btn-micro {
   background: linear-gradient(135deg, #EF4444, #DC2626);
   color: white;
@@ -579,7 +565,6 @@
   100% { transform: scale(1);    box-shadow: 0 0 0 0 rgba(239,68,68,0); }
 }
 
-/* BOUTON SCAN */
 .btn-scan {
   background: linear-gradient(135deg, #F59E0B, #D97706);
   color: white;
@@ -597,7 +582,6 @@
   box-shadow: 0 6px 18px rgba(245,158,11,0.5);
 }
 
-/* BOUTON STOP */
 .btn-stop {
   background: linear-gradient(135deg, #F59E0B, #D97706);
   color: white;
@@ -619,7 +603,6 @@
   box-shadow: 0 6px 18px rgba(245,158,11,0.5);
 }
 
-/* INFO BAR */
 .input-info {
   margin-top: 8px;
   font-size: 11px;
@@ -637,7 +620,6 @@
 }
 #microInfo.lecture { color: #F59E0B; }
 
-/* MODE SOMBRE */
 html[data-mode="sombre"] .chat-box,
 html[data-mode="sombre"] .input-zone {
   background: #1A1D2E !important;
@@ -669,7 +651,6 @@ html[data-mode="sombre"] .input-wrapper {
 }
 html[data-mode="sombre"] #inputMessage { color: #F1F5F9 !important; }
 
-/* RESPONSIVE */
 @media (max-width: 768px) {
   .chat-header { flex-direction: column; text-align: center; padding: 22px; }
   .chat-header-texte h1 { font-size: 20px; }
@@ -681,7 +662,6 @@ html[data-mode="sombre"] #inputMessage { color: #F1F5F9 !important; }
 }
 </style>
 
-<!-- MODAL ZOOM IMAGE -->
 <div class="modal-image" id="modalImage" onclick="fermerModal()">
   <div class="modal-image-content" onclick="event.stopPropagation()">
     <img id="modalImageSrc" src="" alt="Image générée">
@@ -690,10 +670,6 @@ html[data-mode="sombre"] #inputMessage { color: #F1F5F9 !important; }
 </div>
 
 <script>
-// ═══════════════════════════════════════════
-// 💬 NOKIROVA — CHAT + D1 VOCAL + D2 IMAGES + D3 SCAN
-// ═══════════════════════════════════════════
-
 // ÉLÉMENTS DOM
 const formChat     = document.getElementById('formChat');
 const inputMessage = document.getElementById('inputMessage');
@@ -712,7 +688,7 @@ if (user) {
 }
 
 // ═══════════════════════════════════════════
-// 🎨 PHASE D2 — GÉNÉRATION IMAGE (VERSION MULTI-API CORRIGÉE)
+// 🎨 GÉNÉRATION IMAGE (CORRIGÉE - TÉLÉCHARGEMENT STABLE)
 // ═══════════════════════════════════════════
 
 const MOTS_IMAGE = [
@@ -758,92 +734,46 @@ async function genererImage(prompt) {
   messagesZone.scrollTop = messagesZone.scrollHeight;
 
   const promptEncode = encodeURIComponent(prompt);
-
-  // API 1 : Pollinations.ai (IA gratuite)
   const urlPollinations = `https://image.pollinations.ai/prompt/${promptEncode}?width=512&height=512&nologo=true`;
 
-  // API 2 : Unsplash (images libres de droits)
-  const urlUnsplash = `https://source.unsplash.com/512x512/?${promptEncode}`;
-
-  // API 3 : Picsum (images aléatoires en dernier recours)
-  const urlPicsum = `https://picsum.photos/512/512?random=${Math.random()}`;
-
-  let imageUrl = null;
+  let finalUrl = null;
 
   try {
-    // Essayer Pollinations d'abord
-    const testImg1 = new Image();
+    const testImg = new Image();
     await new Promise((resolve, reject) => {
-      testImg1.onload = () => resolve(true);
-      testImg1.onerror = () => reject(new Error('Pollinations échoué'));
-      testImg1.src = urlPollinations;
-      setTimeout(() => reject(new Error('Timeout Pollinations')), 10000);
+      testImg.onload = () => resolve(true);
+      testImg.onerror = () => reject(new Error('Pollinations échoué'));
+      testImg.src = urlPollinations;
+      setTimeout(() => reject(new Error('Timeout (15s)')), 15000);
     });
-    imageUrl = urlPollinations;
-  } catch(e1) {
-    console.log('Pollinations échoué, essai Unsplash');
-    try {
-      const testImg2 = new Image();
-      await new Promise((resolve, reject) => {
-        testImg2.onload = () => resolve(true);
-        testImg2.onerror = () => reject(new Error('Unsplash échoué'));
-        testImg2.src = urlUnsplash;
-        setTimeout(() => reject(new Error('Timeout Unsplash')), 8000);
-      });
-      imageUrl = urlUnsplash;
-    } catch(e2) {
-      console.log('Unsplash échoué, essai Picsum');
-      try {
-        const testImg3 = new Image();
-        await new Promise((resolve, reject) => {
-          testImg3.onload = () => resolve(true);
-          testImg3.onerror = () => reject(new Error('Picsum échoué'));
-          testImg3.src = urlPicsum;
-          setTimeout(() => reject(new Error('Timeout Picsum')), 5000);
-        });
-        imageUrl = urlPicsum;
-      } catch(e3) {
-        throw new Error('Toutes les APIs images sont indisponibles');
-      }
-    }
+    finalUrl = urlPollinations;
+  } catch(e) {
+    console.log('Pollinations échoué, utilisation image de secours');
+    finalUrl = `https://picsum.photos/512/512?random=${Math.random()}`;
   }
 
-  if (imageUrl) {
-    loadDiv.remove();
+  loadDiv.remove();
 
-    const imgDiv = document.createElement('div');
-    imgDiv.className = 'message message-ia message-image';
-    imgDiv.innerHTML = `
-      <div class="avatar avatar-ia">🌸</div>
-      <div class="message-bulle">
-        <div class="image-generee-wrapper">
-          <div class="image-generee-label">🎨 Illustration : "${prompt.substring(0, 80)}"</div>
-          <img class="image-generee" src="${imageUrl}" alt="${prompt}" onclick="zoomImage('${imageUrl}')" loading="lazy">
-          <div class="image-generee-actions">
-            <button class="btn-image-action" onclick="zoomImage('${imageUrl}')">🔍 Agrandir</button>
-            <a class="btn-image-action telecharger" href="${imageUrl}" download="nokirova-image.jpg" target="_blank">⬇️ Télécharger</a>
-            <button class="btn-image-action" onclick="poserQuestion('génère une autre image de ${prompt.replace(/'/g, "\\'")}')">🔄 Regénérer</button>
-          </div>
+  const imgDiv = document.createElement('div');
+  imgDiv.className = 'message message-ia message-image';
+  imgDiv.setAttribute('data-image-url', finalUrl);
+  imgDiv.innerHTML = `
+    <div class="avatar avatar-ia">🌸</div>
+    <div class="message-bulle">
+      <div class="image-generee-wrapper">
+        <div class="image-generee-label">🎨 Illustration : "${prompt.substring(0, 80)}"</div>
+        <img class="image-generee" src="${finalUrl}" alt="${prompt}" onclick="zoomImage('${finalUrl}')" loading="lazy">
+        <div class="image-generee-actions">
+          <button class="btn-image-action" onclick="zoomImage('${finalUrl}')">🔍 Agrandir</button>
+          <a class="btn-image-action telecharger" href="${finalUrl}" download="nokirova-image.jpg" target="_blank" onclick="event.stopPropagation();">⬇️ Télécharger</a>
+          <button class="btn-image-action" onclick="poserQuestion('génère une autre image de ${prompt.replace(/'/g, "\\'")}')">🔄 Regénérer</button>
         </div>
       </div>
-    `;
-    messagesZone.appendChild(imgDiv);
-    messagesZone.scrollTop = messagesZone.scrollHeight;
-    lireVoix(`Voilà une illustration pour ${prompt}`);
-  } else {
-    loadDiv.remove();
-    const errDiv = document.createElement('div');
-    errDiv.className = 'message message-ia';
-    errDiv.innerHTML = `
-      <div class="avatar avatar-ia">🌸</div>
-      <div class="message-bulle" style="background:#FEF3C7;color:#92400E;border:1px solid #F59E0B;">
-        ⚠️ Désolé, je n'ai pas pu générer l'image.<br>
-        💡 Astuce : Essaie une description plus simple comme "un chat" ou "une fleur"
-      </div>
-    `;
-    messagesZone.appendChild(errDiv);
-    messagesZone.scrollTop = messagesZone.scrollHeight;
-  }
+    </div>
+  `;
+  messagesZone.appendChild(imgDiv);
+  messagesZone.scrollTop = messagesZone.scrollHeight;
+  lireVoix(`Voilà une illustration pour ${prompt}`);
 }
 
 function zoomImage(src) {
@@ -931,7 +861,7 @@ if (SpeechRecognition && btnMicro) {
 }
 
 // ═══════════════════════════════════════════
-// 📷 SCANNER COPIE MANUSCRITE - PHASE D3
+// 📷 SCANNER COPIE MANUSCRITE
 // ═══════════════════════════════════════════
 if (btnScan) {
   btnScan.addEventListener('click', () => {

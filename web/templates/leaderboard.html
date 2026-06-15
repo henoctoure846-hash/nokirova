@@ -1,0 +1,506 @@
+{% extends "base.html" %}
+{% block title %}Leaderboard - NOKIROVA{% endblock %}
+{% block contenu %}
+
+<div id="toast" style="
+  position:fixed; top:20px; right:20px; z-index:9999;
+  background:#1A1D2E; color:white; padding:1rem 1.5rem;
+  border-radius:16px; font-weight:600; font-size:0.95rem;
+  box-shadow:0 8px 30px rgba(0,0,0,0.3);
+  transform:translateX(120%); transition:transform 0.4s cubic-bezier(0.175,0.885,0.32,1.275);
+  display:flex; align-items:center; gap:0.8rem; max-width:320px;
+"></div>
+
+<div class="lb-container">
+
+  <!-- ═══ HEADER ═══ -->
+  <div class="lb-header">
+    <div class="lb-header-bg-emoji">🏆</div>
+    <div class="lb-header-icon">🏆</div>
+    <div class="lb-header-text">
+      <h1 class="lb-header-title">Leaderboard</h1>
+      <p class="lb-header-sub">Classement des étudiants NOKIROVA 🌸</p>
+    </div>
+    <div class="lb-header-badge"><span>🔥</span> Live</div>
+  </div>
+
+  <!-- ═══ TON RANG ═══ -->
+  <div class="lb-mon-rang" id="mon-rang" style="display:none;">
+    <div class="lb-rang-left">
+      <div class="lb-rang-num" id="rang-num">#?</div>
+      <div class="lb-rang-avatar" id="rang-avatar">👤</div>
+      <div>
+        <div class="lb-rang-nom" id="rang-nom">Toi</div>
+        <div class="lb-rang-titre" id="rang-titre">🌱 Apprenti</div>
+      </div>
+    </div>
+    <div class="lb-rang-right">
+      <div class="lb-rang-score">
+        <span id="rang-score">0</span>
+        <span class="lb-rang-score-label">pts</span>
+      </div>
+      <div class="lb-rang-pills">
+        <span class="lb-pill lb-pill-violet" id="rang-xp">0 XP</span>
+        <span class="lb-pill lb-pill-rouge" id="rang-streak">0🔥</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ PODIUM ═══ -->
+  <div class="lb-podium" id="lb-podium">
+
+    <!-- 2ème -->
+    <div class="lb-podium-item lb-p2" id="p2">
+      <div class="lb-pod-avatar">🥈</div>
+      <div class="lb-pod-nom" id="p2-nom">—</div>
+      <div class="lb-pod-score" id="p2-score">0</div>
+      <div class="lb-pod-block lb-pod-block-2">2</div>
+    </div>
+
+    <!-- 1er -->
+    <div class="lb-podium-item lb-p1" id="p1">
+      <div class="lb-pod-crown">👑</div>
+      <div class="lb-pod-avatar">🥇</div>
+      <div class="lb-pod-nom" id="p1-nom">—</div>
+      <div class="lb-pod-score" id="p1-score">0</div>
+      <div class="lb-pod-block lb-pod-block-1">1</div>
+    </div>
+
+    <!-- 3ème -->
+    <div class="lb-podium-item lb-p3" id="p3">
+      <div class="lb-pod-avatar">🥉</div>
+      <div class="lb-pod-nom" id="p3-nom">—</div>
+      <div class="lb-pod-score" id="p3-score">0</div>
+      <div class="lb-pod-block lb-pod-block-3">3</div>
+    </div>
+
+  </div>
+
+  <!-- ═══ CLASSEMENT COMPLET ═══ -->
+  <div class="lb-card">
+    <div class="lb-card-header">
+      <div class="lb-card-icon" style="background:linear-gradient(135deg,#F59E0B,#FFD93D);">📋</div>
+      <div>
+        <h3 class="lb-card-title">Classement complet</h3>
+        <p class="lb-card-sub">Basé sur XP + Streak + Cours importés</p>
+      </div>
+      <button onclick="reinitialiser()" class="lb-btn-reset">🔄 Réinitialiser</button>
+    </div>
+    <div id="liste-classement" class="lb-liste"></div>
+  </div>
+
+  <!-- ═══ AJOUTER UN AMI ═══ -->
+  <div class="lb-card lb-card-violet">
+    <div class="lb-card-header">
+      <div class="lb-card-icon" style="background:linear-gradient(135deg,#7B61FF,#A855F7);">➕</div>
+      <div>
+        <h3 class="lb-card-title">Ajouter un étudiant</h3>
+        <p class="lb-card-sub">Entre les stats de ton ami pour le classer</p>
+      </div>
+    </div>
+    <div class="lb-form-grid">
+      <div class="lb-input-wrap">
+        <span class="lb-input-icon">👤</span>
+        <input type="text" id="ami-nom" placeholder="Prénom de ton ami" class="lb-input"/>
+      </div>
+      <div class="lb-input-wrap">
+        <span class="lb-input-icon">⭐</span>
+        <input type="number" id="ami-xp" placeholder="Son XP total" class="lb-input" min="0"/>
+      </div>
+      <div class="lb-input-wrap">
+        <span class="lb-input-icon">🔥</span>
+        <input type="number" id="ami-streak" placeholder="Son streak (jours)" class="lb-input" min="0"/>
+      </div>
+      <div class="lb-input-wrap">
+        <span class="lb-input-icon">📚</span>
+        <input type="number" id="ami-cours" placeholder="Ses cours importés" class="lb-input" min="0"/>
+      </div>
+    </div>
+    <button onclick="ajouterAmi()" class="lb-btn lb-btn-violet">
+      <span class="lb-btn-circle">➕</span>
+      <span>Ajouter au classement</span>
+    </button>
+  </div>
+
+  <!-- ═══ COMMENT LE SCORE EST CALCULÉ ═══ -->
+  <div class="lb-info-card">
+    <div class="lb-card-header">
+      <div class="lb-card-icon" style="background:linear-gradient(135deg,#00C853,#7ED321);">💡</div>
+      <div>
+        <h3 class="lb-card-title">Comment le score est calculé ?</h3>
+      </div>
+    </div>
+    <div class="lb-formule-grid">
+      <div class="lb-formule-item lb-f-violet">
+        <span class="lb-f-emoji">⭐</span>
+        <strong>XP × 1</strong>
+        <span>Chaque point d'expérience compte</span>
+      </div>
+      <div class="lb-formule-item lb-f-rouge">
+        <span class="lb-f-emoji">🔥</span>
+        <strong>Streak × 10</strong>
+        <span>La régularité est récompensée</span>
+      </div>
+      <div class="lb-formule-item lb-f-bleu">
+        <span class="lb-f-emoji">📚</span>
+        <strong>Cours × 5</strong>
+        <span>Chaque cours importé vaut 5 pts</span>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<style>
+@keyframes fadeInUp  { from{opacity:0;transform:translateY(30px)} to{opacity:1;transform:translateY(0)} }
+@keyframes floatTrophy{ 0%,100%{transform:translateY(0) rotate(-2deg)} 50%{transform:translateY(-10px) rotate(2deg)} }
+@keyframes podiumRise { from{transform:scaleY(0);opacity:0} to{transform:scaleY(1);opacity:1} }
+@keyframes crownBounce{ 0%,100%{transform:translateY(0) rotate(-5deg)} 50%{transform:translateY(-8px) rotate(5deg)} }
+@keyframes glowGold   { 0%,100%{box-shadow:0 0 0 0 rgba(245,158,11,0.5)} 50%{box-shadow:0 0 20px 8px rgba(245,158,11,0.2)} }
+@keyframes slideIn    { from{opacity:0;transform:translateX(-20px)} to{opacity:1;transform:translateX(0)} }
+
+/* ── CONTAINER ── */
+.lb-container{ padding:1.5rem; max-width:900px; margin:0 auto; animation:fadeInUp 0.5s ease; }
+
+/* ── HEADER ── */
+.lb-header{ position:relative; overflow:hidden; background:linear-gradient(135deg,#F59E0B,#FFD93D 40%,#FF6B9D); border-radius:28px; padding:2rem; margin-bottom:1.5rem; display:flex; align-items:center; gap:1.2rem; flex-wrap:wrap; box-shadow:0 8px 32px rgba(245,158,11,0.35); }
+.lb-header-bg-emoji{ position:absolute; right:-10px; top:-20px; font-size:9rem; opacity:0.12; pointer-events:none; animation:floatTrophy 4s ease-in-out infinite; }
+.lb-header-icon{ width:72px; height:72px; background:rgba(255,255,255,0.2); border-radius:20px; display:flex; align-items:center; justify-content:center; font-size:2.2rem; backdrop-filter:blur(10px); border:2px solid rgba(255,255,255,0.3); }
+.lb-header-text{ flex:1; }
+.lb-header-title{ font-size:1.8rem; font-weight:900; color:white; margin:0; text-shadow:0 2px 10px rgba(0,0,0,0.2); }
+.lb-header-sub{ color:rgba(255,255,255,0.85); margin:0.3rem 0 0; font-size:0.95rem; }
+.lb-header-badge{ background:rgba(255,255,255,0.2); color:white; padding:0.5rem 1.2rem; border-radius:50px; font-weight:700; font-size:0.85rem; display:flex; align-items:center; gap:0.5rem; backdrop-filter:blur(10px); border:1px solid rgba(255,255,255,0.3); }
+
+/* ── MON RANG ── */
+.lb-mon-rang{
+  background:linear-gradient(135deg,#7B61FF,#A855F7);
+  border-radius:24px; padding:1.2rem 1.5rem;
+  margin-bottom:1.5rem; display:flex;
+  align-items:center; justify-content:space-between;
+  box-shadow:0 8px 28px rgba(123,97,255,0.4);
+  animation:fadeInUp 0.5s ease; flex-wrap:wrap; gap:1rem;
+}
+.lb-rang-left{ display:flex; align-items:center; gap:1rem; }
+.lb-rang-num{ font-size:2rem; font-weight:900; color:white; min-width:50px; }
+.lb-rang-avatar{ width:50px; height:50px; background:rgba(255,255,255,0.2); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:1.5rem; border:2px solid rgba(255,255,255,0.4); }
+.lb-rang-nom{ font-size:1.1rem; font-weight:900; color:white; }
+.lb-rang-titre{ font-size:0.82rem; color:rgba(255,255,255,0.8); font-weight:600; }
+.lb-rang-right{ display:flex; flex-direction:column; align-items:flex-end; gap:0.5rem; }
+.lb-rang-score{ display:flex; align-items:baseline; gap:0.3rem; }
+.lb-rang-score span:first-child{ font-size:2.5rem; font-weight:900; color:white; }
+.lb-rang-score-label{ font-size:1rem; color:rgba(255,255,255,0.8); font-weight:700; }
+.lb-rang-pills{ display:flex; gap:0.5rem; }
+.lb-pill{ padding:0.25rem 0.8rem; border-radius:50px; font-size:0.78rem; font-weight:800; }
+.lb-pill-violet{ background:rgba(255,255,255,0.2); color:white; }
+.lb-pill-rouge{ background:rgba(255,255,255,0.2); color:white; }
+
+/* ── PODIUM ── */
+.lb-podium{
+  display:flex; align-items:flex-end; justify-content:center;
+  gap:1rem; margin-bottom:1.5rem;
+  padding:2rem 1rem 0;
+}
+.lb-podium-item{ display:flex; flex-direction:column; align-items:center; flex:1; max-width:200px; }
+.lb-pod-crown{ font-size:2rem; animation:crownBounce 2s ease-in-out infinite; margin-bottom:0.3rem; }
+.lb-pod-avatar{ font-size:3rem; margin-bottom:0.5rem; }
+.lb-pod-nom{ font-size:0.9rem; font-weight:800; color:#1A1D2E; text-align:center; margin-bottom:0.3rem; max-width:120px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.lb-pod-score{ font-size:0.8rem; color:#6B7280; font-weight:700; margin-bottom:0.8rem; }
+.lb-pod-block{
+  width:100%; border-radius:16px 16px 0 0;
+  display:flex; align-items:center; justify-content:center;
+  font-size:2rem; font-weight:900; color:white;
+  transform-origin:bottom;
+  animation:podiumRise 0.8s cubic-bezier(0.34,1.56,0.64,1) both;
+}
+.lb-pod-block-1{ height:130px; background:linear-gradient(135deg,#F59E0B,#FFD93D); box-shadow:0 -8px 24px rgba(245,158,11,0.4); animation-delay:0.2s; }
+.lb-pod-block-2{ height:95px;  background:linear-gradient(135deg,#9CA3AF,#D1D5DB); box-shadow:0 -6px 20px rgba(156,163,175,0.4); animation-delay:0.4s; }
+.lb-pod-block-3{ height:70px;  background:linear-gradient(135deg,#F59E0B,#B45309); box-shadow:0 -4px 16px rgba(180,83,9,0.3); animation-delay:0.6s; }
+.lb-p1 .lb-pod-nom{ font-size:1rem; color:#92400E; }
+.lb-p1{ transform:translateY(-10px); }
+
+/* ── CARD ── */
+.lb-card{ background:white; border-radius:24px; padding:1.8rem; margin-bottom:1.2rem; box-shadow:0 4px 24px rgba(0,0,0,0.08); border-top:5px solid #F59E0B; animation:fadeInUp 0.5s ease both; }
+.lb-card-violet{ border-top-color:#7B61FF; }
+.lb-card-header{ display:flex; align-items:center; gap:1rem; margin-bottom:1.5rem; flex-wrap:wrap; }
+.lb-card-icon{ width:52px; height:52px; border-radius:14px; display:flex; align-items:center; justify-content:center; font-size:1.5rem; flex-shrink:0; box-shadow:0 4px 12px rgba(0,0,0,0.15); }
+.lb-card-title{ font-size:1.1rem; font-weight:800; color:#1A1D2E; margin:0; }
+.lb-card-sub{ font-size:0.85rem; color:#6B7280; margin:0.2rem 0 0; }
+.lb-btn-reset{ margin-left:auto; background:#F3F4F6; color:#6B7280; border:none; padding:0.5rem 1rem; border-radius:50px; font-weight:700; font-size:0.82rem; cursor:pointer; transition:0.2s; }
+.lb-btn-reset:hover{ background:#EF4444; color:white; }
+
+/* ── LISTE CLASSEMENT ── */
+.lb-liste{ display:flex; flex-direction:column; gap:0.6rem; }
+.lb-row{
+  display:flex; align-items:center; gap:1rem;
+  padding:1rem 1.2rem; border-radius:16px;
+  background:#FAFAFA; border:2px solid #F3F4F6;
+  transition:all 0.2s; animation:slideIn 0.4s ease both;
+}
+.lb-row:hover{ transform:translateX(4px); box-shadow:0 4px 16px rgba(0,0,0,0.08); }
+.lb-row.lb-moi{ background:linear-gradient(135deg,#EDE9FE,#FAF5FF); border-color:#7B61FF; }
+.lb-row-rang{ font-size:1.2rem; font-weight:900; min-width:36px; text-align:center; }
+.lb-row-rang.lb-r1{ color:#F59E0B; }
+.lb-row-rang.lb-r2{ color:#9CA3AF; }
+.lb-row-rang.lb-r3{ color:#B45309; }
+.lb-row-avatar{ width:40px; height:40px; border-radius:50%; background:linear-gradient(135deg,#7B61FF,#A855F7); display:flex; align-items:center; justify-content:center; font-size:1.2rem; flex-shrink:0; }
+.lb-row-infos{ flex:1; }
+.lb-row-nom{ font-size:0.95rem; font-weight:800; color:#1A1D2E; }
+.lb-row-titre{ font-size:0.75rem; color:#6B7280; font-weight:600; }
+.lb-row-right{ display:flex; flex-direction:column; align-items:flex-end; gap:0.2rem; }
+.lb-row-score{ font-size:1.2rem; font-weight:900; color:#7B61FF; }
+.lb-row-detail{ font-size:0.72rem; color:#9CA3AF; font-weight:600; }
+.lb-badge-moi{ background:linear-gradient(135deg,#7B61FF,#A855F7); color:white; padding:0.2rem 0.7rem; border-radius:50px; font-size:0.72rem; font-weight:800; }
+
+/* ── FORM ── */
+.lb-form-grid{ display:grid; grid-template-columns:1fr 1fr; gap:0.8rem; margin-bottom:1rem; }
+.lb-input-wrap{ display:flex; align-items:center; gap:0.8rem; background:#FAF5FF; border:2px solid #DDD6FE; border-radius:14px; padding:0.75rem 1rem; transition:0.2s; }
+.lb-input-wrap:focus-within{ border-color:#7B61FF; }
+.lb-input-icon{ font-size:1rem; flex-shrink:0; }
+.lb-input{ flex:1; border:none; background:transparent; font-size:0.9rem; font-weight:600; outline:none; color:#374151; }
+.lb-input::placeholder{ color:#9CA3AF; font-weight:400; }
+.lb-btn{ width:100%; display:flex; align-items:center; justify-content:center; gap:0.8rem; padding:1rem; border:none; border-radius:50px; font-weight:800; font-size:0.95rem; cursor:pointer; transition:0.3s; }
+.lb-btn:hover{ transform:translateY(-3px); }
+.lb-btn-circle{ width:32px; height:32px; background:rgba(255,255,255,0.25); border-radius:50%; display:flex; align-items:center; justify-content:center; }
+.lb-btn-violet{ background:linear-gradient(135deg,#7B61FF,#5B21B6); color:white; box-shadow:0 6px 20px rgba(123,97,255,0.4); }
+
+/* ── FORMULE ── */
+.lb-info-card{ background:white; border-radius:24px; padding:1.8rem; border-top:5px solid #00C853; box-shadow:0 4px 20px rgba(0,0,0,0.06); }
+.lb-formule-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:0.8rem; margin-top:0.5rem; }
+.lb-formule-item{ padding:1rem; border-radius:16px; text-align:center; display:flex; flex-direction:column; align-items:center; gap:0.4rem; }
+.lb-f-violet{ background:linear-gradient(135deg,#FAF5FF,#EDE9FE); border:2px solid #DDD6FE; }
+.lb-f-rouge{ background:linear-gradient(135deg,#FFF7ED,#FFEDD5); border:2px solid #FED7AA; }
+.lb-f-bleu{ background:linear-gradient(135deg,#EFF6FF,#DBEAFE); border:2px solid #BFDBFE; }
+.lb-f-emoji{ font-size:1.8rem; }
+.lb-formule-item strong{ font-size:1rem; font-weight:900; color:#1A1D2E; }
+.lb-formule-item span{ font-size:0.78rem; color:#6B7280; }
+
+/* ── MODE SOMBRE ── */
+[data-theme="dark"] .lb-card,
+[data-theme="dark"] .lb-info-card{ background:#1E2235; }
+[data-theme="dark"] .lb-card-title{ color:#F1F5F9; }
+[data-theme="dark"] .lb-row{ background:#252A40; border-color:#374151; }
+[data-theme="dark"] .lb-row.lb-moi{ background:linear-gradient(135deg,#2E1065,#1E2235); border-color:#7B61FF; }
+[data-theme="dark"] .lb-row-nom{ color:#F1F5F9; }
+[data-theme="dark"] .lb-pod-nom{ color:#F1F5F9; }
+[data-theme="dark"] .lb-input-wrap{ background:#252A40; border-color:#4B5563; }
+[data-theme="dark"] .lb-input{ color:#F1F5F9; }
+[data-theme="dark"] .lb-formule-item{ border-color:#374151; }
+[data-theme="dark"] .lb-formule-item strong{ color:#F1F5F9; }
+
+/* ── RESPONSIVE ── */
+@media(max-width:640px){
+  .lb-container{ padding:1rem; }
+  .lb-header-title{ font-size:1.4rem; }
+  .lb-header-badge{ display:none; }
+  .lb-form-grid{ grid-template-columns:1fr; }
+  .lb-formule-grid{ grid-template-columns:1fr; }
+  .lb-podium{ gap:0.5rem; padding:1rem 0.5rem 0; }
+  .lb-pod-block-1{ height:100px; }
+  .lb-pod-block-2{ height:75px; }
+  .lb-pod-block-3{ height:55px; }
+}
+</style>
+
+<script>
+const TITRES = ['🌱 Apprenti','📖 Étudiant','🎓 Bachelier','💡 Expert','🏆 Maître','💎 Légende'];
+const AVATARS = ['😊','🧑‍🎓','👨‍💻','🧠','🦁','💎'];
+let monId = '';
+
+document.addEventListener('DOMContentLoaded', init);
+
+function toast(msg, type='info'){
+  const colors={ succes:'linear-gradient(135deg,#00C853,#7ED321)', erreur:'linear-gradient(135deg,#EF4444,#DC2626)', info:'linear-gradient(135deg,#2962FF,#7B61FF)', warning:'linear-gradient(135deg,#F59E0B,#FFD93D)' };
+  const t=document.getElementById('toast');
+  t.innerHTML=msg; t.style.background=colors[type]||colors.info;
+  t.style.transform='translateX(0)';
+  setTimeout(()=>{ t.style.transform='translateX(120%)'; },3200);
+}
+
+function calcScore(xp, streak, cours){
+  return (xp*1) + (streak*10) + (cours*5);
+}
+
+function getTitre(score){
+  if(score >= 500) return TITRES[5];
+  if(score >= 300) return TITRES[4];
+  if(score >= 150) return TITRES[3];
+  if(score >= 75)  return TITRES[2];
+  if(score >= 25)  return TITRES[1];
+  return TITRES[0];
+}
+
+function getAvatar(score){
+  if(score >= 500) return AVATARS[5];
+  if(score >= 300) return AVATARS[4];
+  if(score >= 150) return AVATARS[3];
+  if(score >= 75)  return AVATARS[2];
+  if(score >= 25)  return AVATARS[1];
+  return AVATARS[0];
+}
+
+async function init(){
+  monId = localStorage.getItem('nokirova_user_id') || 'moi';
+
+  // Charger mes stats depuis l'API
+  try{
+    const r = await fetch('/api/graphiques/data');
+    const d = await r.json();
+    if(d.succes){
+      const stats = d.data.stats || {};
+      const moi = {
+        id     : monId,
+        nom    : localStorage.getItem('nokirova_user') || 'Moi',
+        xp     : stats.xp || 0,
+        streak : stats.streak_jours || 0,
+        cours  : stats.cours_importes || 0,
+        estMoi : true
+      };
+      // Sauvegarder mes stats dans le classement
+      sauverJoueur(moi);
+    }
+  } catch(e){ console.log('Erreur stats:', e); }
+
+  afficherClassement();
+}
+
+function getClassement(){
+  const raw = localStorage.getItem('nokirova_classement');
+  return raw ? JSON.parse(raw) : [];
+}
+
+function sauverClassement(liste){
+  localStorage.setItem('nokirova_classement', JSON.stringify(liste));
+}
+
+function sauverJoueur(joueur){
+  let liste = getClassement();
+  const idx = liste.findIndex(j => j.id === joueur.id);
+  if(idx >= 0){ liste[idx] = { ...liste[idx], ...joueur }; }
+  else{ liste.push(joueur); }
+  sauverClassement(liste);
+}
+
+function afficherClassement(){
+  let liste = getClassement();
+
+  // Calculer scores et trier
+  liste = liste.map(j => ({
+    ...j,
+    score: calcScore(j.xp||0, j.streak||0, j.cours||0)
+  })).sort((a,b) => b.score - a.score);
+
+  // ── Podium ──
+  const top3 = liste.slice(0,3);
+  ['p1','p2','p3'].forEach((id,i) => {
+    const j = top3[i];
+    if(j){
+      document.getElementById(id+'-nom').textContent   = j.nom;
+      document.getElementById(id+'-score').textContent = j.score + ' pts';
+    } else {
+      document.getElementById(id+'-nom').textContent   = '—';
+      document.getElementById(id+'-score').textContent = '';
+    }
+  });
+
+  // ── Mon rang ──
+  const monRang = liste.findIndex(j => j.estMoi) + 1;
+  const moi = liste.find(j => j.estMoi);
+  if(moi){
+    document.getElementById('mon-rang').style.display = 'flex';
+    document.getElementById('rang-num').textContent   = '#' + monRang;
+    document.getElementById('rang-nom').textContent   = moi.nom;
+    document.getElementById('rang-titre').textContent = getTitre(moi.score||0);
+    document.getElementById('rang-score').textContent = moi.score||0;
+    document.getElementById('rang-xp').textContent    = (moi.xp||0) + ' XP';
+    document.getElementById('rang-streak').textContent= (moi.streak||0) + '🔥';
+    document.getElementById('rang-avatar').textContent= getAvatar(moi.score||0);
+  }
+
+  // ── Liste complète ──
+  const container = document.getElementById('liste-classement');
+  container.innerHTML = '';
+  if(liste.length === 0){
+    container.innerHTML = '<div style="text-align:center;padding:2rem;color:#9CA3AF;">😊 Aucun étudiant pour l\'instant !</div>';
+    return;
+  }
+
+  liste.forEach((j, i) => {
+    const rang    = i + 1;
+    const isMoi   = j.estMoi;
+    const score   = j.score || 0;
+    const titre   = getTitre(score);
+    const avatar  = getAvatar(score);
+    const medaille= rang===1 ? '🥇' : rang===2 ? '🥈' : rang===3 ? '🥉' : rang;
+    const clsRang = rang===1 ? 'lb-r1' : rang===2 ? 'lb-r2' : rang===3 ? 'lb-r3' : '';
+
+    const div = document.createElement('div');
+    div.className = 'lb-row' + (isMoi ? ' lb-moi' : '');
+    div.style.animationDelay = (i*0.05)+'s';
+    div.innerHTML = `
+      <div class="lb-row-rang ${clsRang}">${medaille}</div>
+      <div class="lb-row-avatar">${avatar}</div>
+      <div class="lb-row-infos">
+        <div class="lb-row-nom">${esc(j.nom)} ${isMoi ? '<span class="lb-badge-moi">Toi 👈</span>' : ''}</div>
+        <div class="lb-row-titre">${titre}</div>
+      </div>
+      <div class="lb-row-right">
+        <div class="lb-row-score">${score} pts</div>
+        <div class="lb-row-detail">⭐${j.xp||0} 🔥${j.streak||0} 📚${j.cours||0}</div>
+      </div>
+      ${!isMoi ? `<button onclick="supprimerJoueur('${j.id}')" style="background:none;border:none;cursor:pointer;color:#EF4444;font-size:1.1rem;padding:0.3rem;" title="Supprimer">🗑️</button>` : ''}
+    `;
+    container.appendChild(div);
+  });
+}
+
+function ajouterAmi(){
+  const nom    = document.getElementById('ami-nom').value.trim();
+  const xp     = parseInt(document.getElementById('ami-xp').value)     || 0;
+  const streak = parseInt(document.getElementById('ami-streak').value) || 0;
+  const cours  = parseInt(document.getElementById('ami-cours').value)  || 0;
+
+  if(!nom){ toast('⚠️ Entre le prénom de ton ami !', 'warning'); return; }
+
+  const ami = {
+    id     : 'ami_' + Date.now(),
+    nom    : nom,
+    xp     : xp,
+    streak : streak,
+    cours  : cours,
+    estMoi : false
+  };
+
+  sauverJoueur(ami);
+  afficherClassement();
+  toast('✅ ' + nom + ' ajouté au classement ! 🎉', 'succes');
+
+  // Reset form
+  document.getElementById('ami-nom').value    = '';
+  document.getElementById('ami-xp').value     = '';
+  document.getElementById('ami-streak').value = '';
+  document.getElementById('ami-cours').value  = '';
+}
+
+function supprimerJoueur(id){
+  let liste = getClassement().filter(j => j.id !== id);
+  sauverClassement(liste);
+  afficherClassement();
+  toast('🗑️ Étudiant retiré du classement', 'info');
+}
+
+function reinitialiser(){
+  if(!confirm('⚠️ Réinitialiser le classement ? (Tes propres stats resteront)')) return;
+  const liste = getClassement().filter(j => j.estMoi);
+  sauverClassement(liste);
+  afficherClassement();
+  toast('🔄 Classement réinitialisé !', 'info');
+}
+
+function esc(t){
+  const d=document.createElement('div');
+  d.textContent=t||'';
+  return d.innerHTML;
+}
+</script>
+
+{% endblock %}

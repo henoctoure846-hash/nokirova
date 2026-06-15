@@ -867,6 +867,10 @@ function esc(t) {
   d.textContent = t || '';
   return d.innerHTML;
 }
+    @app.route('/leaderboard')
+def page_leaderboard():
+    return render_template('leaderboard.html', page_active='leaderboard',
+                           nom_cours=session_data.get('nom_cours'))
 </script>
 
 {% endblock %}

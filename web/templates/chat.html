@@ -712,7 +712,7 @@ if (user) {
 }
 
 // ═══════════════════════════════════════════
-// 🎨 PHASE D2 — GÉNÉRATION IMAGE (VERSION CORRIGÉE)
+// 🎨 PHASE D2 — GÉNÉRATION IMAGE (VERSION MULTI-API CORRIGÉE)
 // ═══════════════════════════════════════════
 
 const MOTS_IMAGE = [
@@ -758,17 +758,57 @@ async function genererImage(prompt) {
   messagesZone.scrollTop = messagesZone.scrollHeight;
 
   const promptEncode = encodeURIComponent(prompt);
-  const url = `https://image.pollinations.ai/prompt/${promptEncode}?width=512&height=512&nologo=true`;
+
+  // API 1 : Pollinations.ai (IA gratuite)
+  const urlPollinations = `https://image.pollinations.ai/prompt/${promptEncode}?width=512&height=512&nologo=true`;
+
+  // API 2 : Unsplash (images libres de droits)
+  const urlUnsplash = `https://source.unsplash.com/512x512/?${promptEncode}`;
+
+  // API 3 : Picsum (images aléatoires en dernier recours)
+  const urlPicsum = `https://picsum.photos/512/512?random=${Math.random()}`;
+
+  let imageUrl = null;
 
   try {
-    const imgTest = new Image();
+    // Essayer Pollinations d'abord
+    const testImg1 = new Image();
     await new Promise((resolve, reject) => {
-      imgTest.onload = () => resolve(true);
-      imgTest.onerror = () => reject(new Error('Image non trouvée'));
-      imgTest.src = url;
-      setTimeout(() => reject(new Error('Timeout (15s)')), 15000);
+      testImg1.onload = () => resolve(true);
+      testImg1.onerror = () => reject(new Error('Pollinations échoué'));
+      testImg1.src = urlPollinations;
+      setTimeout(() => reject(new Error('Timeout Pollinations')), 10000);
     });
+    imageUrl = urlPollinations;
+  } catch(e1) {
+    console.log('Pollinations échoué, essai Unsplash');
+    try {
+      const testImg2 = new Image();
+      await new Promise((resolve, reject) => {
+        testImg2.onload = () => resolve(true);
+        testImg2.onerror = () => reject(new Error('Unsplash échoué'));
+        testImg2.src = urlUnsplash;
+        setTimeout(() => reject(new Error('Timeout Unsplash')), 8000);
+      });
+      imageUrl = urlUnsplash;
+    } catch(e2) {
+      console.log('Unsplash échoué, essai Picsum');
+      try {
+        const testImg3 = new Image();
+        await new Promise((resolve, reject) => {
+          testImg3.onload = () => resolve(true);
+          testImg3.onerror = () => reject(new Error('Picsum échoué'));
+          testImg3.src = urlPicsum;
+          setTimeout(() => reject(new Error('Timeout Picsum')), 5000);
+        });
+        imageUrl = urlPicsum;
+      } catch(e3) {
+        throw new Error('Toutes les APIs images sont indisponibles');
+      }
+    }
+  }
 
+  if (imageUrl) {
     loadDiv.remove();
 
     const imgDiv = document.createElement('div');
@@ -777,11 +817,11 @@ async function genererImage(prompt) {
       <div class="avatar avatar-ia">🌸</div>
       <div class="message-bulle">
         <div class="image-generee-wrapper">
-          <div class="image-generee-label">🎨 Image générée : "${prompt.substring(0, 80)}"</div>
-          <img class="image-generee" src="${url}" alt="${prompt}" onclick="zoomImage('${url}')" loading="lazy">
+          <div class="image-generee-label">🎨 Illustration : "${prompt.substring(0, 80)}"</div>
+          <img class="image-generee" src="${imageUrl}" alt="${prompt}" onclick="zoomImage('${imageUrl}')" loading="lazy">
           <div class="image-generee-actions">
-            <button class="btn-image-action" onclick="zoomImage('${url}')">🔍 Agrandir</button>
-            <a class="btn-image-action telecharger" href="${url}" download="nokirova-image.jpg" target="_blank">⬇️ Télécharger</a>
+            <button class="btn-image-action" onclick="zoomImage('${imageUrl}')">🔍 Agrandir</button>
+            <a class="btn-image-action telecharger" href="${imageUrl}" download="nokirova-image.jpg" target="_blank">⬇️ Télécharger</a>
             <button class="btn-image-action" onclick="poserQuestion('génère une autre image de ${prompt.replace(/'/g, "\\'")}')">🔄 Regénérer</button>
           </div>
         </div>
@@ -789,12 +829,9 @@ async function genererImage(prompt) {
     `;
     messagesZone.appendChild(imgDiv);
     messagesZone.scrollTop = messagesZone.scrollHeight;
-    lireVoix(`Voilà, j'ai généré une image de ${prompt}`);
-
-  } catch(e) {
+    lireVoix(`Voilà une illustration pour ${prompt}`);
+  } else {
     loadDiv.remove();
-    console.error('Erreur image:', e);
-
     const errDiv = document.createElement('div');
     errDiv.className = 'message message-ia';
     errDiv.innerHTML = `

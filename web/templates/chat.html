@@ -45,10 +45,10 @@
             <span class="suggestion-titre">Astuces</span>
             <span class="suggestion-desc">Tips de prof</span>
           </button>
-          <button class="suggestion-card" onclick="poserQuestion('Explique-moi l\'économie en 5 lignes')">
-            <span class="suggestion-icone">💰</span>
-            <span class="suggestion-titre">Économie</span>
-            <span class="suggestion-desc">Concepts clés</span>
+          <button class="suggestion-card" onclick="poserQuestion('génère une image de la savane africaine')">
+            <span class="suggestion-icone">🎨</span>
+            <span class="suggestion-titre">Image IA</span>
+            <span class="suggestion-desc">Génère une image</span>
           </button>
           <button class="suggestion-card" onclick="poserQuestion('Comment apprendre une langue rapidement ?')">
             <span class="suggestion-icone">🌍</span>
@@ -63,7 +63,7 @@
       <form id="formChat">
         <div class="input-wrapper">
           <textarea id="inputMessage"
-                    placeholder="💬 Pose ta question ici..."
+                    placeholder="💬 Pose ta question ou 🎨 'génère une image de...' "
                     rows="1"></textarea>
 
           <button type="button" id="btnStop" class="btn-stop" title="Arrêter la lecture" style="display:none;">
@@ -81,7 +81,7 @@
         <div class="input-info" id="inputInfo">
           <span>💡 Entrée pour envoyer</span>
           <span>•</span>
-          <span>Shift+Entrée pour nouvelle ligne</span>
+          <span>🎨 "génère une image de..."</span>
           <span>•</span>
           <span id="microInfo">🎤 Clic micro pour parler</span>
         </div>
@@ -94,7 +94,7 @@
 <style>
 /* ═══════════════════════════════════════════
    💬 CHAT PAGE - NOKIROVA
-   Phase D1 : Chat Vocal complet
+   Phase D1 : Chat Vocal + D2 : Génération Images
    ═══════════════════════════════════════════ */
 .chat-page {
   max-width: 1100px;
@@ -351,6 +351,154 @@
   50% { transform: scale(1.3); }
 }
 
+/* ═══════════════════════════════════════
+   🎨 BULLE IMAGE GÉNÉRÉE — Phase D2
+   ═══════════════════════════════════════ */
+.message-image .message-bulle {
+  padding: 10px !important;
+  background: white !important;
+  border: 2px solid #E9D5FF !important;
+  border-bottom-left-radius: 6px;
+  max-width: 80% !important;
+}
+.image-generee-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.image-generee-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: #7B61FF;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.image-generee {
+  width: 100%;
+  max-width: 380px;
+  border-radius: 16px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+  display: block;
+  transition: transform 0.3s;
+  cursor: zoom-in;
+}
+.image-generee:hover { transform: scale(1.02); }
+.image-generee-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.btn-image-action {
+  background: linear-gradient(135deg, #7B61FF, #5B21B6);
+  color: white;
+  border: none;
+  border-radius: 20px;
+  padding: 7px 16px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.btn-image-action:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(123,97,255,0.4);
+}
+.btn-image-action.telecharger {
+  background: linear-gradient(135deg, #00C853, #059669);
+}
+.btn-image-action.telecharger:hover {
+  box-shadow: 0 4px 12px rgba(0,200,83,0.4);
+}
+
+/* CHARGEMENT IMAGE */
+.chargement-image {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 24px !important;
+  background: linear-gradient(135deg, #F3E8FF, #EDE9FE) !important;
+  border: 2px solid #C4B5FD !important;
+  min-width: 200px;
+}
+.chargement-image-icone {
+  font-size: 40px;
+  animation: spinPulse 2s linear infinite;
+}
+@keyframes spinPulse {
+  0%   { transform: rotate(0deg) scale(1); }
+  50%  { transform: rotate(180deg) scale(1.2); }
+  100% { transform: rotate(360deg) scale(1); }
+}
+.chargement-image-texte {
+  font-size: 13px;
+  font-weight: 700;
+  color: #7B61FF;
+  text-align: center;
+}
+.chargement-image-barre {
+  width: 160px;
+  height: 6px;
+  background: #E5E7EB;
+  border-radius: 4px;
+  overflow: hidden;
+}
+.chargement-image-progress {
+  height: 100%;
+  background: linear-gradient(90deg, #7B61FF, #EC4899);
+  border-radius: 4px;
+  animation: progressBar 3s ease-in-out infinite;
+}
+@keyframes progressBar {
+  0%   { width: 0%; }
+  50%  { width: 70%; }
+  100% { width: 95%; }
+}
+
+/* MODAL ZOOM IMAGE */
+.modal-image {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.85);
+  z-index: 9999;
+  align-items: center;
+  justify-content: center;
+  animation: fadeInUp 0.3s ease;
+}
+.modal-image.open { display: flex; }
+.modal-image-content {
+  position: relative;
+  max-width: 90vw;
+  max-height: 90vh;
+}
+.modal-image-content img {
+  max-width: 90vw;
+  max-height: 85vh;
+  border-radius: 20px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  display: block;
+}
+.modal-fermer {
+  position: absolute;
+  top: -14px; right: -14px;
+  background: #EF4444;
+  color: white;
+  border: none;
+  width: 34px; height: 34px;
+  border-radius: 50%;
+  font-size: 18px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(239,68,68,0.4);
+}
+
 /* INPUT ZONE */
 .input-zone {
   padding: 18px 22px;
@@ -483,9 +631,7 @@
   font-weight: 600;
   transition: all 0.3s;
 }
-#microInfo.lecture {
-  color: #F59E0B;
-}
+#microInfo.lecture { color: #F59E0B; }
 
 /* MODE SOMBRE */
 html[data-mode="sombre"] .chat-box,
@@ -510,6 +656,10 @@ html[data-mode="sombre"] .message-ia .message-bulle {
   color: #F1F5F9 !important;
   border-color: #3A3D4E !important;
 }
+html[data-mode="sombre"] .message-image .message-bulle {
+  background: #2A2D3E !important;
+  border-color: #4C1D95 !important;
+}
 html[data-mode="sombre"] .input-wrapper {
   background: #2A2D3E !important;
   border-color: #3A3D4E !important;
@@ -526,6 +676,7 @@ html[data-mode="sombre"] #inputMessage { color: #F1F5F9 !important; }
   .suggestion-icone { font-size: 24px; }
   .suggestion-titre { font-size: 12px; }
   .input-zone { padding: 14px; }
+  .image-generee { max-width: 100%; }
 }
 @media (max-width: 480px) {
   .suggestions-grid { grid-template-columns: 1fr 1fr; }
@@ -534,9 +685,17 @@ html[data-mode="sombre"] #inputMessage { color: #F1F5F9 !important; }
 }
 </style>
 
+<!-- MODAL ZOOM IMAGE -->
+<div class="modal-image" id="modalImage" onclick="fermerModal()">
+  <div class="modal-image-content" onclick="event.stopPropagation()">
+    <img id="modalImageSrc" src="" alt="Image générée">
+    <button class="modal-fermer" onclick="fermerModal()">✕</button>
+  </div>
+</div>
+
 <script>
 // ═══════════════════════════════════════════
-// 💬 NOKIROVA - CHAT + PHASE D1 : VOCAL
+// 💬 NOKIROVA — CHAT + D1 VOCAL + D2 IMAGES
 // ═══════════════════════════════════════════
 
 // --- ÉLÉMENTS DOM ---
@@ -551,21 +710,153 @@ const microInfo    = document.getElementById('microInfo');
 // --- PERSONNALISATION USER ---
 const user = JSON.parse(localStorage.getItem('nokirova_user') || 'null');
 if (user) {
-  document.getElementById('userPrenom').textContent  = user.prenom;
+  document.getElementById('userPrenom').textContent   = user.prenom;
   document.getElementById('bienvenueNom').textContent = user.prenom;
 }
 
 // ═══════════════════════════════════════════
-// 🔊 SYNTHÈSE VOCALE (TTS) — Réponse IA parlée
+// 🎨 PHASE D2 — DÉTECTION ET GÉNÉRATION IMAGE
+// ═══════════════════════════════════════════
+
+// Mots-clés qui déclenchent la génération d'image
+const MOTS_IMAGE = [
+  'génère une image', 'generé une image', 'génere une image',
+  'crée une image',   'cree une image',   'créé une image',
+  'dessine',          'illustre',         'montre-moi une image',
+  'fais une image',   'produis une image','génère moi',
+  'crée moi une image','génère une photo', 'fais un dessin'
+];
+
+function estDemandeImage(texte) {
+  const t = texte.toLowerCase().trim();
+  return MOTS_IMAGE.some(mot => t.includes(mot));
+}
+
+function extrairePromptImage(texte) {
+  const t = texte.toLowerCase();
+  // On retire le mot-clé pour garder seulement la description
+  let prompt = texte;
+  MOTS_IMAGE.forEach(mot => {
+    const regex = new RegExp(mot, 'gi');
+    prompt = prompt.replace(regex, '').trim();
+  });
+  // Nettoyer ponctuation en début
+  prompt = prompt.replace(/^[^a-zA-ZÀ-ÿ0-9]+/, '').trim();
+  return prompt || texte;
+}
+
+function construireUrlImage(prompt) {
+  // Pollinations.ai — gratuit, sans clé API
+  const promptEncode = encodeURIComponent(prompt);
+  const seed = Math.floor(Math.random() * 99999);
+  return `[image.pollinations.ai](https://image.pollinations.ai/prompt/${promptEncode}?width=512&height=512&seed=${seed}&nologo=true)`;
+}
+
+async function genererImage(prompt) {
+  // 1. Retirer la bienvenue si présente
+  const bienvenue = document.querySelector('.message-bienvenue');
+  if (bienvenue) bienvenue.remove();
+
+  // 2. Afficher le chargement image
+  const loadDiv = document.createElement('div');
+  loadDiv.id = 'chargementImage';
+  loadDiv.className = 'message message-ia';
+  loadDiv.innerHTML = `
+    <div class="avatar avatar-ia">🌸</div>
+    <div class="message-bulle chargement-image">
+      <span class="chargement-image-icone">🎨</span>
+      <span class="chargement-image-texte">Génération en cours...<br><small style="font-weight:400;color:#A78BFA">"${prompt}"</small></span>
+      <div class="chargement-image-barre">
+        <div class="chargement-image-progress"></div>
+      </div>
+    </div>
+  `;
+  messagesZone.appendChild(loadDiv);
+  messagesZone.scrollTop = messagesZone.scrollHeight;
+
+  // 3. Construire l'URL et charger l'image
+  const url = construireUrlImage(prompt);
+
+  try {
+    await new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload  = resolve;
+      img.onerror = reject;
+      img.src = url;
+      // Timeout 30 secondes
+      setTimeout(() => reject(new Error('timeout')), 30000);
+    });
+
+    // 4. Retirer le chargement
+    loadDiv.remove();
+
+    // 5. Afficher l'image dans une bulle
+    const imgDiv = document.createElement('div');
+    imgDiv.className = 'message message-ia message-image';
+    imgDiv.innerHTML = `
+      <div class="avatar avatar-ia">🌸</div>
+      <div class="message-bulle">
+        <div class="image-generee-wrapper">
+          <div class="image-generee-label">🎨 Image générée pour : <em>"${prompt}"</em></div>
+          <img class="image-generee"
+               src="${url}"
+               alt="${prompt}"
+               onclick="zoomImage('${url}')"
+               title="Clic pour agrandir">
+          <div class="image-generee-actions">
+            <button class="btn-image-action" onclick="zoomImage('${url}')">🔍 Agrandir</button>
+            <a class="btn-image-action telecharger"
+               href="${url}"
+               download="nokirova-image.jpg"
+               target="_blank">⬇️ Télécharger</a>
+            <button class="btn-image-action" onclick="poserQuestion('génère une autre image de ${prompt}')">🔄 Regénérer</button>
+          </div>
+        </div>
+      </div>
+    `;
+    messagesZone.appendChild(imgDiv);
+    messagesZone.scrollTop = messagesZone.scrollHeight;
+
+    // Pas de TTS pour les images
+    lireVoix(`Voilà ! J'ai généré une image de ${prompt}`);
+
+  } catch(e) {
+    loadDiv.remove();
+    const errDiv = document.createElement('div');
+    errDiv.className = 'message message-ia';
+    errDiv.innerHTML = `
+      <div class="avatar avatar-ia">🌸</div>
+      <div class="message-bulle" style="background:#FEF3C7;color:#92400E;border:1px solid #F59E0B;">
+        ⚠️ Impossible de générer l'image. Vérifie ta connexion et réessaie !
+      </div>
+    `;
+    messagesZone.appendChild(errDiv);
+    messagesZone.scrollTop = messagesZone.scrollHeight;
+  }
+}
+
+// --- MODAL ZOOM ---
+function zoomImage(src) {
+  document.getElementById('modalImageSrc').src = src;
+  document.getElementById('modalImage').classList.add('open');
+}
+function fermerModal() {
+  document.getElementById('modalImage').classList.remove('open');
+}
+// Fermer avec Echap
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') fermerModal();
+});
+
+// ═══════════════════════════════════════════
+// 🔊 SYNTHÈSE VOCALE (TTS) — D1
 // ═══════════════════════════════════════════
 let iaSpeaking = false;
 
 function lireVoix(texte) {
   if (!('speechSynthesis' in window)) return;
-
   speechSynthesis.cancel();
 
-  // On nettoie le texte : on enlève les emojis pour une lecture plus naturelle
   const textePropre = texte
     .replace(/[\u{1F000}-\u{1FFFF}]/gu, '')
     .replace(/[⚠️✅❌💡🔥🎯📚]/g, '')
@@ -585,7 +876,6 @@ function lireVoix(texte) {
     microInfo.textContent = '🔊 NOKIROVA parle...';
     microInfo.classList.add('lecture');
   };
-
   u.onend = () => {
     iaSpeaking = false;
     btnStop.style.display = 'none';
@@ -593,7 +883,6 @@ function lireVoix(texte) {
     microInfo.textContent = '🎤 Clic micro pour parler';
     microInfo.classList.remove('lecture');
   };
-
   u.onerror = () => {
     iaSpeaking = false;
     btnStop.style.display = 'none';
@@ -605,7 +894,6 @@ function lireVoix(texte) {
   speechSynthesis.speak(u);
 }
 
-// Bouton Stop : coupe la lecture IA
 btnStop.addEventListener('click', () => {
   speechSynthesis.cancel();
   btnStop.style.display = 'none';
@@ -615,36 +903,26 @@ btnStop.addEventListener('click', () => {
 });
 
 // ═══════════════════════════════════════════
-// 🎤 RECONNAISSANCE VOCALE (STT)
+// 🎤 RECONNAISSANCE VOCALE (STT) — D1
 // ═══════════════════════════════════════════
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 let msgEcouteDiv = null;
 
 if (SpeechRecognition && btnMicro) {
   const recognition = new SpeechRecognition();
-  recognition.lang            = 'fr-FR';
-  recognition.continuous      = false;
-  recognition.interimResults  = false;
+  recognition.lang           = 'fr-FR';
+  recognition.continuous     = false;
+  recognition.interimResults = false;
 
-  // --- DÉMARRAGE MICRO ---
   btnMicro.addEventListener('click', () => {
-    // Si l'IA parle, on la coupe d'abord
-    if (iaSpeaking) {
-      speechSynthesis.cancel();
-    }
-    try {
-      recognition.start();
-    } catch(e) {
-      // Déjà en cours, on ignore
-    }
+    if (iaSpeaking) speechSynthesis.cancel();
+    try { recognition.start(); } catch(e) {}
   });
 
-  // --- MICRO ACTIF : Afficher bulle "J'écoute..." ---
   recognition.onstart = () => {
     btnMicro.classList.add('ecoute');
     microInfo.textContent = '🎤 J\'écoute... parle !';
 
-    // Ajouter bulle visuelle dans le chat
     const bienvenue = document.querySelector('.message-bienvenue');
     if (bienvenue) bienvenue.remove();
 
@@ -661,53 +939,31 @@ if (SpeechRecognition && btnMicro) {
     messagesZone.scrollTop = messagesZone.scrollHeight;
   };
 
-  // --- RÉSULTAT REÇU ---
   recognition.onresult = (e) => {
     const texteSaisi = e.results[0][0].transcript;
-
-    // Remplacer la bulle d'écoute par le vrai message
-    if (msgEcouteDiv) {
-      msgEcouteDiv.remove();
-      msgEcouteDiv = null;
-    }
-
+    if (msgEcouteDiv) { msgEcouteDiv.remove(); msgEcouteDiv = null; }
     inputMessage.value = texteSaisi;
     envoyerMessage(texteSaisi);
   };
 
-  // --- FIN MICRO (sans résultat) ---
   recognition.onend = () => {
     btnMicro.classList.remove('ecoute');
     microInfo.textContent = '🎤 Clic micro pour parler';
-
-    // Retirer la bulle d'écoute si aucun résultat
-    if (msgEcouteDiv) {
-      msgEcouteDiv.remove();
-      msgEcouteDiv = null;
-    }
+    if (msgEcouteDiv) { msgEcouteDiv.remove(); msgEcouteDiv = null; }
   };
 
-  // --- ERREURS MICRO ---
   recognition.onerror = (e) => {
     btnMicro.classList.remove('ecoute');
     if (msgEcouteDiv) { msgEcouteDiv.remove(); msgEcouteDiv = null; }
 
     let msg = '';
     switch(e.error) {
-      case 'not-allowed':
-        msg = '⚠️ Micro bloqué. Autorise le micro dans ton navigateur.';
-        break;
-      case 'no-speech':
-        msg = '🤫 Rien entendu. Réessaie !';
-        break;
-      case 'network':
-        msg = '⚠️ Erreur réseau. Vérifie ta connexion.';
-        break;
-      default:
-        msg = `⚠️ Erreur micro : ${e.error}`;
+      case 'not-allowed': msg = '⚠️ Micro bloqué. Autorise le micro dans ton navigateur.'; break;
+      case 'no-speech':   msg = '🤫 Rien entendu. Réessaie !'; break;
+      case 'network':     msg = '⚠️ Erreur réseau. Vérifie ta connexion.'; break;
+      default:            msg = `⚠️ Erreur micro : ${e.error}`;
     }
 
-    // Afficher l'erreur dans le chat (message temporaire)
     const errDiv = document.createElement('div');
     errDiv.className = 'message message-ia';
     errDiv.innerHTML = `
@@ -718,15 +974,11 @@ if (SpeechRecognition && btnMicro) {
     `;
     messagesZone.appendChild(errDiv);
     messagesZone.scrollTop = messagesZone.scrollHeight;
-
-    // Auto-suppression après 4 secondes
     setTimeout(() => errDiv.remove(), 4000);
-
     microInfo.textContent = '🎤 Clic micro pour parler';
   };
 
 } else if (btnMicro) {
-  // Navigateur non compatible → on cache le bouton micro
   btnMicro.style.display = 'none';
   document.getElementById('microInfo').style.display = 'none';
 }
@@ -771,7 +1023,7 @@ function retirerChargement() {
 }
 
 // ═══════════════════════════════════════════
-// 🚀 ENVOI MESSAGE À L'IA
+// 🚀 ENVOI MESSAGE — ROUTAGE IA ou IMAGE
 // ═══════════════════════════════════════════
 async function envoyerMessage(q) {
   if (!q.trim()) return;
@@ -781,26 +1033,33 @@ async function envoyerMessage(q) {
   inputMessage.style.height = 'auto';
   btnEnvoyer.disabled = true;
   btnMicro.disabled   = true;
-  afficherChargement();
 
-  try {
-    const r = await fetch('/api/chat', {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({ question: q })
-    });
-    const data = await r.json();
-    retirerChargement();
+  // 🎨 ROUTAGE : image ou IA ?
+  if (estDemandeImage(q)) {
+    const prompt = extrairePromptImage(q);
+    await genererImage(prompt);
+  } else {
+    // Réponse IA classique
+    afficherChargement();
+    try {
+      const r = await fetch('/api/chat', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ question: q })
+      });
+      const data = await r.json();
+      retirerChargement();
 
-    if (data.succes) {
-      ajouterMessage(data.reponse, 'ia');
-      lireVoix(data.reponse);  // 🔊 L'IA parle sa réponse
-    } else {
-      ajouterMessage(`⚠️ Erreur : ${data.erreur}`, 'ia');
+      if (data.succes) {
+        ajouterMessage(data.reponse, 'ia');
+        lireVoix(data.reponse);
+      } else {
+        ajouterMessage(`⚠️ Erreur : ${data.erreur}`, 'ia');
+      }
+    } catch (e) {
+      retirerChargement();
+      ajouterMessage('⚠️ Erreur de connexion au serveur...', 'ia');
     }
-  } catch (e) {
-    retirerChargement();
-    ajouterMessage('⚠️ Erreur de connexion au serveur...', 'ia');
   }
 
   btnEnvoyer.disabled = false;
@@ -823,7 +1082,6 @@ inputMessage.addEventListener('keydown', e => {
   }
 });
 
-// Auto-resize textarea
 inputMessage.addEventListener('input', function() {
   this.style.height = 'auto';
   this.style.height = Math.min(this.scrollHeight, 120) + 'px';
@@ -831,7 +1089,6 @@ inputMessage.addEventListener('input', function() {
 
 function poserQuestion(q) { envoyerMessage(q); }
 
-// Focus auto au démarrage
 inputMessage.focus();
 </script>
 

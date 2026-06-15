@@ -14,7 +14,11 @@
       <h1>NOKIROVA</h1>
       <p class="hero-subtitle">L'IA qui révolutionne tes révisions à Bouaké 🇨🇮</p>
       <div class="hero-buttons">
-        <a href="/register" class="btn-primary">🚀 Commencer gratuitement</a>
+        {% if user %}
+          <a href="/" class="btn-primary">🚀 Accéder à mon espace</a>
+        {% else %}
+          <a href="/bienvenue" class="btn-primary">🚀 Commencer gratuitement</a>
+        {% endif %}
         <a href="#features" class="btn-secondary">✨ Découvrir</a>
       </div>
       <div class="hero-stats">
@@ -31,10 +35,6 @@
           <span class="stat-label">Disponible</span>
         </div>
       </div>
-    </div>
-    <div class="hero-phone-mockup">
-      <img src="/static/images/phone-mockup.png" alt="NOKIROVA sur mobile" onerror="this.style.display='none'">
-      <div class="mockup-badge">📱 Installable sur Android</div>
     </div>
   </section>
 
@@ -125,7 +125,11 @@
   <section class="cta-landing">
     <h2>Prêt à réussir ?</h2>
     <p>Rejoins des milliers d'étudiants qui révisent mieux avec NOKIROVA</p>
-    <a href="/register" class="btn-cta">🎓 Créer mon compte gratuitement</a>
+    {% if user %}
+      <a href="/" class="btn-cta">🎓 Retour à mon espace</a>
+    {% else %}
+      <a href="/bienvenue" class="btn-cta">🎓 Créer mon compte gratuitement</a>
+    {% endif %}
   </section>
 
 </div>
@@ -142,11 +146,7 @@
   color: white;
   padding: 60px 20px 80px;
   position: relative;
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  align-items: center;
-  gap: 40px;
+  text-align: center;
 }
 .hero-bg-particles {
   position: absolute;
@@ -159,11 +159,10 @@
   pointer-events: none;
 }
 .hero-content {
-  flex: 1;
-  min-width: 280px;
   position: relative;
   z-index: 1;
-  text-align: center;
+  max-width: 800px;
+  margin: 0 auto;
 }
 .hero-logo {
   font-size: 80px;
@@ -197,6 +196,7 @@
   text-decoration: none;
   font-weight: bold;
   transition: all 0.3s;
+  display: inline-block;
 }
 .btn-primary {
   background: white;
@@ -233,21 +233,6 @@
 .stat-label {
   font-size: 14px;
   opacity: 0.8;
-}
-.hero-phone-mockup {
-  flex: 1;
-  min-width: 250px;
-  text-align: center;
-  position: relative;
-  z-index: 1;
-}
-.mockup-badge {
-  background: rgba(255,255,255,0.2);
-  backdrop-filter: blur(10px);
-  padding: 10px 20px;
-  border-radius: 30px;
-  margin-top: 20px;
-  display: inline-block;
 }
 
 /* FEATURES */
@@ -470,7 +455,7 @@ if (document.getElementById('qrCanvas')) {
 // Fonctions de partage
 function partagerWhatsApp() {
   const url = encodeURIComponent(window.location.origin);
-  const texte = encodeURIComponent("🌸 NOKIROVA - L'IA qui révolutionne les révisions ! Gratuit, avec chat vocal, scan copie et plus encore. Rejoins-nous :");
+  const texte = encodeURIComponent("🌸 NOKIROVA - L'IA gratuite pour réussir tes examens ! Chat vocal, scan copie, QCM. Rejoins-moi :");
   window.open(`https://wa.me/?text=${texte}%20${url}`, '_blank');
 }
 
@@ -480,11 +465,7 @@ function partagerFacebook() {
 
 function copierLien() {
   navigator.clipboard.writeText(window.location.origin);
-  if (typeof afficherNotification === 'function') {
-    afficherNotification('✅ Lien copié ! Partage-le avec tes amis', 'succes');
-  } else {
-    alert('✅ Lien copié !');
-  }
+  alert('✅ Lien copié ! Partage-le à tes amis');
 }
 </script>
 

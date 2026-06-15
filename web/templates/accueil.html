@@ -1,119 +1,436 @@
 {% extends "base.html" %}
-{% block title %}🌸 NOKIROVA - Accueil{% endblock %}
+
+{% block title %}🏠 Accueil - NOKIROVA{% endblock %}
 
 {% block contenu %}
 
-<!-- HEADER PERSONNALISÉ -->
-<div class="header-accueil">
-    <img src="{{ url_for('logo') }}" alt="Logo" class="header-logo">
-    <div class="header-texte">
-        <h1>Bienvenue <span id="user-prenom">cher étudiant</span> ! 🌸</h1>
-        <p>✨ <span id="user-niveau"></span> • Ton professeur intelligent personnel ✨</p>
+<div class="accueil-page">
+
+  <div class="hero-section">
+    <div class="hero-bg">🌸</div>
+    <div class="hero-content">
+      <div class="hero-icone">🎓</div>
+      <h1>Bienvenue, <span id="prenomUser">{{ salutation }}</span> !</h1>
+      <p>{{ date_actuelle }} • Niveau {{ stats.niveau }}</p>
     </div>
+  </div>
+
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-emoji">⭐</div>
+      <div class="stat-valeur">{{ stats.niveau }}</div>
+      <div class="stat-label">Niveau</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-emoji">🔥</div>
+      <div class="stat-valeur">{{ stats.streak }}</div>
+      <div class="stat-label">Streak</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-emoji">📚</div>
+      <div class="stat-valeur">{{ stats.cours_importes }}</div>
+      <div class="stat-label">Cours</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-emoji">💬</div>
+      <div class="stat-valeur">{{ stats.questions_posees }}</div>
+      <div class="stat-label">Questions</div>
+    </div>
+  </div>
+
+  <!-- 🧠 TUTEUR IA PERSONNALISÉ - PHASE D4 -->
+  <div class="card-tuteur">
+    <div class="tuteur-header">
+      <div class="tuteur-avatar">🧠</div>
+      <div class="tuteur-titre">
+        <h3>Ton Tuteur IA</h3>
+        <p>Apprentissage personnalisé</p>
+      </div>
+    </div>
+
+    <div class="tuteur-conseil" id="tuteurConseil">
+      <div class="skeleton">⏳ Chargement de ton conseil personnalisé...</div>
+    </div>
+
+    <div class="tuteur-points-faibles" id="pointsFaibles">
+      <div class="skeleton">📊 Analyse de tes matières...</div>
+    </div>
+
+    <div class="tuteur-recommandations" id="recommandations">
+      <div class="skeleton">🎯 Génération des recommandations...</div>
+    </div>
+
+    <div class="tuteur-footer">
+      <button class="btn-chat" onclick="window.location.href='/chat'">
+        💬 Poser une question à ton tuteur
+      </button>
+    </div>
+  </div>
+
+  <div class="actions-grid">
+    <a href="/import" class="action-card">
+      <div class="action-emoji">📤</div>
+      <div class="action-titre">Importer un cours</div>
+      <div class="action-desc">PDF, Word, PowerPoint</div>
+    </a>
+    <a href="/chat" class="action-card">
+      <div class="action-emoji">💬</div>
+      <div class="action-titre">Chat IA</div>
+      <div class="action-desc">Pose toutes tes questions</div>
+    </a>
+    <a href="/qcm" class="action-card">
+      <div class="action-emoji">📝</div>
+      <div class="action-titre">QCM</div>
+      <div class="action-desc">Teste tes connaissances</div>
+    </a>
+    <a href="/flashcards" class="action-card">
+      <div class="action-emoji">🃏</div>
+      <div class="action-titre">Flashcards</div>
+      <div class="action-desc">Mémorisation efficace</div>
+    </a>
+    <a href="/pomodoro" class="action-card">
+      <div class="action-emoji">🍅</div>
+      <div class="action-titre">Pomodoro</div>
+      <div class="action-desc">Concentre-toi</div>
+    </a>
+    <a href="/bibliotheque" class="action-card">
+      <div class="action-emoji">📚</div>
+      <div class="action-titre">Bibliothèque</div>
+      <div class="action-desc">Tous tes cours</div>
+    </a>
+  </div>
 </div>
 
-<!-- BANNIÈRE DATE -->
-<div class="banniere-date">
-    <strong>{{ salutation }} ! • {{ date_actuelle }}</strong>
-    <div class="banniere-sous-texte">
-        ⚠️ Aucune tâche prévue aujourd'hui<br>
-        📅 Clique sur Planificateur pour en ajouter !
-    </div>
-</div>
+<style>
+.accueil-page {
+  max-width: 1100px;
+  margin: 0 auto;
+  animation: fadeInUp 0.5s ease;
+}
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
 
-<!-- STATS -->
-<div class="cartes-stats">
-    <div class="carte-stat carte-niveau">
-        <div class="stat-icone">⭐</div>
-        <div class="stat-valeur">Niveau {{ stats.niveau }}</div>
-        <div class="stat-label">{{ stats.xp }} XP</div>
-    </div>
-    <div class="carte-stat carte-streak">
-        <div class="stat-icone">🔥</div>
-        <div class="stat-valeur">{{ stats.streak_jours }} jour(s)</div>
-        <div class="stat-label">Streak quotidien</div>
-    </div>
-    <div class="carte-stat carte-cours">
-        <div class="stat-icone">📚</div>
-        <div class="stat-valeur">{{ stats.cours_importes }}</div>
-        <div class="stat-label">Cours importés</div>
-    </div>
-</div>
+.hero-section {
+  position: relative;
+  background: linear-gradient(135deg, #7B61FF, #5B21B6);
+  border-radius: 28px;
+  padding: 30px;
+  margin-bottom: 25px;
+  color: white;
+  overflow: hidden;
+}
+.hero-bg {
+  position: absolute;
+  top: -30px;
+  right: -20px;
+  font-size: 180px;
+  opacity: 0.15;
+  pointer-events: none;
+}
+.hero-content {
+  position: relative;
+  z-index: 1;
+}
+.hero-icone {
+  font-size: 48px;
+  margin-bottom: 12px;
+}
+.hero-content h1 {
+  font-size: 28px;
+  margin: 0 0 8px;
+  font-weight: 900;
+}
+.hero-content p {
+  font-size: 14px;
+  opacity: 0.9;
+  margin: 0;
+}
 
-<!-- CARTES CAPSULES -->
-<div class="cartes-rapides">
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 15px;
+  margin-bottom: 25px;
+}
+.stat-card {
+  background: white;
+  border-radius: 20px;
+  padding: 18px 12px;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  transition: all 0.3s;
+}
+.stat-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+}
+.stat-emoji {
+  font-size: 28px;
+  margin-bottom: 8px;
+}
+.stat-valeur {
+  font-size: 28px;
+  font-weight: 900;
+  color: #7B61FF;
+}
+.stat-label {
+  font-size: 12px;
+  color: #6B7280;
+  margin-top: 5px;
+}
 
-    <a href="/bibliotheque" class="carte-rapide carte-bibli">
-        <div class="carte-rapide-icone">📚</div>
-        <div class="carte-rapide-contenu">
-            <div class="carte-rapide-titre">Bibliothèque</div>
-            <div class="carte-rapide-desc">Tous tes cours organisés au même endroit</div>
-        </div>
-    </a>
+.card-tuteur {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 24px;
+  padding: 24px;
+  margin-bottom: 25px;
+  color: white;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+}
+.tuteur-header {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+.tuteur-avatar {
+  font-size: 48px;
+  background: rgba(255,255,255,0.2);
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.tuteur-titre h3 {
+  margin: 0;
+  font-size: 20px;
+}
+.tuteur-titre p {
+  margin: 5px 0 0;
+  opacity: 0.8;
+  font-size: 13px;
+}
+.tuteur-conseil {
+  background: rgba(255,255,255,0.15);
+  border-radius: 16px;
+  padding: 15px;
+  margin-bottom: 20px;
+  font-size: 15px;
+  line-height: 1.5;
+}
+.tuteur-points-faibles {
+  margin-bottom: 20px;
+}
+.faible-item {
+  background: rgba(0,0,0,0.2);
+  border-radius: 12px;
+  padding: 12px;
+  margin-bottom: 10px;
+}
+.faible-matiere {
+  font-weight: bold;
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+.faible-barre {
+  height: 6px;
+  background: rgba(255,255,255,0.3);
+  border-radius: 3px;
+  overflow: hidden;
+  margin: 8px 0;
+}
+.faible-progress {
+  height: 100%;
+  background: #FFD93D;
+  border-radius: 3px;
+  transition: width 0.5s;
+}
+.faible-conseil {
+  font-size: 12px;
+  opacity: 0.9;
+}
+.recommandation-item {
+  background: rgba(255,255,255,0.1);
+  border-radius: 12px;
+  padding: 12px;
+  margin-bottom: 10px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+.recommandation-item:hover {
+  background: rgba(255,255,255,0.2);
+  transform: translateX(5px);
+}
+.recommandation-titre {
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+.recommandation-message {
+  font-size: 13px;
+  opacity: 0.9;
+}
+.tuteur-footer {
+  margin-top: 15px;
+}
+.btn-chat {
+  background: white;
+  color: #764ba2;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 30px;
+  font-weight: bold;
+  cursor: pointer;
+  width: 100%;
+  transition: all 0.3s;
+}
+.btn-chat:hover {
+  transform: scale(1.02);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
 
-    <a href="/planificateur" class="carte-rapide carte-plani">
-        <div class="carte-rapide-icone">📅</div>
-        <div class="carte-rapide-contenu">
-            <div class="carte-rapide-titre">Planificateur</div>
-            <div class="carte-rapide-desc">Organise ton agenda de révisions</div>
-        </div>
-    </a>
+.actions-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 15px;
+}
+.action-card {
+  background: white;
+  border-radius: 20px;
+  padding: 20px;
+  text-align: center;
+  text-decoration: none;
+  transition: all 0.3s;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+.action-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 25px rgba(0,0,0,0.1);
+}
+.action-emoji {
+  font-size: 36px;
+  margin-bottom: 12px;
+}
+.action-titre {
+  font-weight: 800;
+  font-size: 16px;
+  color: #1A1D2E;
+  margin-bottom: 5px;
+}
+.action-desc {
+  font-size: 11px;
+  color: #9CA3AF;
+}
 
-    <a href="/ocr" class="carte-rapide carte-scan">
-        <div class="carte-rapide-icone">📸</div>
-        <div class="carte-rapide-contenu">
-            <div class="carte-rapide-titre">Scanner</div>
-            <div class="carte-rapide-desc">Photo de tes notes → texte intelligent</div>
-        </div>
-    </a>
+.skeleton {
+  animation: pulse 1.5s infinite;
+}
+@keyframes pulse {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
 
-    <a href="/qcm" class="carte-rapide carte-qcm">
-        <div class="carte-rapide-icone">🎯</div>
-        <div class="carte-rapide-contenu">
-            <div class="carte-rapide-titre">QCM</div>
-            <div class="carte-rapide-desc">Teste tes connaissances avec l'IA</div>
-        </div>
-    </a>
+@media (max-width: 768px) {
+  .stats-grid { grid-template-columns: repeat(2, 1fr); }
+  .actions-grid { grid-template-columns: repeat(2, 1fr); }
+  .hero-content h1 { font-size: 22px; }
+}
 
-    <a href="/flashcards" class="carte-rapide carte-flash">
-        <div class="carte-rapide-icone">🃏</div>
-        <div class="carte-rapide-contenu">
-            <div class="carte-rapide-titre">Flashcards</div>
-            <div class="carte-rapide-desc">Mémorise tout facilement</div>
-        </div>
-    </a>
+@media (max-width: 480px) {
+  .actions-grid { grid-template-columns: 1fr; }
+}
 
-    <a href="/pomodoro" class="carte-rapide carte-pomo">
-        <div class="carte-rapide-icone">⏱️</div>
-        <div class="carte-rapide-contenu">
-            <div class="carte-rapide-titre">Pomodoro</div>
-            <div class="carte-rapide-desc">Focus 25 min, pause 5 min, productivité 💪</div>
-        </div>
-    </a>
-
-</div>
-
-<!-- OBJECTIF -->
-<div class="objectif">
-    <div class="objectif-titre">🎯 OBJECTIF DU JOUR</div>
-    <div class="objectif-texte">
-        📚 Importe un cours et fais au moins 5 QCM !<br>
-        Tu vas y arriver <span id="objectif-prenom">cher étudiant</span> 💪
-    </div>
-</div>
-
-<!-- BOUTON COMMENCER -->
-<a href="/import" class="btn-commencer">🚀 Commencer maintenant</a>
+html[data-mode="sombre"] .stat-card,
+html[data-mode="sombre"] .action-card {
+  background: #2A2D3E;
+}
+html[data-mode="sombre"] .stat-valeur { color: #C4A5FF; }
+html[data-mode="sombre"] .action-titre { color: #F1F5F9; }
+</style>
 
 <script>
-// Vérifier si user existe, sinon rediriger
+// Charger les données du tuteur IA
+async function chargerTuteur() {
+    try {
+        const response = await fetch('/api/tuteur/dashboard');
+        const data = await response.json();
+
+        if (data.succes && data.data) {
+            afficherConseil(data.data.conseil_perso);
+            afficherPointsFaibles(data.data.points_faibles);
+            afficherRecommandations(data.data.recommandations);
+        }
+    } catch (err) {
+        console.error('Erreur tuteur:', err);
+        document.getElementById('tuteurConseil').innerHTML = '<div>⚠️ Recharger la page pour le tuteur</div>';
+    }
+}
+
+function afficherConseil(conseil) {
+    const el = document.getElementById('tuteurConseil');
+    if (el) el.innerHTML = `<div class="conseil-text">💬 ${conseil}</div>`;
+}
+
+function afficherPointsFaibles(points) {
+    const el = document.getElementById('pointsFaibles');
+    if (!el) return;
+
+    if (!points || points.length === 0) {
+        el.innerHTML = '<div class="faible-item">🎉 Aucun point faible détecté ! Continue comme ça !</div>';
+        return;
+    }
+
+    let html = '<h4 style="margin:0 0 12px">📚 Matières à travailler</h4>';
+    for (const p of points) {
+        html += `
+            <div class="faible-item">
+                <div class="faible-matiere">
+                    <span>${p.matiere}</span>
+                    <span>${p.niveau}</span>
+                </div>
+                <div class="faible-barre">
+                    <div class="faible-progress" style="width: ${p.score}%"></div>
+                </div>
+                <div class="faible-conseil">💡 ${p.conseil}</div>
+            </div>
+        `;
+    }
+    el.innerHTML = html;
+}
+
+function afficherRecommandations(recos) {
+    const el = document.getElementById('recommandations');
+    if (!el) return;
+
+    if (!recos || recos.length === 0) {
+        el.innerHTML = '<div class="recommandation-item">✨ Pas de recommandation pour le moment</div>';
+        return;
+    }
+
+    let html = '<h4 style="margin:0 0 12px">🎯 Recommandations du jour</h4>';
+    for (const r of recos) {
+        html += `
+            <div class="recommandation-item" onclick="if('${r.lien}') window.location.href='${r.lien}'">
+                <div class="recommandation-titre">${r.titre}</div>
+                <div class="recommandation-message">${r.message}</div>
+                ${r.action ? `<div style="margin-top:8px;font-size:12px;opacity:0.8">👉 ${r.action}</div>` : ''}
+            </div>
+        `;
+    }
+    el.innerHTML = html;
+}
+
+// Charger au chargement
+document.addEventListener('DOMContentLoaded', chargerTuteur);
+
+// Récupérer le prénom de l'utilisateur
 const user = JSON.parse(localStorage.getItem('nokirova_user') || 'null');
-if (!user) {
-    window.location.href = '/bienvenue';
-} else {
-    document.getElementById('user-prenom').textContent = user.prenom;
-    document.getElementById('user-niveau').textContent = user.niveau;
-    document.getElementById('objectif-prenom').textContent = user.prenom;
+if (user && user.prenom) {
+    document.getElementById('prenomUser').textContent = user.prenom;
 }
 </script>
 

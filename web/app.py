@@ -1405,6 +1405,101 @@ def page_landing():
     return render_template('landing.html')
 
 # ═══════════════════════════════════════════
+# ✅ TO-DO LIST API - PHASE G
+# ═══════════════════════════════════════════
+
+def init_todo_table():
+    """Crée la table des tâches si elle n'existe pas"""
+    conn = db.get_connexion()
+    cur = conn.cursor()
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS todo (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            texte TEXT NOT NULL,
+            terminee INTEGER DEFAULT 0,
+            date_creation TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            user_id TEXT
+        )
+    """)
+    conn.commit()
+    conn.close()
+
+@app.route('/api/todo/liste')
+def api_todo_liste():
+    try:
+        init_todo_table()
+        conn = db.get_connexion()
+        cur = conn.cursor()
+        cur.execute("SELECT id, texte, terminee FROM todo ORDER BY date_creation DESC")
+        rows = cur.fetchall()
+        conn.close()
+        taches = [{"id": r[0], "texte": r[1], "terminee": bool(r[2])} for r in rows]
+        return jsonify({"succes": True, "taches": taches})
+    except Exception as e:
+        return jsonify({"succes": False, "erreur": str(e), "taches": []})
+
+@app.route('/api/todo/ajouter', methods=['POST'])
+def api_todo_ajouter():
+    try:
+        data = request.get_json()
+        texte = data.get('texte', '').strip()
+        if not texte:
+            return jsonify({"succes": False, "erreur": "Texte vide"})
+        init_todo_table()
+        conn = db.get_connexion()
+        cur = conn.cursor()
+        cur.execute("INSERT INTO todo (texte) VALUES (?)", (texte,))
+        conn.commit()
+        conn.close()
+        return jsonify({"succes": True})
+    except Exception as e:
+        return jsonify({"succes": False, "erreur": str(e)})
+
+@app.route('/api/todo/toggle/<int:id_t>', methods=['POST'])
+def api_todo_toggle(id_t):
+    try:
+        conn = db.get_connexion()
+        cur = conn.cursor()
+        cur.execute("UPDATE todo SET terminee = 1 - terminee WHERE id = ?", (id_t,))
+        conn.commit()
+        conn.close()
+        return jsonify({"succes": True})
+    except Exception as e:
+        return jsonify({"succes": False, "erreur": str(e)})
+
+@app.route('/api/todo/supprimer/<int:id_t>', methods=['POST'])
+def api_todo_supprimer(id_t):
+    try:
+        conn = db.get_connexion()
+        cur = conn.cursor()
+        cur.execute("DELETE FROM todo WHERE id = ?", (id_t,))
+        conn.commit()
+        conn.close()
+        return jsonify({"succes": True})
+    except Exception as e:
+        return jsonify({"succes": False, "erreur": str(e)})
+
+# ═══════════════════════════════════════════
+# 📊 DASHBOARD STATS API
+# ═══════════════════════════════════════════
+
+@app.route('/api/dashboard/stats')
+def api_dashboard_stats():
+    try:
+        stats = get_stats_safe()
+        # Récupérer nombre flashcards
+        from db.flashcards import compter_flashcards
+        flashcards = compter_flashcards() if hasattr(db, 'flashcards') else 0
+        return jsonify({
+            "succes": True,
+            "pomodoro": stats.get('sessions_pomodoro', 0),
+            "flashcards": flashcards,
+            "streak": stats.get('streak', 0)
+        })
+    except Exception as e:
+        return jsonify({"succes": False, "erreur": str(e), "pomodoro": 0, "flashcards": 0, "streak": 0})
+
+# ═══════════════════════════════════════════
 # 🚀 LANCEMENT
 # ═══════════════════════════════════════════
 

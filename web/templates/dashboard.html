@@ -4,7 +4,7 @@
 
 <div class="db-container">
   <div class="db-header">
-    <h1>Bienvenue, Étudiant ! 🚀</h1>
+    <h1>Bienvenue, <span id="userPrenom">Étudiant</span> ! 🚀</h1>
     <p>Prêt à booster ta productivité aujourd'hui ?</p>
   </div>
 
@@ -44,12 +44,17 @@
         <h3>Importer</h3>
         <p>Ajouter un nouveau cours</p>
       </a>
+      <a href="/taches" class="db-nav-item">
+        <span>✅</span>
+        <h3>To-Do List</h3>
+        <p>Gérer tes tâches</p>
+      </a>
     </div>
   </div>
 </div>
 
 <style>
-.db-container { max-width: 900px; margin: 0 auto; padding: 2rem; }
+.db-container { max-width: 900px; margin: 0 auto; padding: 2rem; animation: fadeInUp 0.5s ease; }
 .db-header { margin-bottom: 2rem; }
 .db-header h1 { font-size: 2rem; color: #1A1D2E; }
 
@@ -60,38 +65,63 @@
 .db-stat-card {
   background: white; padding: 1.5rem; border-radius: 20px;
   text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+  transition: transform 0.3s;
 }
+.db-stat-card:hover { transform: translateY(-5px); }
 .db-stat-emoji { font-size: 2rem; display: block; margin-bottom: 0.5rem; }
 .db-stat-num { font-size: 1.8rem; font-weight: 800; color: #2962FF; }
 .db-stat-label { font-size: 0.85rem; color: #6B7280; margin-top: 0.2rem; }
 
-.db-nav-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.5rem; }
+.db-nav-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; }
 .db-nav-item {
   background: white; padding: 1.5rem; border-radius: 20px;
-  text-decoration: none; color: #1A1D2E; transition: transform 0.2s;
+  text-decoration: none; color: #1A1D2E; transition: all 0.3s;
   box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-  border: 1px solid #E5E7EB;
+  text-align: center;
 }
-.db-nav-item:hover { transform: translateY(-5px); border-color: #2962FF; }
-.db-nav-item span { font-size: 2rem; }
+.db-nav-item:hover { transform: translateY(-5px); box-shadow: 0 8px 25px rgba(0,0,0,0.1); }
+.db-nav-item span { font-size: 2rem; display: block; margin-bottom: 0.5rem; }
 .db-nav-item h3 { margin: 0.5rem 0; }
-.db-nav-item p { font-size: 0.9rem; color: #6B7280; }
+.db-nav-item p { font-size: 0.85rem; color: #6B7280; }
 
-[data-theme="dark"] .db-stat-card, [data-theme="dark"] .db-nav-item { background: #1E2235; border-color: #374151; }
+[data-theme="dark"] .db-stat-card,
+[data-theme="dark"] .db-nav-item { background: #1E2235; }
 [data-theme="dark"] .db-header h1 { color: #F1F5F9; }
+[data-theme="dark"] .db-stat-num { color: #A855F7; }
+@keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 </style>
 
 <script>
-// Appel API pour récupérer les stats globales au chargement
-document.addEventListener('DOMContentLoaded', () => {
-  fetch('/api/dashboard/stats')
-    .then(r => r.json())
-    .then(d => {
-      document.getElementById('stat-pomodoro').textContent = d.pomodoro || 0;
-      document.getElementById('stat-flashcards').textContent = d.flashcards || 0;
-      document.getElementById('stat-streak').textContent = d.streak || 0;
-    });
-});
+async function chargerStats() {
+  try {
+    const response = await fetch('/api/dashboard/stats');
+    const data = await response.json();
+    if (data.succes) {
+      document.getElementById('stat-pomodoro').textContent = data.pomodoro || 0;
+      document.getElementById('stat-flashcards').textContent = data.flashcards || 0;
+      document.getElementById('stat-streak').textContent = data.streak || 0;
+    } else {
+      // Fallback localStorage
+      const localStats = JSON.parse(localStorage.getItem('nokirova_stats') || '{}');
+      document.getElementById('stat-pomodoro').textContent = localStats.pomodoro || 0;
+      document.getElementById('stat-flashcards').textContent = localStats.flashcards || 0;
+      document.getElementById('stat-streak').textContent = localStats.streak || 0;
+    }
+  } catch (err) {
+    console.log('Erreur API, fallback localStorage');
+    const localStats = JSON.parse(localStorage.getItem('nokirova_stats') || '{}');
+    document.getElementById('stat-pomodoro').textContent = localStats.pomodoro || 0;
+    document.getElementById('stat-flashcards').textContent = localStats.flashcards || 0;
+    document.getElementById('stat-streak').textContent = localStats.streak || 0;
+  }
+}
+
+const user = JSON.parse(localStorage.getItem('nokirova_user') || 'null');
+if (user && user.prenom) {
+  document.getElementById('userPrenom').textContent = user.prenom;
+}
+
+document.addEventListener('DOMContentLoaded', chargerStats);
 </script>
 
 {% endblock %}

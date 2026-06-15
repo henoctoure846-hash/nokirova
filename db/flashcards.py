@@ -162,3 +162,12 @@ def get_flashcards_a_revoir(nom_deck: str = None) -> list:
     cards = cur.fetchall()
     conn.close()
     return cards
+
+def compter_flashcards():
+    """Retourne le nombre total de flashcards créées"""
+    conn = get_connexion()
+    cur = conn.cursor()
+    cur.execute("SELECT COUNT(*) FROM flashcards")
+    count = cur.fetchone()[0]
+    conn.close()
+    return count

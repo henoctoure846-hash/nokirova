@@ -1,0 +1,264 @@
+{% extends "base.html" %}
+{% block title %}To-Do List - NOKIROVA{% endblock %}
+{% block contenu %}
+
+<div class="td-container">
+  <div class="td-header">
+    <div class="td-header-icon">✅</div>
+    <div>
+      <h1 class="td-header-title">Ma To-Do List</h1>
+      <p class="td-header-sub">Gère tes priorités quotidiennes</p>
+    </div>
+    <button onclick="activerRappels()" class="td-btn-rappel" title="Activer les rappels quotidiens">🔔 Rappels</button>
+  </div>
+
+  <div class="td-input-card">
+    <input type="text" id="input-tache" placeholder="Ajouter une nouvelle tâche..." class="td-input" onkeypress="if(event.key==='Enter') ajouterTache()">
+    <button onclick="ajouterTache()" class="td-btn-add">Ajouter</button>
+  </div>
+
+  <div class="td-stats">
+    <div class="td-stat">📋 Total: <span id="total-taches">0</span></div>
+    <div class="td-stat">✅ Terminées: <span id="terminees-taches">0</span></div>
+    <div class="td-stat">⏳ Restantes: <span id="restantes-taches">0</span></div>
+  </div>
+
+  <div id="liste-taches" class="td-list">
+    <div class="td-placeholder">✨ Aucune tâche pour le moment. Ajoutes-en une !</div>
+  </div>
+</div>
+
+<style>
+.td-container { max-width: 650px; margin: 0 auto; padding: 2rem; animation: fadeInUp 0.5s ease; }
+.td-header { display: flex; align-items: center; gap: 1rem; margin-bottom: 2rem; flex-wrap: wrap; }
+.td-header-icon { font-size: 2.5rem; }
+.td-header-title { font-size: 1.8rem; font-weight: 900; color: #1A1D2E; margin: 0; }
+.td-header-sub { color: #6B7280; margin: 0; }
+.td-btn-rappel { margin-left: auto; background: linear-gradient(135deg, #7B61FF, #5B21B6); color: white; border: none; padding: 0.6rem 1.2rem; border-radius: 30px; cursor: pointer; font-weight: 600; }
+.td-input-card { display: flex; gap: 0.5rem; margin-bottom: 1.5rem; }
+.td-input { flex: 1; padding: 1rem; border-radius: 16px; border: 2px solid #E5E7EB; outline: none; transition: all 0.2s; font-size: 1rem; }
+.td-input:focus { border-color: #7B61FF; box-shadow: 0 0 0 3px rgba(123,97,255,0.1); }
+.td-btn-add { padding: 0 1.8rem; background: linear-gradient(135deg, #00C853, #059669); color: white; border-radius: 16px; border: none; font-weight: 700; cursor: pointer; transition: transform 0.2s; }
+.td-btn-add:hover { transform: scale(1.02); }
+
+.td-stats { display: flex; gap: 1.5rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
+.td-stat { background: #F3F4F6; padding: 0.5rem 1rem; border-radius: 30px; font-size: 0.85rem; font-weight: 600; color: #374151; }
+[data-theme="dark"] .td-stat { background: #1E2235; color: #9CA3AF; }
+
+.td-list { display: flex; flex-direction: column; gap: 0.8rem; }
+.td-item {
+  background: white; padding: 1rem 1.2rem; border-radius: 16px;
+  display: flex; align-items: center; justify-content: space-between;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+  transition: all 0.3s;
+  border-left: 5px solid #7B61FF;
+}
+.td-item:hover { transform: translateX(5px); box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+.td-item.done { opacity: 0.6; border-left-color: #00C853; }
+.td-item.done .td-item-texte { text-decoration: line-through; }
+.td-item-texte { flex: 1; cursor: pointer; font-size: 1rem; display: flex; align-items: center; gap: 0.8rem; }
+.td-item-check { width: 24px; height: 24px; border-radius: 50%; border: 2px solid #D1D5DB; display: inline-flex; align-items: center; justify-content: center; transition: all 0.2s; }
+.td-item.done .td-item-check { background: #00C853; border-color: #00C853; color: white; content: "✓"; }
+.td-actions { display: flex; gap: 0.5rem; }
+.td-btn-del { background: #FEE2E2; color: #EF4444; border: none; padding: 0.5rem 0.8rem; border-radius: 12px; cursor: pointer; font-size: 0.9rem; transition: all 0.2s; }
+.td-btn-del:hover { background: #EF4444; color: white; }
+
+.td-placeholder { text-align: center; padding: 3rem; color: #9CA3AF; font-size: 0.95rem; }
+
+[data-theme="dark"] .td-header-title { color: #F1F5F9; }
+[data-theme="dark"] .td-input { background: #1E2235; border-color: #374151; color: white; }
+[data-theme="dark"] .td-item { background: #1E2235; color: #F1F5F9; }
+@keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+</style>
+
+<script>
+let taches = [];
+
+async function ajouterTache() {
+  const input = document.getElementById('input-tache');
+  const texte = input.value.trim();
+  if (!texte) return;
+
+  try {
+    const response = await fetch('/api/todo/ajouter', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ texte: texte })
+    });
+    const data = await response.json();
+    if (data.succes) {
+      input.value = '';
+      chargerTaches();
+      // Notification locale
+      if (Notification.permission === 'granted') {
+        new Notification('✅ Nouvelle tâche ajoutée !', { body: texte, icon: '/logo' });
+      }
+    } else {
+      // Fallback localStorage
+      sauvegarderLocal();
+      chargerTaches();
+    }
+  } catch (err) {
+    sauvegarderLocal();
+    chargerTaches();
+  }
+}
+
+function sauvegarderLocal() {
+  localStorage.setItem('nokirova_taches', JSON.stringify(taches));
+}
+
+function chargerTachesLocal() {
+  const saved = localStorage.getItem('nokirova_taches');
+  if (saved) {
+    taches = JSON.parse(saved);
+  } else {
+    taches = [];
+  }
+  afficherTaches();
+}
+
+async function chargerTaches() {
+  try {
+    const response = await fetch('/api/todo/liste');
+    const data = await response.json();
+    if (data.succes && data.taches) {
+      taches = data.taches;
+      sauvegarderLocal();
+      afficherTaches();
+    } else {
+      chargerTachesLocal();
+    }
+  } catch (err) {
+    chargerTachesLocal();
+  }
+}
+
+function afficherTaches() {
+  const container = document.getElementById('liste-taches');
+  if (taches.length === 0) {
+    container.innerHTML = '<div class="td-placeholder">✨ Aucune tâche pour le moment. Ajoutes-en une !</div>';
+    document.getElementById('total-taches').textContent = '0';
+    document.getElementById('terminees-taches').textContent = '0';
+    document.getElementById('restantes-taches').textContent = '0';
+    return;
+  }
+
+  const total = taches.length;
+  const terminees = taches.filter(t => t.terminee).length;
+  const restantes = total - terminees;
+
+  document.getElementById('total-taches').textContent = total;
+  document.getElementById('terminees-taches').textContent = terminees;
+  document.getElementById('restantes-taches').textContent = restantes;
+
+  container.innerHTML = '';
+  taches.forEach(t => {
+    const div = document.createElement('div');
+    div.className = `td-item ${t.terminee ? 'done' : ''}`;
+    div.innerHTML = `
+      <div class="td-item-texte" onclick="toggleTache(${t.id})">
+        <span class="td-item-check">${t.terminee ? '✓' : ''}</span>
+        <span>${escapeHtml(t.texte)}</span>
+      </div>
+      <div class="td-actions">
+        <button class="td-btn-del" onclick="supprimerTache(${t.id})">🗑️</button>
+      </div>
+    `;
+    container.appendChild(div);
+  });
+}
+
+async function toggleTache(id) {
+  try {
+    const response = await fetch(`/api/todo/toggle/${id}`, { method: 'POST' });
+    const data = await response.json();
+    if (data.succes) {
+      chargerTaches();
+    } else {
+      // Fallback local
+      const tache = taches.find(t => t.id === id);
+      if (tache) tache.terminee = !tache.terminee;
+      sauvegarderLocal();
+      afficherTaches();
+    }
+  } catch (err) {
+    const tache = taches.find(t => t.id === id);
+    if (tache) tache.terminee = !tache.terminee;
+    sauvegarderLocal();
+    afficherTaches();
+  }
+}
+
+async function supprimerTache(id) {
+  try {
+    const response = await fetch(`/api/todo/supprimer/${id}`, { method: 'POST' });
+    const data = await response.json();
+    if (data.succes) {
+      chargerTaches();
+    } else {
+      taches = taches.filter(t => t.id !== id);
+      sauvegarderLocal();
+      afficherTaches();
+    }
+  } catch (err) {
+    taches = taches.filter(t => t.id !== id);
+    sauvegarderLocal();
+    afficherTaches();
+  }
+}
+
+function escapeHtml(text) {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+function activerRappels() {
+  if (Notification.permission === 'granted') {
+    alert('🔔 Les rappels sont déjà activés !');
+  } else if (Notification.permission !== 'denied') {
+    Notification.requestPermission().then(perm => {
+      if (perm === 'granted') {
+        alert('✅ Rappels activés ! Tu recevras une notification chaque matin.');
+        // Planifier un rappel quotidien
+        scheduleDailyReminder();
+      }
+    });
+  }
+}
+
+function scheduleDailyReminder() {
+  // Stocker dans localStorage que les rappels sont activés
+  localStorage.setItem('nokirova_rappel', 'true');
+}
+
+// Vérifier si c'est le matin pour rappel
+function checkMorningReminder() {
+  const heure = new Date().getHours();
+  const rappelActive = localStorage.getItem('nokirova_rappel') === 'true';
+  const dernierRappel = localStorage.getItem('nokirova_dernier_rappel');
+  const aujourdhui = new Date().toDateString();
+
+  if (rappelActive && dernierRappel !== aujourdhui && heure >= 8 && heure <= 10) {
+    if (Notification.permission === 'granted') {
+      const nonTerminees = taches.filter(t => !t.terminee).length;
+      new Notification('🌅 Bonjour ! Ta To-Do List t\'attend', {
+        body: `Il te reste ${nonTerminees} tâche${nonTerminees > 1 ? 's' : ''} à faire aujourd'hui.`,
+        icon: '/logo'
+      });
+      localStorage.setItem('nokirova_dernier_rappel', aujourdhui);
+    }
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  chargerTaches();
+  setTimeout(checkMorningReminder, 5000);
+
+  // Re-vérifier toutes les heures
+  setInterval(checkMorningReminder, 3600000);
+});
+</script>
+
+{% endblock %}

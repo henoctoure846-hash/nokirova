@@ -6,7 +6,6 @@
 
 <div class="chat-page">
 
-  <!-- HEADER VIOLET -->
   <div class="chat-header">
     <div class="chat-header-bg">💬</div>
     <div class="chat-header-icone">💬</div>
@@ -16,10 +15,8 @@
     </div>
   </div>
 
-  <!-- CHAT BOX -->
   <div class="chat-box">
 
-    <!-- MESSAGES -->
     <div class="messages-zone" id="messagesZone">
       <div class="message-bienvenue">
         <div class="bienvenue-logo">🌸</div>
@@ -62,13 +59,17 @@
       </div>
     </div>
 
-    <!-- ZONE INPUT -->
     <div class="input-zone">
       <form id="formChat">
         <div class="input-wrapper">
           <textarea id="inputMessage"
                     placeholder="💬 Pose ta question ici..."
                     rows="1"></textarea>
+
+          <button type="button" id="btnMicro" class="btn-micro" title="Parler avec la voix">
+            🎤
+          </button>
+
           <button type="submit" class="btn-envoyer" title="Envoyer">
             <span class="btn-envoyer-icone">🚀</span>
           </button>
@@ -359,6 +360,7 @@
   max-height: 120px;
 }
 
+/* BOUTON ENVOYER */
 .btn-envoyer {
   background: linear-gradient(135deg, #7B61FF, #5B21B6);
   color: white;
@@ -384,6 +386,34 @@
   transform: none;
 }
 .btn-envoyer-icone { font-size: 18px; }
+
+/* BOUTON MICRO (PHASE D1) */
+.btn-micro {
+  background: linear-gradient(135deg, #EF4444, #DC2626);
+  color: white;
+  border: none;
+  width: 46px; height: 46px;
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+  transition: all 0.3s;
+}
+.btn-micro:hover {
+  transform: scale(1.1);
+}
+.btn-micro.ecoute {
+  animation: pulseMicro 1s infinite;
+}
+@keyframes pulseMicro {
+  0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+  50% { transform: scale(1.15); box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+  100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+}
 
 .input-info {
   margin-top: 8px;
@@ -444,18 +474,20 @@ html[data-mode="sombre"] #inputMessage { color: #F1F5F9 !important; }
 </style>
 
 <script>
+// --- INITIALISATION DES VARIABLES ---
 const formChat = document.getElementById('formChat');
 const inputMessage = document.getElementById('inputMessage');
 const messagesZone = document.getElementById('messagesZone');
 const btnEnvoyer = document.querySelector('.btn-envoyer');
 
-// Personnalisation
+// Personnalisation User
 const user = JSON.parse(localStorage.getItem('nokirova_user') || 'null');
 if (user) {
   document.getElementById('userPrenom').textContent = user.prenom;
   document.getElementById('bienvenueNom').textContent = user.prenom;
 }
 
+// --- FONCTIONS UI CHAT ---
 function ajouterMessage(contenu, type) {
   const bienvenue = document.querySelector('.message-bienvenue');
   if (bienvenue) bienvenue.remove();
@@ -492,6 +524,47 @@ function retirerChargement() {
   if (div) div.remove();
 }
 
+// --- PHASE D1 : FONCTIONS VOCALES ---
+const btnMicro = document.getElementById('btnMicro');
+const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+// Fonction de synthèse vocale (TTS)
+function lireVoix(texte) {
+  if (!('speechSynthesis' in window)) return;
+  speechSynthesis.cancel(); // Stoppe l'audio précédent si on relance
+  const u = new SpeechSynthesisUtterance(texte);
+  u.lang = 'fr-FR';
+  speechSynthesis.speak(u);
+}
+
+// Configuration de la reconnaissance vocale (Speech-to-Text)
+if (SpeechRecognition && btnMicro) {
+  const recognition = new SpeechRecognition();
+  recognition.lang = 'fr-FR';
+  recognition.continuous = false;
+  recognition.interimResults = false;
+
+  btnMicro.addEventListener('click', () => {
+    recognition.start();
+    btnMicro.classList.add('ecoute'); // Active l'animation rouge
+  });
+
+  recognition.onresult = (e) => {
+    const texteSaisi = e.results[0][0].transcript;
+    inputMessage.value = texteSaisi;
+    envoyerMessage(texteSaisi); // Envoi direct de la voix à l'IA
+  };
+
+  recognition.onend = () => {
+    btnMicro.classList.remove('ecoute'); // Retire l'animation
+  };
+} else if (btnMicro) {
+  // Option de repli si le navigateur n'est pas compatible
+  btnMicro.style.display = 'none';
+  console.log("Reconnaissance vocale non supportée par ce navigateur.");
+}
+
+// --- FONCTION D'ENVOI PRINCIPALE ---
 async function envoyerMessage(q) {
   if (!q.trim()) return;
   ajouterMessage(q, 'user');
@@ -508,16 +581,23 @@ async function envoyerMessage(q) {
     });
     const data = await r.json();
     retirerChargement();
-    if (data.succes) ajouterMessage(data.reponse, 'ia');
-    else ajouterMessage(`⚠️ Erreur : ${data.erreur}`, 'ia');
+
+    if (data.succes) {
+      ajouterMessage(data.reponse, 'ia');
+      lireVoix(data.reponse); // L'IA répond et parle
+    } else {
+      ajouterMessage(`⚠️ Erreur : ${data.erreur}`, 'ia');
+    }
   } catch (e) {
     retirerChargement();
-    ajouterMessage(`⚠️ Erreur : ${e}`, 'ia');
+    ajouterMessage(`⚠️ Erreur de connexion au serveur...`, 'ia');
   }
+
   btnEnvoyer.disabled = false;
   inputMessage.focus();
 }
 
+// --- GESTIONNAIRES D'ÉVÉNEMENTS ---
 formChat.addEventListener('submit', e => {
   e.preventDefault();
   envoyerMessage(inputMessage.value);
@@ -536,8 +616,11 @@ inputMessage.addEventListener('input', function() {
   this.style.height = Math.min(this.scrollHeight, 120) + 'px';
 });
 
-function poserQuestion(q) { envoyerMessage(q); }
+function poserQuestion(q) {
+  envoyerMessage(q);
+}
 
+// Focus auto au démarrage
 inputMessage.focus();
 </script>
 

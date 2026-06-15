@@ -218,6 +218,14 @@ function copierMessage() {
   navigator.clipboard.writeText(message);
   alert('✅ Message copié !');
 }
+
+    <!-- BANNIÈRE INVITATION -->
+<div class="invite-banner" style="background: linear-gradient(135deg, #00C853, #059669); border-radius: 20px; padding: 1.5rem; text-align: center; margin-bottom: 1.5rem; color: white;">
+  <div style="font-size: 3rem;">🎁</div>
+  <h3 style="margin: 0.5rem 0;">Invite un ami et gagne des badges !</h3>
+  <p>Chaque ami qui rejoint = +50 XP pour toi</p>
+  <button onclick="copierLien()" style="background: white; color: #059669; border: none; padding: 0.8rem 1.5rem; border-radius: 50px; font-weight: bold; cursor: pointer; margin-top: 0.5rem;">🔗 Copier mon lien</button>
+</div>
 </script>
 
 {% endblock %}

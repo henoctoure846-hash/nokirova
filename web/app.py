@@ -1499,6 +1499,19 @@ def api_dashboard_stats():
     except Exception as e:
         return jsonify({"succes": False, "erreur": str(e), "pomodoro": 0, "flashcards": 0, "streak": 0})
 
+    @app.route('/api/share/stats')
+    def api_share_stats():
+        try:
+            from db.base import get_connexion
+            conn = get_connexion()
+            cur = conn.cursor()
+            cur.execute("SELECT COUNT(*) FROM users")
+            total_users = cur.fetchone()[0]
+            conn.close()
+            return jsonify({"succes": True, "total_users": total_users})
+        except Exception as e:
+            return jsonify({"succes": False, "erreur": str(e), "total_users": 1})
+
 # ═══════════════════════════════════════════
 # 🚀 LANCEMENT
 # ═══════════════════════════════════════════

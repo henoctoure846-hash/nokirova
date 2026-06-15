@@ -1512,6 +1512,109 @@ def api_dashboard_stats():
         except Exception as e:
             return jsonify({"succes": False, "erreur": str(e), "total_users": 1})
 
+        # ═══════════════════════════════════════════
+        # 👤 PROFIL COMPLET (API) - VERSION CORRIGÉE
+        # ═══════════════════════════════════════════
+
+        @app.route('/api/profil/info')
+        def api_profil_info():
+            try:
+                stats = get_stats_safe()
+                user_info = {}
+
+                user_id = request.cookies.get('nokirova_user_id')
+
+                if user_id:
+                    from db.base import get_user_info
+                    user_info = get_user_info(int(user_id)) or {}
+
+                profil = {
+                    "nom_complet": user_info.get('prenom', '') + ' ' + user_info.get('nom', '') if user_info.get(
+                        'prenom') else 'Étudiant NOKIROVA',
+                    "email": user_info.get('email', ''),
+                    "numero": "",
+                    "universite": "",
+                    "annee_etude": "",
+                    "date_naissance": "",
+                    "bio": "",
+                    "photo_url": ""
+                }
+
+                try:
+                    import json
+                    profil_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+                                               'profil.json')
+                    if os.path.exists(profil_path):
+                        with open(profil_path, 'r', encoding='utf-8') as f:
+                            saved_profil = json.load(f)
+                            profil.update(saved_profil)
+                except Exception:
+                    pass
+
+                try:
+                    from db.pomodoro import get_stats_pomodoro
+                    pomo = get_stats_pomodoro()
+                except Exception:
+                    pomo = {}
+
+                try:
+                    badges_raw = db.lister_badges()
+                    badges = [{"nom": b[0], "desc": b[1], "emoji": b[2], "date": b[3]} for b in badges_raw]
+                except Exception:
+                    badges = []
+
+                return jsonify({
+                    "succes": True,
+                    "profil": profil,
+                    "stats": stats,
+                    "pomodoro": pomo,
+                    "badges": badges
+                })
+            except Exception as e:
+                return jsonify({"succes": False, "erreur": str(e)})
+
+        @app.route('/api/profil/save', methods=['POST'])
+        def api_profil_save():
+            try:
+                data = request.get_json()
+
+                import json
+                profil_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'profil.json')
+
+                profil_data = {}
+                if os.path.exists(profil_path):
+                    with open(profil_path, 'r', encoding='utf-8') as f:
+                        try:
+                            profil_data = json.load(f)
+                        except:
+                            profil_data = {}
+
+                for key in ['nom_complet', 'email', 'numero', 'universite', 'annee_etude', 'date_naissance', 'bio']:
+                    if key in data:
+                        profil_data[key] = data[key]
+
+                with open(profil_path, 'w', encoding='utf-8') as f:
+                    json.dump(profil_data, f, ensure_ascii=False, indent=2)
+
+                user_id = request.cookies.get('nokirova_user_id')
+                if user_id and data.get('nom_complet'):
+                    parts = data['nom_complet'].strip().split(' ', 1)
+                    prenom = parts[0]
+                    nom = parts[1] if len(parts) > 1 else ''
+
+                    from db.base import get_connexion
+                    conn = get_connexion()
+                    cur = conn.cursor()
+                    cur.execute("UPDATE users SET prenom = ?, nom = ?, email = ? WHERE id = ?",
+                                (prenom, nom, data.get('email', ''), int(user_id)))
+                    conn.commit()
+                    conn.close()
+
+                return jsonify({"succes": True, "message": "Profil sauvegardé"})
+
+            except Exception as e:
+                return jsonify({"succes": False, "erreur": str(e)})
+
 # ═══════════════════════════════════════════
 # 🚀 LANCEMENT
 # ═══════════════════════════════════════════

@@ -189,20 +189,12 @@ document.getElementById('registerForm').addEventListener('submit', async (e) => 
     const data = await response.json();
 
     if (data.succes) {
-      if (typeof afficherNotification === 'function') {
-        afficherNotification('✅ Compte créé ! Connecte-toi', 'succes');
-      } else {
-        alert('✅ Compte créé ! Connecte-toi');
-      }
+      alert('✅ Compte créé ! Connecte-toi');
       setTimeout(() => {
         window.location.href = '/login';
       }, 1000);
     } else {
-      if (typeof afficherNotification === 'function') {
-        afficherNotification(data.erreur, 'erreur');
-      } else {
-        alert('❌ ' + data.erreur);
-      }
+      alert('❌ ' + data.erreur);
       btn.disabled = false;
       btn.textContent = '🎉 S\'inscrire';
     }

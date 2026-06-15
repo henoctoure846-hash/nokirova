@@ -1,8 +1,4 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title><!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
@@ -24,7 +20,7 @@
             padding: 40px 30px;
             border-radius: 28px;
             box-shadow: 0 20px 60px rgba(0,0,0,0.25);
-            max-width: 450px;
+            max-width: 480px;
             width: 100%;
             text-align: center;
         }
@@ -98,6 +94,18 @@
             color: #9CA3AF;
             font-style: italic;
         }
+        .login-link {
+            margin-top: 15px;
+            font-size: 14px;
+        }
+        .login-link a {
+            color: #7ED321;
+            text-decoration: none;
+            font-weight: 700;
+        }
+        .login-link a:hover {
+            text-decoration: underline;
+        }
     </style>
 </head>
 <body>
@@ -107,15 +115,21 @@
     <h1 class="bienvenue-titre">🌸 Bienvenue !</h1>
     <p class="bienvenue-sous">
         Je suis ton professeur intelligent personnel.<br>
-        Dis-moi qui tu es pour commencer ✨
+        Crée ton compte pour commencer ✨
     </p>
 
     <form class="form-bienvenue" onsubmit="enregistrerUtilisateur(event)">
         <label for="prenom">👤 Ton prénom</label>
         <input type="text" id="prenom" required placeholder="Ex: Hénoc" maxlength="30">
 
+        <label for="email">📧 Ton email (pour te reconnecter)</label>
+        <input type="email" id="email" required placeholder="exemple@email.com">
+
+        <label for="password">🔒 Mot de passe</label>
+        <input type="password" id="password" required placeholder="Au moins 6 caractères" minlength="6">
+
         <label for="universite">🎓 Ton université (optionnel)</label>
-        <input type="text" id="universite" placeholder="Ex: Université Internationale ICK de Bouaké" maxlength="50">
+        <input type="text" id="universite" placeholder="Ex: Université Internationale ICK de Bouaké">
 
         <label for="niveau">📚 Ton niveau d'étude</label>
         <select id="niveau">
@@ -129,11 +143,15 @@
             <option value="Autre">Autre</option>
         </select>
 
-        <button type="submit" class="btn-bienvenue">🚀 Commencer l'aventure</button>
+        <button type="submit" class="btn-bienvenue">🚀 Créer mon compte</button>
     </form>
 
+    <div class="login-link">
+        Déjà un compte ? <a href="/login">Se connecter</a>
+    </div>
+
     <p class="invite-text">
-        🔒 Tes infos restent sur ton appareil. Aucun compte requis.
+        🔒 Tes données sont sécurisées. Connecte-toi pour retrouver tes cours.
     </p>
 </div>
 
@@ -141,21 +159,39 @@
 function enregistrerUtilisateur(e) {
     e.preventDefault();
     const prenom = document.getElementById('prenom').value.trim();
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value;
     const universite = document.getElementById('universite').value.trim();
     const niveau = document.getElementById('niveau').value;
 
     if (!prenom) return alert('⚠️ Ton prénom est obligatoire !');
+    if (!email) return alert('⚠️ Ton email est obligatoire !');
+    if (!password || password.length < 6) return alert('⚠️ Mot de passe (min 6 caractères)');
 
-    const user = {
-        prenom: prenom,
-        universite: universite || 'Non précisé',
-        niveau: niveau,
-        date_creation: new Date().toISOString(),
-        user_id: 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2,9)
-    };
-
-    localStorage.setItem('nokirova_user', JSON.stringify(user));
-    window.location.href = '/';
+    fetch('/api/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password, prenom, nom: '' })
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.succes) {
+            const user = {
+                id: data.user_id,
+                prenom: prenom,
+                email: email,
+                universite: universite || 'Non précisé',
+                niveau: niveau,
+                date_creation: new Date().toISOString(),
+                user_id: data.user_id
+            };
+            localStorage.setItem('nokirova_user', JSON.stringify(user));
+            window.location.href = '/';
+        } else {
+            alert('❌ ' + (data.erreur || 'Erreur création compte'));
+        }
+    })
+    .catch(err => alert('❌ Erreur réseau : ' + err.message));
 }
 
 // Si déjà connecté → rediriger
@@ -163,11 +199,6 @@ if (localStorage.getItem('nokirova_user')) {
     window.location.href = '/';
 }
 </script>
-
-</body>
-</html></title>
-</head>
-<body>
 
 </body>
 </html>

@@ -5,7 +5,6 @@
 {% endblock %}
 {% block contenu %}
 
-<!-- TOAST -->
 <div id="toast" style="
   position:fixed; top:20px; right:20px; z-index:9999;
   background:#1A1D2E; color:white; padding:1rem 1.5rem;
@@ -25,8 +24,27 @@
       <h1 class="gr-header-title">Mes Statistiques</h1>
       <p class="gr-header-sub">Suis ta progression en temps réel 📈</p>
     </div>
-    <div class="gr-header-badge">
-      <span>📈</span> Live Stats
+    <div class="gr-header-badge"><span>📈</span> Live Stats</div>
+  </div>
+
+  <!-- ═══ NIVEAU + XP BARRE ═══ -->
+  <div class="gr-xp-card">
+    <div class="gr-xp-left">
+      <div class="gr-xp-badge" id="xp-badge">🥉</div>
+      <div>
+        <div class="gr-xp-label">Niveau <span id="xp-niveau">1</span></div>
+        <div class="gr-xp-titre" id="xp-titre">🌱 Apprenti</div>
+      </div>
+    </div>
+    <div class="gr-xp-right">
+      <div class="gr-xp-bar-wrap">
+        <div class="gr-xp-bar-fill" id="xp-bar" style="width:0%"></div>
+      </div>
+      <div class="gr-xp-info">
+        <span id="xp-actuel">0</span> XP
+        <span style="color:#9CA3AF"> / </span>
+        <span id="xp-prochain">100</span> XP pour niveau suivant
+      </div>
     </div>
   </div>
 
@@ -54,13 +72,69 @@
     </div>
   </div>
 
+  <!-- ═══ STREAK + OBJECTIF ═══ -->
+  <div class="gr-mid-grid">
+
+    <!-- Streak Card -->
+    <div class="gr-streak-card">
+      <div class="gr-streak-flames" id="streak-flames">🔥</div>
+      <div class="gr-streak-val" id="streak-val">0</div>
+      <div class="gr-streak-label">jours de streak</div>
+      <div class="gr-streak-msg" id="streak-msg">Continue comme ça ! 💪</div>
+    </div>
+
+    <!-- Objectif du jour -->
+    <div class="gr-objectif-card">
+      <div class="gr-obj-header">
+        <span>🎯</span>
+        <strong>Objectif du jour</strong>
+      </div>
+      <div class="gr-obj-item">
+        <span>📚 Cours chargé</span>
+        <div class="gr-obj-bar-wrap">
+          <div class="gr-obj-bar" id="obj-cours" style="width:0%; background:#7ED321;"></div>
+        </div>
+        <span class="gr-obj-pct" id="obj-cours-txt">0%</span>
+      </div>
+      <div class="gr-obj-item">
+        <span>🍅 Pomodoro (objectif 2)</span>
+        <div class="gr-obj-bar-wrap">
+          <div class="gr-obj-bar" id="obj-pomo" style="width:0%; background:#EF4444;"></div>
+        </div>
+        <span class="gr-obj-pct" id="obj-pomo-txt">0%</span>
+      </div>
+      <div class="gr-obj-item">
+        <span>🃏 Flashcards (objectif 5)</span>
+        <div class="gr-obj-bar-wrap">
+          <div class="gr-obj-bar" id="obj-fc" style="width:0%; background:#7B61FF;"></div>
+        </div>
+        <span class="gr-obj-pct" id="obj-fc-txt">0%</span>
+      </div>
+      <div class="gr-obj-item">
+        <span>💬 Chat IA (objectif 3)</span>
+        <div class="gr-obj-bar-wrap">
+          <div class="gr-obj-bar" id="obj-chat" style="width:0%; background:#F59E0B;"></div>
+        </div>
+        <span class="gr-obj-pct" id="obj-chat-txt">0%</span>
+      </div>
+    </div>
+
+    <!-- Meilleure matière -->
+    <div class="gr-best-card">
+      <div class="gr-best-emoji">🏅</div>
+      <div class="gr-best-label">Meilleure matière</div>
+      <div class="gr-best-val" id="best-matiere">—</div>
+      <div class="gr-best-sub" id="best-sub">0 cours</div>
+    </div>
+
+  </div>
+
   <!-- ═══ CHARTS GRID ═══ -->
   <div class="gr-charts-grid">
 
     <div class="gr-chart-card">
       <div class="gr-chart-header">
-        <div class="gr-chart-icon"
-             style="background:linear-gradient(135deg,#A855F7,#7B61FF);">📅</div>
+        <div class="gr-chart-icon" style="background:linear-gradient(135deg,#A855F7,#7B61FF);">📅</div>
         <h3 class="gr-chart-title">Activité (7 derniers jours)</h3>
       </div>
       <canvas id="chart-activite"></canvas>
@@ -68,8 +142,7 @@
 
     <div class="gr-chart-card">
       <div class="gr-chart-header">
-        <div class="gr-chart-icon"
-             style="background:linear-gradient(135deg,#EF4444,#F59E0B);">⏱️</div>
+        <div class="gr-chart-icon" style="background:linear-gradient(135deg,#EF4444,#F59E0B);">⏱️</div>
         <h3 class="gr-chart-title">Pomodoro (7 derniers jours)</h3>
       </div>
       <canvas id="chart-pomodoro"></canvas>
@@ -77,8 +150,7 @@
 
     <div class="gr-chart-card">
       <div class="gr-chart-header">
-        <div class="gr-chart-icon"
-             style="background:linear-gradient(135deg,#FF6B9D,#7B61FF);">🎯</div>
+        <div class="gr-chart-icon" style="background:linear-gradient(135deg,#FF6B9D,#7B61FF);">🎯</div>
         <h3 class="gr-chart-title">Activité par type</h3>
       </div>
       <canvas id="chart-types"></canvas>
@@ -86,8 +158,7 @@
 
     <div class="gr-chart-card">
       <div class="gr-chart-header">
-        <div class="gr-chart-icon"
-             style="background:linear-gradient(135deg,#00C853,#FFD93D);">📚</div>
+        <div class="gr-chart-icon" style="background:linear-gradient(135deg,#00C853,#FFD93D);">📚</div>
         <h3 class="gr-chart-title">Cours par matière</h3>
       </div>
       <canvas id="chart-matieres"></canvas>
@@ -95,8 +166,7 @@
 
     <div class="gr-chart-card gr-chart-full">
       <div class="gr-chart-header">
-        <div class="gr-chart-icon"
-             style="background:linear-gradient(135deg,#2962FF,#00C853);">🃏</div>
+        <div class="gr-chart-icon" style="background:linear-gradient(135deg,#2962FF,#00C853);">🃏</div>
         <h3 class="gr-chart-title">Performances Flashcards</h3>
       </div>
       <canvas id="chart-flashcards"></canvas>
@@ -107,8 +177,7 @@
   <!-- ═══ RÉSUMÉ ═══ -->
   <div class="gr-resume-card">
     <div class="gr-resume-header">
-      <div class="gr-resume-icon"
-           style="background:linear-gradient(135deg,#A855F7,#7B61FF);">📋</div>
+      <div class="gr-resume-icon" style="background:linear-gradient(135deg,#A855F7,#7B61FF);">📋</div>
       <div>
         <h3 class="gr-resume-title">Résumé complet</h3>
         <p class="gr-resume-sub">Toutes tes statistiques détaillées</p>
@@ -121,409 +190,337 @@
 
 <style>
 
-/* ── ANIMATIONS ── */
-@keyframes fadeInUp {
-  from { opacity:0; transform:translateY(30px); }
-  to   { opacity:1; transform:translateY(0); }
-}
-@keyframes floatChart {
-  0%,100% { transform:translateY(0px) rotate(-2deg); }
-  50%      { transform:translateY(-10px) rotate(2deg); }
-}
-@keyframes bounceIn {
-  0%   { transform:scale(0.3); opacity:0; }
-  50%  { transform:scale(1.05); }
-  70%  { transform:scale(0.9); }
-  100% { transform:scale(1); opacity:1; }
-}
-@keyframes countUp {
-  from { opacity:0; transform:translateY(10px); }
-  to   { opacity:1; transform:translateY(0); }
-}
+@keyframes fadeInUp  { from{opacity:0;transform:translateY(30px)} to{opacity:1;transform:translateY(0)} }
+@keyframes floatChart{ 0%,100%{transform:translateY(0) rotate(-2deg)} 50%{transform:translateY(-10px) rotate(2deg)} }
+@keyframes bounceIn  { 0%{transform:scale(0.3);opacity:0} 50%{transform:scale(1.05)} 70%{transform:scale(0.9)} 100%{transform:scale(1);opacity:1} }
+@keyframes xpFill    { from{width:0%} }
+@keyframes flamePulse{ 0%,100%{transform:scale(1)} 50%{transform:scale(1.2)} }
+@keyframes barGrow   { from{width:0%} }
 
 /* ── CONTAINER ── */
-.gr-container {
-  padding:1.5rem;
-  max-width:1200px;
-  margin:0 auto;
-  animation:fadeInUp 0.5s ease;
-}
+.gr-container{ padding:1.5rem; max-width:1200px; margin:0 auto; animation:fadeInUp 0.5s ease; }
 
 /* ── HEADER ── */
-.gr-header {
-  position:relative; overflow:hidden;
-  background:linear-gradient(135deg,#A855F7 0%,#7B61FF 50%,#2962FF 100%);
-  border-radius:28px; padding:2rem;
-  margin-bottom:1.5rem;
-  display:flex; align-items:center; gap:1.2rem; flex-wrap:wrap;
-  box-shadow:0 8px 32px rgba(168,85,247,0.35);
+.gr-header{ position:relative; overflow:hidden; background:linear-gradient(135deg,#A855F7,#7B61FF 50%,#2962FF); border-radius:28px; padding:2rem; margin-bottom:1.5rem; display:flex; align-items:center; gap:1.2rem; flex-wrap:wrap; box-shadow:0 8px 32px rgba(168,85,247,0.35); }
+.gr-header-bg-emoji{ position:absolute; right:-10px; top:-20px; font-size:9rem; opacity:0.12; pointer-events:none; animation:floatChart 4s ease-in-out infinite; }
+.gr-header-icon{ width:72px; height:72px; background:rgba(255,255,255,0.2); border-radius:20px; display:flex; align-items:center; justify-content:center; font-size:2.2rem; backdrop-filter:blur(10px); border:2px solid rgba(255,255,255,0.3); }
+.gr-header-text{ flex:1; }
+.gr-header-title{ font-size:1.8rem; font-weight:900; color:white; margin:0; }
+.gr-header-sub{ color:rgba(255,255,255,0.85); margin:0.3rem 0 0; font-size:0.95rem; }
+.gr-header-badge{ background:rgba(255,255,255,0.2); color:white; padding:0.5rem 1.2rem; border-radius:50px; font-weight:700; font-size:0.85rem; display:flex; align-items:center; gap:0.5rem; backdrop-filter:blur(10px); border:1px solid rgba(255,255,255,0.3); }
+
+/* ── XP CARD ── */
+.gr-xp-card{
+  background:white; border-radius:24px; padding:1.5rem 2rem;
+  margin-bottom:1.2rem; display:flex; align-items:center; gap:2rem;
+  box-shadow:0 4px 24px rgba(168,85,247,0.12);
+  border-top:5px solid #A855F7; flex-wrap:wrap;
+  animation:fadeInUp 0.5s ease;
 }
-.gr-header-bg-emoji {
-  position:absolute; right:-10px; top:-20px;
-  font-size:9rem; opacity:0.12; pointer-events:none;
-  animation:floatChart 4s ease-in-out infinite;
-}
-.gr-header-icon {
-  width:72px; height:72px;
-  background:rgba(255,255,255,0.2);
-  border-radius:20px;
+.gr-xp-left{ display:flex; align-items:center; gap:1rem; }
+.gr-xp-badge{
+  width:64px; height:64px; border-radius:50%;
+  background:linear-gradient(135deg,#A855F7,#7B61FF);
   display:flex; align-items:center; justify-content:center;
-  font-size:2.2rem; flex-shrink:0;
-  backdrop-filter:blur(10px);
-  border:2px solid rgba(255,255,255,0.3);
+  font-size:2rem; box-shadow:0 4px 16px rgba(168,85,247,0.4);
 }
-.gr-header-text { flex:1; }
-.gr-header-title {
-  font-size:1.8rem; font-weight:900;
-  color:white; margin:0;
-  text-shadow:0 2px 10px rgba(0,0,0,0.2);
+.gr-xp-label{ font-size:0.8rem; color:#9CA3AF; font-weight:700; text-transform:uppercase; }
+.gr-xp-titre{ font-size:1.1rem; font-weight:900; color:#1A1D2E; }
+.gr-xp-right{ flex:1; min-width:200px; }
+.gr-xp-bar-wrap{
+  height:18px; background:#EDE9FE; border-radius:50px;
+  overflow:hidden; margin-bottom:0.5rem;
 }
-.gr-header-sub {
-  color:rgba(255,255,255,0.85);
-  margin:0.3rem 0 0; font-size:0.95rem;
+.gr-xp-bar-fill{
+  height:100%; border-radius:50px;
+  background:linear-gradient(90deg,#A855F7,#7B61FF,#2962FF);
+  transition:width 1.5s cubic-bezier(0.34,1.56,0.64,1);
+  box-shadow:0 2px 8px rgba(168,85,247,0.4);
 }
-.gr-header-badge {
-  background:rgba(255,255,255,0.2);
-  color:white; padding:0.5rem 1.2rem;
-  border-radius:50px; font-weight:700; font-size:0.85rem;
-  display:flex; align-items:center; gap:0.5rem;
-  backdrop-filter:blur(10px);
-  border:1px solid rgba(255,255,255,0.3);
-  white-space:nowrap;
-}
+.gr-xp-info{ font-size:0.82rem; color:#6B7280; font-weight:600; }
 
 /* ── QUICK STATS ── */
-.gr-quick-grid {
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
-  gap:1rem; margin-bottom:1.5rem;
-}
-.gr-qs {
-  background:white; border-radius:20px;
-  padding:1.4rem 1rem; text-align:center;
-  box-shadow:0 4px 20px rgba(0,0,0,0.07);
-  display:flex; flex-direction:column; align-items:center; gap:0.3rem;
-  transition:all 0.3s; animation:bounceIn 0.5s ease both;
-}
-.gr-qs:hover { transform:translateY(-5px); }
-.gr-qs-or     { border-top:5px solid #F59E0B; }
-.gr-qs-violet { border-top:5px solid #A855F7; }
-.gr-qs-rouge  { border-top:5px solid #EF4444; }
-.gr-qs-vert   { border-top:5px solid #00C853; }
-.gr-qs-emoji  { font-size:2.2rem; }
-.gr-qs-val {
-  font-size:2rem; font-weight:900; color:#1A1D2E;
-  animation:countUp 0.5s ease;
-}
-.gr-qs-name {
-  font-size:0.72rem; color:#9CA3AF;
-  font-weight:700; text-transform:uppercase; letter-spacing:1px;
-}
+.gr-quick-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:1rem; margin-bottom:1.2rem; }
+.gr-qs{ background:white; border-radius:20px; padding:1.4rem 1rem; text-align:center; box-shadow:0 4px 20px rgba(0,0,0,0.07); display:flex; flex-direction:column; align-items:center; gap:0.3rem; transition:0.3s; animation:bounceIn 0.5s ease both; }
+.gr-qs:hover{ transform:translateY(-5px); }
+.gr-qs-or    { border-top:5px solid #F59E0B; }
+.gr-qs-violet{ border-top:5px solid #A855F7; }
+.gr-qs-rouge { border-top:5px solid #EF4444; }
+.gr-qs-vert  { border-top:5px solid #00C853; }
+.gr-qs-emoji { font-size:2.2rem; }
+.gr-qs-val   { font-size:2rem; font-weight:900; color:#1A1D2E; }
+.gr-qs-name  { font-size:0.72rem; color:#9CA3AF; font-weight:700; text-transform:uppercase; letter-spacing:1px; }
 
-/* ── CHARTS GRID ── */
-.gr-charts-grid {
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(360px,1fr));
-  gap:1rem; margin-bottom:1.5rem;
-}
-.gr-chart-card {
-  background:white; border-radius:24px;
-  padding:1.5rem;
-  box-shadow:0 4px 24px rgba(168,85,247,0.1);
-  border-top:5px solid #A855F7;
-  animation:fadeInUp 0.5s ease both;
-  transition:all 0.3s;
-}
-.gr-chart-card:hover {
-  transform:translateY(-4px);
-  box-shadow:0 8px 32px rgba(168,85,247,0.2);
-}
-.gr-chart-full { grid-column:1 / -1; }
+/* ── MID GRID ── */
+.gr-mid-grid{ display:grid; grid-template-columns:1fr 2fr 1fr; gap:1rem; margin-bottom:1.2rem; }
 
-.gr-chart-header {
-  display:flex; align-items:center; gap:0.8rem;
-  margin-bottom:1.2rem;
+/* Streak Card */
+.gr-streak-card{
+  background:linear-gradient(135deg,#FFF7ED,#FFEDD5);
+  border-radius:24px; padding:1.5rem; text-align:center;
+  border-top:5px solid #EF4444;
+  box-shadow:0 4px 20px rgba(239,68,68,0.12);
+  animation:fadeInUp 0.5s ease;
 }
-.gr-chart-icon {
-  width:42px; height:42px; border-radius:12px;
-  display:flex; align-items:center; justify-content:center;
-  font-size:1.2rem; flex-shrink:0;
-  box-shadow:0 4px 12px rgba(0,0,0,0.15);
+.gr-streak-flames{ font-size:3rem; animation:flamePulse 1.5s ease-in-out infinite; }
+.gr-streak-val{ font-size:3rem; font-weight:900; color:#EF4444; line-height:1; }
+.gr-streak-label{ font-size:0.8rem; color:#9CA3AF; font-weight:700; text-transform:uppercase; margin-top:0.3rem; }
+.gr-streak-msg{ font-size:0.85rem; color:#7C3AED; font-weight:700; margin-top:0.8rem; }
+
+/* Objectif Card */
+.gr-objectif-card{
+  background:white; border-radius:24px; padding:1.5rem;
+  border-top:5px solid #7B61FF;
+  box-shadow:0 4px 20px rgba(123,97,255,0.1);
+  animation:fadeInUp 0.5s ease;
 }
-.gr-chart-title {
-  font-size:1rem; font-weight:800; color:#1A1D2E; margin:0;
+.gr-obj-header{ display:flex; align-items:center; gap:0.5rem; margin-bottom:1rem; font-weight:800; color:#1A1D2E; }
+.gr-obj-item{ display:flex; align-items:center; gap:0.8rem; margin-bottom:0.8rem; font-size:0.82rem; color:#6B7280; }
+.gr-obj-bar-wrap{ flex:1; height:10px; background:#F3F4F6; border-radius:50px; overflow:hidden; }
+.gr-obj-bar{ height:100%; border-radius:50px; transition:width 1.5s ease; }
+.gr-obj-pct{ font-size:0.75rem; font-weight:800; color:#1A1D2E; min-width:35px; text-align:right; }
+
+/* Best matière */
+.gr-best-card{
+  background:linear-gradient(135deg,#ECFDF5,#D1FAE5);
+  border-radius:24px; padding:1.5rem; text-align:center;
+  border-top:5px solid #00C853;
+  box-shadow:0 4px 20px rgba(0,200,83,0.12);
+  animation:fadeInUp 0.5s ease;
 }
+.gr-best-emoji{ font-size:2.5rem; margin-bottom:0.5rem; }
+.gr-best-label{ font-size:0.8rem; color:#9CA3AF; font-weight:700; text-transform:uppercase; }
+.gr-best-val{ font-size:1.2rem; font-weight:900; color:#00C853; margin-top:0.5rem; }
+.gr-best-sub{ font-size:0.82rem; color:#6B7280; margin-top:0.3rem; }
+
+/* ── CHARTS ── */
+.gr-charts-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(360px,1fr)); gap:1rem; margin-bottom:1.2rem; }
+.gr-chart-card{ background:white; border-radius:24px; padding:1.5rem; box-shadow:0 4px 24px rgba(168,85,247,0.1); border-top:5px solid #A855F7; animation:fadeInUp 0.5s ease both; transition:0.3s; }
+.gr-chart-card:hover{ transform:translateY(-4px); box-shadow:0 8px 32px rgba(168,85,247,0.2); }
+.gr-chart-full{ grid-column:1 / -1; }
+.gr-chart-header{ display:flex; align-items:center; gap:0.8rem; margin-bottom:1.2rem; }
+.gr-chart-icon{ width:42px; height:42px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:1.2rem; }
+.gr-chart-title{ font-size:1rem; font-weight:800; color:#1A1D2E; margin:0; }
 
 /* ── RÉSUMÉ ── */
-.gr-resume-card {
-  background:white; border-radius:24px;
-  padding:1.8rem;
-  box-shadow:0 4px 24px rgba(0,0,0,0.07);
-  border-top:5px solid #A855F7;
-  animation:fadeInUp 0.5s ease 0.3s both;
-}
-.gr-resume-header {
-  display:flex; align-items:center; gap:1rem;
-  margin-bottom:1.5rem;
-}
-.gr-resume-icon {
-  width:52px; height:52px; border-radius:14px;
-  display:flex; align-items:center; justify-content:center;
-  font-size:1.5rem; flex-shrink:0;
-  box-shadow:0 4px 12px rgba(0,0,0,0.15);
-}
-.gr-resume-title {
-  font-size:1.1rem; font-weight:800; color:#1A1D2E; margin:0;
-}
-.gr-resume-sub { font-size:0.85rem; color:#6B7280; margin:0.2rem 0 0; }
+.gr-resume-card{ background:white; border-radius:24px; padding:1.8rem; box-shadow:0 4px 24px rgba(0,0,0,0.07); border-top:5px solid #A855F7; animation:fadeInUp 0.5s ease 0.3s both; }
+.gr-resume-header{ display:flex; align-items:center; gap:1rem; margin-bottom:1.5rem; }
+.gr-resume-icon{ width:52px; height:52px; border-radius:14px; display:flex; align-items:center; justify-content:center; font-size:1.5rem; }
+.gr-resume-title{ font-size:1.1rem; font-weight:800; color:#1A1D2E; margin:0; }
+.gr-resume-sub{ font-size:0.85rem; color:#6B7280; margin:0.2rem 0 0; }
+.gr-resume-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:0.8rem; }
+.gr-resume-item{ background:linear-gradient(135deg,#FAF5FF,#EDE9FE); border-radius:14px; padding:1rem 1.2rem; border-left:4px solid #A855F7; transition:0.2s; animation:fadeInUp 0.4s ease both; }
+.gr-resume-item:hover{ transform:translateX(4px); }
+.gr-resume-item strong{ display:block; color:#6B21A8; font-size:0.8rem; margin-bottom:0.4rem; text-transform:uppercase; letter-spacing:0.5px; }
+.gr-resume-item span{ color:#1A1D2E; font-size:1.3rem; font-weight:900; }
 
-.gr-resume-grid {
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
-  gap:0.8rem;
-}
-.gr-resume-item {
-  background:linear-gradient(135deg,#FAF5FF,#EDE9FE);
-  border-radius:14px; padding:1rem 1.2rem;
-  border-left:4px solid #A855F7;
-  transition:all 0.2s; animation:fadeInUp 0.4s ease both;
-}
-.gr-resume-item:hover { transform:translateX(4px); }
-.gr-resume-item strong {
-  display:block; color:#6B21A8;
-  font-size:0.8rem; margin-bottom:0.4rem;
-  text-transform:uppercase; letter-spacing:0.5px;
-}
-.gr-resume-item span {
-  color:#1A1D2E; font-size:1.3rem; font-weight:900;
-}
-
-/* ══════════════════════════════════ */
-/* MODE SOMBRE */
-/* ══════════════════════════════════ */
+/* ── MODE SOMBRE ── */
+[data-theme="dark"] .gr-xp-card,
 [data-theme="dark"] .gr-qs,
 [data-theme="dark"] .gr-chart-card,
-[data-theme="dark"] .gr-resume-card { background:#1E2235; }
-[data-theme="dark"] .gr-qs-val { color:#F1F5F9; }
-[data-theme="dark"] .gr-chart-title { color:#F1F5F9; }
-[data-theme="dark"] .gr-resume-title { color:#F1F5F9; }
-[data-theme="dark"] .gr-resume-sub { color:#94A3B8; }
-[data-theme="dark"] .gr-resume-item {
-  background:linear-gradient(135deg,#2E1065,#1E2235);
-  border-left-color:#A855F7;
-}
-[data-theme="dark"] .gr-resume-item span { color:#F1F5F9; }
-[data-theme="dark"] .gr-resume-item strong { color:#C4B5FD; }
+[data-theme="dark"] .gr-objectif-card,
+[data-theme="dark"] .gr-resume-card{ background:#1E2235; }
+[data-theme="dark"] .gr-xp-bar-wrap{ background:#2D3A50; }
+[data-theme="dark"] .gr-xp-titre,
+[data-theme="dark"] .gr-qs-val,
+[data-theme="dark"] .gr-chart-title,
+[data-theme="dark"] .gr-resume-title{ color:#F1F5F9; }
+[data-theme="dark"] .gr-streak-card{ background:linear-gradient(135deg,#2D1B10,#3D1F0D); }
+[data-theme="dark"] .gr-best-card{ background:linear-gradient(135deg,#052E16,#14532D); }
+[data-theme="dark"] .gr-resume-item{ background:linear-gradient(135deg,#2E1065,#1E2235); }
+[data-theme="dark"] .gr-resume-item span{ color:#F1F5F9; }
+[data-theme="dark"] .gr-obj-bar-wrap{ background:#374151; }
 
-/* ══════════════════════════════════ */
-/* RESPONSIVE */
-/* ══════════════════════════════════ */
-@media (max-width:768px) {
-  .gr-charts-grid { grid-template-columns:1fr; }
-  .gr-chart-full { grid-column:1; }
-}
-@media (max-width:640px) {
-  .gr-container { padding:1rem; }
-  .gr-header { padding:1.2rem; }
-  .gr-header-title { font-size:1.4rem; }
-  .gr-header-badge { display:none; }
-  .gr-quick-grid { grid-template-columns:repeat(2,1fr); }
-}
+/* ── RESPONSIVE ── */
+@media(max-width:900px){ .gr-mid-grid{ grid-template-columns:1fr 1fr; } .gr-best-card{ grid-column:1/-1; } }
+@media(max-width:768px){ .gr-charts-grid{ grid-template-columns:1fr; } .gr-chart-full{ grid-column:1; } .gr-mid-grid{ grid-template-columns:1fr; } }
+@media(max-width:640px){ .gr-container{ padding:1rem; } .gr-header-title{ font-size:1.4rem; } .gr-header-badge{ display:none; } .gr-quick-grid{ grid-template-columns:repeat(2,1fr); } }
 </style>
 
 <script>
 document.addEventListener('DOMContentLoaded', charger);
 
-/* ── TOAST ── */
-function toast(msg, type = 'info') {
-  const colors = {
-    succes : 'linear-gradient(135deg,#00C853,#7ED321)',
-    erreur : 'linear-gradient(135deg,#EF4444,#DC2626)',
-    info   : 'linear-gradient(135deg,#2962FF,#7B61FF)',
-  };
+function toast(msg, type='info') {
+  const colors = { succes:'linear-gradient(135deg,#00C853,#7ED321)', erreur:'linear-gradient(135deg,#EF4444,#DC2626)', info:'linear-gradient(135deg,#2962FF,#7B61FF)' };
   const t = document.getElementById('toast');
-  t.innerHTML = msg;
-  t.style.background = colors[type] || colors.info;
+  t.innerHTML = msg; t.style.background = colors[type]||colors.info;
   t.style.transform = 'translateX(0)';
-  setTimeout(() => { t.style.transform = 'translateX(120%)'; }, 3200);
+  setTimeout(()=>{ t.style.transform='translateX(120%)'; }, 3200);
 }
 
-/* ── CHARGER ── */
 function charger() {
-  fetch('/api/graphiques/data').then(r => r.json()).then(d => {
-    if (!d.succes) { toast('❌ Erreur : ' + d.erreur, 'erreur'); return; }
+  fetch('/api/graphiques/data').then(r=>r.json()).then(d=>{
+    if (!d.succes){ toast('❌ Erreur : '+d.erreur,'erreur'); return; }
     const data   = d.data;
     const resume = d.resume;
 
-    /* Stats rapides */
-    animerVal('qs-niv',    data.stats.niveau         || 1);
-    animerVal('qs-xp',     data.stats.xp             || 0);
-    animerVal('qs-streak', data.stats.streak_jours   || 0);
-    animerVal('qs-cours',  data.stats.cours_importes || 0);
+    // ── Quick stats ──
+    animerVal('qs-niv',    data.stats.niveau||1);
+    animerVal('qs-xp',     data.stats.xp||0);
+    animerVal('qs-streak', data.stats.streak_jours||0);
+    animerVal('qs-cours',  data.stats.cours_importes||0);
 
-    /* Chart 1 : Activité 7j */
-    new Chart(document.getElementById('chart-activite'), {
-      type: 'line',
-      data: {
+    // ── XP Barre ──
+    const niveau    = data.stats.niveau||1;
+    const xp        = data.stats.xp||0;
+    const xpParNiv  = 100;
+    const xpActuel  = xp % xpParNiv;
+    const xpProchain= xpParNiv;
+    const pct       = Math.min(100, Math.round((xpActuel/xpProchain)*100));
+
+    document.getElementById('xp-niveau').textContent  = niveau;
+    document.getElementById('xp-actuel').textContent  = xpActuel;
+    document.getElementById('xp-prochain').textContent= xpProchain;
+
+    const titres = ['🌱 Apprenti','📖 Étudiant','🎓 Bachelier','💡 Expert','🏆 Maître','💎 Légende'];
+    document.getElementById('xp-titre').textContent = titres[Math.min(niveau-1, titres.length-1)];
+
+    const badges = ['🥉','🥈','🥇','🏅','🏆','💎'];
+    document.getElementById('xp-badge').textContent = badges[Math.min(niveau-1, badges.length-1)];
+
+    setTimeout(()=>{
+      document.getElementById('xp-bar').style.width = pct + '%';
+    }, 300);
+
+    // ── Streak ──
+    const streak = data.stats.streak_jours||0;
+    document.getElementById('streak-val').textContent = streak;
+    const flames = streak >= 7 ? '🔥🔥🔥' : streak >= 3 ? '🔥🔥' : '🔥';
+    document.getElementById('streak-flames').textContent = flames;
+    const msgs = streak >= 30 ? '🏆 Légendaire !' : streak >= 14 ? '💎 Incroyable !' : streak >= 7 ? '🌟 Super forme !' : streak >= 3 ? '💪 Continue !' : '😊 Lance-toi !';
+    document.getElementById('streak-msg').textContent = msgs;
+
+    // ── Objectifs du jour ──
+    const pomoAujourdhui = (data.pomodoro_jours && data.pomodoro_jours[6])||0;
+    const fcVusAujourdhui= (data.fc_vus)||0;
+    const chatAujourdhui = (data.activite_jours && data.activite_jours[6])||0;
+    const coursCharge    = (data.stats.cours_importes||0) > 0 ? 100 : 0;
+
+    setObjectif('obj-cours', 'obj-cours-txt', coursCharge, 100);
+    setObjectif('obj-pomo',  'obj-pomo-txt',  pomoAujourdhui, 2);
+    setObjectif('obj-fc',    'obj-fc-txt',    Math.min(fcVusAujourdhui,5), 5);
+    setObjectif('obj-chat',  'obj-chat-txt',  Math.min(chatAujourdhui,3), 3);
+
+    // ── Meilleure matière ──
+    const matieres = data.cours_par_matiere||{};
+    let bestMat='—', bestNb=0;
+    Object.entries(matieres).forEach(([k,v])=>{ if(v>bestNb){ bestMat=k; bestNb=v; } });
+    document.getElementById('best-matiere').textContent = bestMat;
+    document.getElementById('best-sub').textContent     = bestNb + ' cours';
+
+    // ── Chart 1 : Activité ──
+    new Chart(document.getElementById('chart-activite'),{
+      type:'line',
+      data:{
         labels: data.jours,
-        datasets: [{
-          label: 'Activités IA',
+        datasets:[{
+          label:'Activités',
           data: data.activite_jours,
-          borderColor: '#A855F7',
-          backgroundColor: 'rgba(168,85,247,0.15)',
-          tension: 0.4, fill: true, borderWidth: 3, pointRadius: 5,
-          pointBackgroundColor: '#A855F7',
-          pointBorderColor: 'white', pointBorderWidth: 2,
+          borderColor:'#A855F7',
+          backgroundColor:'rgba(168,85,247,0.15)',
+          tension:0.4, fill:true, borderWidth:3, pointRadius:5,
+          pointBackgroundColor:'#A855F7', pointBorderColor:'white', pointBorderWidth:2,
         }]
       },
-      options: {
-        responsive: true,
-        plugins: { legend: { display: false } },
-        scales: {
-          y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)' } },
-          x: { grid: { display: false } }
-        }
-      }
+      options:{ responsive:true, plugins:{legend:{display:false}}, scales:{ y:{beginAtZero:true,grid:{color:'rgba(0,0,0,0.05)'}}, x:{grid:{display:false}} } }
     });
 
-    /* Chart 2 : Pomodoro 7j */
-    new Chart(document.getElementById('chart-pomodoro'), {
-      type: 'bar',
-      data: {
+    // ── Chart 2 : Pomodoro ──
+    new Chart(document.getElementById('chart-pomodoro'),{
+      type:'bar',
+      data:{
         labels: data.jours,
-        datasets: [{
-          label: 'Minutes',
+        datasets:[{
+          label:'Minutes',
           data: data.pomodoro_jours,
-          backgroundColor: 'rgba(239,68,68,0.8)',
-          borderRadius: 10, borderSkipped: false,
+          backgroundColor:[
+            'rgba(239,68,68,0.9)','rgba(245,158,11,0.9)','rgba(168,85,247,0.9)',
+            'rgba(41,98,255,0.9)','rgba(0,200,83,0.9)','rgba(255,107,157,0.9)',
+            'rgba(123,97,255,0.9)'
+          ],
+          borderRadius:10, borderSkipped:false,
         }]
       },
-      options: {
-        responsive: true,
-        plugins: { legend: { display: false } },
-        scales: {
-          y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)' } },
-          x: { grid: { display: false } }
-        }
-      }
+      options:{ responsive:true, plugins:{legend:{display:false}}, scales:{ y:{beginAtZero:true,grid:{color:'rgba(0,0,0,0.05)'}}, x:{grid:{display:false}} } }
     });
 
-    /* Chart 3 : Types */
+    // ── Chart 3 : Types ──
     const typesLabels = Object.keys(data.activite_par_type);
     const typesValues = Object.values(data.activite_par_type);
-    if (typesLabels.length > 0) {
-      new Chart(document.getElementById('chart-types'), {
-        type: 'doughnut',
-        data: {
-          labels: typesLabels,
-          datasets: [{
-            data: typesValues,
-            backgroundColor: [
-              '#FF6B9D','#2962FF','#F59E0B',
-              '#00C853','#7B61FF','#FFD93D','#A855F7'
-            ],
-            borderWidth: 3, borderColor: 'white',
-            hoverOffset: 8,
-          }]
+    if(typesLabels.length>0){
+      new Chart(document.getElementById('chart-types'),{
+        type:'doughnut',
+        data:{
+          labels:typesLabels,
+          datasets:[{ data:typesValues, backgroundColor:['#FF6B9D','#2962FF','#F59E0B','#00C853','#7B61FF','#FFD93D','#A855F7'], borderWidth:3, borderColor:'white', hoverOffset:8 }]
         },
-        options: {
-          responsive: true,
-          plugins: {
-            legend: { position: 'bottom', labels: { padding: 16, usePointStyle: true } }
-          },
-          cutout: '60%',
-        }
+        options:{ responsive:true, plugins:{ legend:{ position:'bottom', labels:{padding:16,usePointStyle:true} } }, cutout:'60%' }
       });
     }
 
-    /* Chart 4 : Matières */
+    // ── Chart 4 : Matières ──
     const matLabels = Object.keys(data.cours_par_matiere);
     const matValues = Object.values(data.cours_par_matiere);
-    if (matLabels.length > 0) {
-      new Chart(document.getElementById('chart-matieres'), {
-        type: 'pie',
-        data: {
-          labels: matLabels,
-          datasets: [{
-            data: matValues,
-            backgroundColor: [
-              '#7ED321','#FFD93D','#7EC8FF','#FFC9DE',
-              '#A855F7','#F59E0B','#00C853','#7B61FF'
-            ],
-            borderWidth: 3, borderColor: 'white',
-            hoverOffset: 8,
-          }]
+    if(matLabels.length>0){
+      new Chart(document.getElementById('chart-matieres'),{
+        type:'pie',
+        data:{
+          labels:matLabels,
+          datasets:[{ data:matValues, backgroundColor:['#7ED321','#FFD93D','#7EC8FF','#FFC9DE','#A855F7','#F59E0B','#00C853','#7B61FF'], borderWidth:3, borderColor:'white', hoverOffset:8 }]
         },
-        options: {
-          responsive: true,
-          plugins: {
-            legend: { position: 'bottom', labels: { padding: 16, usePointStyle: true } }
-          }
-        }
+        options:{ responsive:true, plugins:{ legend:{ position:'bottom', labels:{padding:16,usePointStyle:true} } } }
       });
     }
 
-    /* Chart 5 : Flashcards */
-    new Chart(document.getElementById('chart-flashcards'), {
-      type: 'bar',
-      data: {
-        labels: ['✅ Réussis', '❌ Ratés', '👀 Total vus'],
-        datasets: [{
-          data: [data.fc_reussis, data.fc_rates, data.fc_vus],
-          backgroundColor: [
-            'rgba(0,200,83,0.85)',
-            'rgba(239,68,68,0.85)',
-            'rgba(123,97,255,0.85)'
-          ],
-          borderRadius: 12, borderSkipped: false,
+    // ── Chart 5 : Flashcards ──
+    new Chart(document.getElementById('chart-flashcards'),{
+      type:'bar',
+      data:{
+        labels:['✅ Réussis','❌ Ratés','👀 Total vus'],
+        datasets:[{
+          data:[data.fc_reussis, data.fc_rates, data.fc_vus],
+          backgroundColor:['rgba(0,200,83,0.85)','rgba(239,68,68,0.85)','rgba(123,97,255,0.85)'],
+          borderRadius:12, borderSkipped:false,
         }]
       },
-      options: {
-        responsive: true,
-        plugins: { legend: { display: false } },
-        scales: {
-          y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)' } },
-          x: { grid: { display: false } }
-        }
-      }
+      options:{ responsive:true, plugins:{legend:{display:false}}, scales:{ y:{beginAtZero:true,grid:{color:'rgba(0,0,0,0.05)'}}, x:{grid:{display:false}} } }
     });
 
-    /* Résumé */
+    // ── Résumé ──
     const r = document.getElementById('resume-grid');
     const items = [
-      ['🏆 Niveau',           resume.niveau],
-      ['⭐ XP total',         resume.xp],
-      ['🔥 Streak',           resume.streak + ' j'],
-      ['📚 Cours',            resume.nb_cours],
-      ['📝 Notes',            resume.nb_notes],
-      ['🃏 Flashcards',       resume.nb_flashcards],
-      ['🎯 QCM réussis',      resume.qcm_reussis + '/' + resume.qcm_total + ' (' + resume.taux_qcm + '%)'],
-      ['🍅 Pomodoros',        resume.sessions_pomodoro + ' (' + resume.minutes_pomodoro + ' min)'],
-      ['📜 Historique',       resume.nb_historique],
-      ['💎 Taux Flashcards',  resume.taux_flashcards + '%'],
+      ['🏆 Niveau',          resume.niveau],
+      ['⭐ XP total',        resume.xp],
+      ['🔥 Streak',          resume.streak+' j'],
+      ['📚 Cours',           resume.nb_cours],
+      ['📝 Notes',           resume.nb_notes],
+      ['🃏 Flashcards',      resume.nb_flashcards],
+      ['🎯 QCM',             resume.qcm_reussis+'/'+resume.qcm_total+' ('+resume.taux_qcm+'%)'],
+      ['🍅 Pomodoros',       resume.sessions_pomodoro+' ('+resume.minutes_pomodoro+' min)'],
+      ['📜 Historique',      resume.nb_historique],
+      ['💎 Taux FC',         resume.taux_flashcards+'%'],
     ];
-    items.forEach(([k, v], i) => {
+    items.forEach(([k,v],i)=>{
       const div = document.createElement('div');
       div.className = 'gr-resume-item';
-      div.style.animationDelay = (i * 0.05) + 's';
+      div.style.animationDelay = (i*0.05)+'s';
       div.innerHTML = `<strong>${k}</strong><span>${v}</span>`;
       r.appendChild(div);
     });
 
-  }).catch(() => toast('❌ Erreur chargement stats', 'erreur'));
+  }).catch(()=>toast('❌ Erreur chargement stats','erreur'));
 }
 
-/* ── ANIMER VALEUR ── */
 function animerVal(id, cible) {
-  const el  = document.getElementById(id);
-  const dur = 800;
-  const pas = Math.ceil(cible / (dur / 16));
-  let val   = 0;
-  const iv  = setInterval(() => {
-    val = Math.min(val + pas, cible);
-    el.textContent = val;
-    if (val >= cible) clearInterval(iv);
-  }, 16);
+  const el=document.getElementById(id), dur=800, pas=Math.ceil(cible/(dur/16));
+  let val=0;
+  const iv=setInterval(()=>{ val=Math.min(val+pas,cible); el.textContent=val; if(val>=cible) clearInterval(iv); },16);
+}
+
+function setObjectif(barId, txtId, actuel, objectif) {
+  const pct = Math.min(100, Math.round((actuel/objectif)*100));
+  setTimeout(()=>{ document.getElementById(barId).style.width = pct+'%'; }, 500);
+  document.getElementById(txtId).textContent = pct+'%';
 }
 </script>
 

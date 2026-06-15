@@ -154,7 +154,8 @@ def parser_flashcards(texte):
         blocs = [b.strip() for b in blocs if b.strip()]
         for bloc in blocs:
             lignes = [l.strip() for l in bloc.split('\n') if l.strip()]
-            recto_lines, verso_lines, mode = [], [], None
+            recto_lines, verso_lines, mode = None, None, None
+            recto_lines, verso_lines = [], []
             for ligne in lignes:
                 m_r = re.match(r'^(recto|question|q)\s*:?\s*(.*)$', ligne, re.IGNORECASE)
                 m_v = re.match(r'^(verso|réponse|reponse|r)\s*:?\s*(.*)$', ligne, re.IGNORECASE)

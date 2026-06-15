@@ -66,6 +66,10 @@
                     placeholder="💬 Pose ta question ici..."
                     rows="1"></textarea>
 
+          <button type="button" id="btnStop" class="btn-stop" title="Arrêter la lecture" style="display:none;">
+            ⏹️
+          </button>
+
           <button type="button" id="btnMicro" class="btn-micro" title="Parler avec la voix">
             🎤
           </button>
@@ -74,10 +78,12 @@
             <span class="btn-envoyer-icone">🚀</span>
           </button>
         </div>
-        <div class="input-info">
+        <div class="input-info" id="inputInfo">
           <span>💡 Entrée pour envoyer</span>
           <span>•</span>
-          <span>Shift+Entrée pour ligne suivante</span>
+          <span>Shift+Entrée pour nouvelle ligne</span>
+          <span>•</span>
+          <span id="microInfo">🎤 Clic micro pour parler</span>
         </div>
       </form>
     </div>
@@ -87,7 +93,8 @@
 
 <style>
 /* ═══════════════════════════════════════════
-   💬 CHAT PAGE REDESIGN PRO
+   💬 CHAT PAGE - NOKIROVA
+   Phase D1 : Chat Vocal complet
    ═══════════════════════════════════════════ */
 .chat-page {
   max-width: 1100px;
@@ -325,6 +332,25 @@
   40% { transform: scale(1); opacity: 1; }
 }
 
+/* MESSAGE D'ECOUTE DANS LE CHAT */
+.message-ecoute .message-bulle {
+  background: linear-gradient(135deg, #FEF3C7, #FDE68A) !important;
+  color: #92400E !important;
+  border: 2px solid #F59E0B !important;
+  font-style: italic;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.ecoute-icon {
+  font-size: 20px;
+  animation: pulseIcon 1s infinite;
+}
+@keyframes pulseIcon {
+  0%,100% { transform: scale(1); }
+  50% { transform: scale(1.3); }
+}
+
 /* INPUT ZONE */
 .input-zone {
   padding: 18px 22px;
@@ -387,7 +413,7 @@
 }
 .btn-envoyer-icone { font-size: 18px; }
 
-/* BOUTON MICRO (PHASE D1) */
+/* BOUTON MICRO */
 .btn-micro {
   background: linear-gradient(135deg, #EF4444, #DC2626);
   color: white;
@@ -395,7 +421,7 @@
   width: 46px; height: 46px;
   border-radius: 50%;
   cursor: pointer;
-  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+  box-shadow: 0 4px 12px rgba(239,68,68,0.4);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -403,18 +429,45 @@
   flex-shrink: 0;
   transition: all 0.3s;
 }
-.btn-micro:hover {
-  transform: scale(1.1);
+.btn-micro:hover { transform: scale(1.1); }
+.btn-micro:disabled {
+  background: #D1D5DB;
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
 }
 .btn-micro.ecoute {
   animation: pulseMicro 1s infinite;
 }
 @keyframes pulseMicro {
-  0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
-  50% { transform: scale(1.15); box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
-  100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+  0%   { transform: scale(1);    box-shadow: 0 0 0 0   rgba(239,68,68,0.7); }
+  50%  { transform: scale(1.15); box-shadow: 0 0 0 10px rgba(239,68,68,0); }
+  100% { transform: scale(1);    box-shadow: 0 0 0 0   rgba(239,68,68,0); }
 }
 
+/* BOUTON STOP */
+.btn-stop {
+  background: linear-gradient(135deg, #F59E0B, #D97706);
+  color: white;
+  border: none;
+  width: 46px; height: 46px;
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(245,158,11,0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  flex-shrink: 0;
+  transition: all 0.3s;
+  animation: fadeInUp 0.3s ease;
+}
+.btn-stop:hover {
+  transform: scale(1.1);
+  box-shadow: 0 6px 18px rgba(245,158,11,0.5);
+}
+
+/* INFO BAR */
 .input-info {
   margin-top: 8px;
   font-size: 11px;
@@ -423,6 +476,15 @@
   display: flex;
   gap: 6px;
   justify-content: center;
+  flex-wrap: wrap;
+}
+#microInfo {
+  color: #EF4444;
+  font-weight: 600;
+  transition: all 0.3s;
+}
+#microInfo.lecture {
+  color: #F59E0B;
 }
 
 /* MODE SOMBRE */
@@ -437,7 +499,7 @@ html[data-mode="sombre"] .message-bienvenue {
   background: linear-gradient(135deg, #2A1D4E, #4A1D3E) !important;
 }
 html[data-mode="sombre"] .message-bienvenue h2 { color: #C4A5FF; }
-html[data-mode="sombre"] .message-bienvenue p { color: #94A3B8; }
+html[data-mode="sombre"] .message-bienvenue p  { color: #94A3B8; }
 html[data-mode="sombre"] .suggestion-card {
   background: #2A2D3E !important;
   border-color: #3A3D4E !important;
@@ -465,36 +527,220 @@ html[data-mode="sombre"] #inputMessage { color: #F1F5F9 !important; }
   .suggestion-titre { font-size: 12px; }
   .input-zone { padding: 14px; }
 }
-
 @media (max-width: 480px) {
   .suggestions-grid { grid-template-columns: 1fr 1fr; }
   .avatar { width: 36px; height: 36px; font-size: 18px; }
-  .input-info { display: none; }
+  .input-info { font-size: 10px; }
 }
 </style>
 
 <script>
-// --- INITIALISATION DES VARIABLES ---
-const formChat = document.getElementById('formChat');
+// ═══════════════════════════════════════════
+// 💬 NOKIROVA - CHAT + PHASE D1 : VOCAL
+// ═══════════════════════════════════════════
+
+// --- ÉLÉMENTS DOM ---
+const formChat     = document.getElementById('formChat');
 const inputMessage = document.getElementById('inputMessage');
 const messagesZone = document.getElementById('messagesZone');
-const btnEnvoyer = document.querySelector('.btn-envoyer');
+const btnEnvoyer   = document.querySelector('.btn-envoyer');
+const btnMicro     = document.getElementById('btnMicro');
+const btnStop      = document.getElementById('btnStop');
+const microInfo    = document.getElementById('microInfo');
 
-// Personnalisation User
+// --- PERSONNALISATION USER ---
 const user = JSON.parse(localStorage.getItem('nokirova_user') || 'null');
 if (user) {
-  document.getElementById('userPrenom').textContent = user.prenom;
+  document.getElementById('userPrenom').textContent  = user.prenom;
   document.getElementById('bienvenueNom').textContent = user.prenom;
 }
 
-// --- FONCTIONS UI CHAT ---
+// ═══════════════════════════════════════════
+// 🔊 SYNTHÈSE VOCALE (TTS) — Réponse IA parlée
+// ═══════════════════════════════════════════
+let iaSpeaking = false;
+
+function lireVoix(texte) {
+  if (!('speechSynthesis' in window)) return;
+
+  speechSynthesis.cancel();
+
+  // On nettoie le texte : on enlève les emojis pour une lecture plus naturelle
+  const textePropre = texte
+    .replace(/[\u{1F000}-\u{1FFFF}]/gu, '')
+    .replace(/[⚠️✅❌💡🔥🎯📚]/g, '')
+    .trim();
+
+  if (!textePropre) return;
+
+  const u = new SpeechSynthesisUtterance(textePropre);
+  u.lang  = 'fr-FR';
+  u.rate  = 1.0;
+  u.pitch = 1.0;
+
+  u.onstart = () => {
+    iaSpeaking = true;
+    btnStop.style.display = 'flex';
+    btnMicro.disabled = true;
+    microInfo.textContent = '🔊 NOKIROVA parle...';
+    microInfo.classList.add('lecture');
+  };
+
+  u.onend = () => {
+    iaSpeaking = false;
+    btnStop.style.display = 'none';
+    btnMicro.disabled = false;
+    microInfo.textContent = '🎤 Clic micro pour parler';
+    microInfo.classList.remove('lecture');
+  };
+
+  u.onerror = () => {
+    iaSpeaking = false;
+    btnStop.style.display = 'none';
+    btnMicro.disabled = false;
+    microInfo.textContent = '🎤 Clic micro pour parler';
+    microInfo.classList.remove('lecture');
+  };
+
+  speechSynthesis.speak(u);
+}
+
+// Bouton Stop : coupe la lecture IA
+btnStop.addEventListener('click', () => {
+  speechSynthesis.cancel();
+  btnStop.style.display = 'none';
+  btnMicro.disabled = false;
+  microInfo.textContent = '🎤 Clic micro pour parler';
+  microInfo.classList.remove('lecture');
+});
+
+// ═══════════════════════════════════════════
+// 🎤 RECONNAISSANCE VOCALE (STT)
+// ═══════════════════════════════════════════
+const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+let msgEcouteDiv = null;
+
+if (SpeechRecognition && btnMicro) {
+  const recognition = new SpeechRecognition();
+  recognition.lang            = 'fr-FR';
+  recognition.continuous      = false;
+  recognition.interimResults  = false;
+
+  // --- DÉMARRAGE MICRO ---
+  btnMicro.addEventListener('click', () => {
+    // Si l'IA parle, on la coupe d'abord
+    if (iaSpeaking) {
+      speechSynthesis.cancel();
+    }
+    try {
+      recognition.start();
+    } catch(e) {
+      // Déjà en cours, on ignore
+    }
+  });
+
+  // --- MICRO ACTIF : Afficher bulle "J'écoute..." ---
+  recognition.onstart = () => {
+    btnMicro.classList.add('ecoute');
+    microInfo.textContent = '🎤 J\'écoute... parle !';
+
+    // Ajouter bulle visuelle dans le chat
+    const bienvenue = document.querySelector('.message-bienvenue');
+    if (bienvenue) bienvenue.remove();
+
+    msgEcouteDiv = document.createElement('div');
+    msgEcouteDiv.className = 'message message-user message-ecoute';
+    msgEcouteDiv.innerHTML = `
+      <div class="avatar avatar-user">👤</div>
+      <div class="message-bulle">
+        <span class="ecoute-icon">🎤</span>
+        <span>J'écoute... parle !</span>
+      </div>
+    `;
+    messagesZone.appendChild(msgEcouteDiv);
+    messagesZone.scrollTop = messagesZone.scrollHeight;
+  };
+
+  // --- RÉSULTAT REÇU ---
+  recognition.onresult = (e) => {
+    const texteSaisi = e.results[0][0].transcript;
+
+    // Remplacer la bulle d'écoute par le vrai message
+    if (msgEcouteDiv) {
+      msgEcouteDiv.remove();
+      msgEcouteDiv = null;
+    }
+
+    inputMessage.value = texteSaisi;
+    envoyerMessage(texteSaisi);
+  };
+
+  // --- FIN MICRO (sans résultat) ---
+  recognition.onend = () => {
+    btnMicro.classList.remove('ecoute');
+    microInfo.textContent = '🎤 Clic micro pour parler';
+
+    // Retirer la bulle d'écoute si aucun résultat
+    if (msgEcouteDiv) {
+      msgEcouteDiv.remove();
+      msgEcouteDiv = null;
+    }
+  };
+
+  // --- ERREURS MICRO ---
+  recognition.onerror = (e) => {
+    btnMicro.classList.remove('ecoute');
+    if (msgEcouteDiv) { msgEcouteDiv.remove(); msgEcouteDiv = null; }
+
+    let msg = '';
+    switch(e.error) {
+      case 'not-allowed':
+        msg = '⚠️ Micro bloqué. Autorise le micro dans ton navigateur.';
+        break;
+      case 'no-speech':
+        msg = '🤫 Rien entendu. Réessaie !';
+        break;
+      case 'network':
+        msg = '⚠️ Erreur réseau. Vérifie ta connexion.';
+        break;
+      default:
+        msg = `⚠️ Erreur micro : ${e.error}`;
+    }
+
+    // Afficher l'erreur dans le chat (message temporaire)
+    const errDiv = document.createElement('div');
+    errDiv.className = 'message message-ia';
+    errDiv.innerHTML = `
+      <div class="avatar avatar-ia">🌸</div>
+      <div class="message-bulle" style="background:#FEF3C7;color:#92400E;border:1px solid #F59E0B;">
+        ${msg}
+      </div>
+    `;
+    messagesZone.appendChild(errDiv);
+    messagesZone.scrollTop = messagesZone.scrollHeight;
+
+    // Auto-suppression après 4 secondes
+    setTimeout(() => errDiv.remove(), 4000);
+
+    microInfo.textContent = '🎤 Clic micro pour parler';
+  };
+
+} else if (btnMicro) {
+  // Navigateur non compatible → on cache le bouton micro
+  btnMicro.style.display = 'none';
+  document.getElementById('microInfo').style.display = 'none';
+}
+
+// ═══════════════════════════════════════════
+// 💬 FONCTIONS UI CHAT
+// ═══════════════════════════════════════════
 function ajouterMessage(contenu, type) {
   const bienvenue = document.querySelector('.message-bienvenue');
   if (bienvenue) bienvenue.remove();
 
   const msgDiv = document.createElement('div');
   msgDiv.className = `message message-${type}`;
-  const avatar = type === 'user' ? '👤' : '🌸';
+  const avatar      = type === 'user' ? '👤' : '🌸';
   const avatarClass = type === 'user' ? 'avatar-user' : 'avatar-ia';
 
   msgDiv.innerHTML = `
@@ -524,80 +770,47 @@ function retirerChargement() {
   if (div) div.remove();
 }
 
-// --- PHASE D1 : FONCTIONS VOCALES ---
-const btnMicro = document.getElementById('btnMicro');
-const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-
-// Fonction de synthèse vocale (TTS)
-function lireVoix(texte) {
-  if (!('speechSynthesis' in window)) return;
-  speechSynthesis.cancel(); // Stoppe l'audio précédent si on relance
-  const u = new SpeechSynthesisUtterance(texte);
-  u.lang = 'fr-FR';
-  speechSynthesis.speak(u);
-}
-
-// Configuration de la reconnaissance vocale (Speech-to-Text)
-if (SpeechRecognition && btnMicro) {
-  const recognition = new SpeechRecognition();
-  recognition.lang = 'fr-FR';
-  recognition.continuous = false;
-  recognition.interimResults = false;
-
-  btnMicro.addEventListener('click', () => {
-    recognition.start();
-    btnMicro.classList.add('ecoute'); // Active l'animation rouge
-  });
-
-  recognition.onresult = (e) => {
-    const texteSaisi = e.results[0][0].transcript;
-    inputMessage.value = texteSaisi;
-    envoyerMessage(texteSaisi); // Envoi direct de la voix à l'IA
-  };
-
-  recognition.onend = () => {
-    btnMicro.classList.remove('ecoute'); // Retire l'animation
-  };
-} else if (btnMicro) {
-  // Option de repli si le navigateur n'est pas compatible
-  btnMicro.style.display = 'none';
-  console.log("Reconnaissance vocale non supportée par ce navigateur.");
-}
-
-// --- FONCTION D'ENVOI PRINCIPALE ---
+// ═══════════════════════════════════════════
+// 🚀 ENVOI MESSAGE À L'IA
+// ═══════════════════════════════════════════
 async function envoyerMessage(q) {
   if (!q.trim()) return;
+
   ajouterMessage(q, 'user');
   inputMessage.value = '';
   inputMessage.style.height = 'auto';
   btnEnvoyer.disabled = true;
+  btnMicro.disabled   = true;
   afficherChargement();
 
   try {
     const r = await fetch('/api/chat', {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({question: q})
+      body: JSON.stringify({ question: q })
     });
     const data = await r.json();
     retirerChargement();
 
     if (data.succes) {
       ajouterMessage(data.reponse, 'ia');
-      lireVoix(data.reponse); // L'IA répond et parle
+      lireVoix(data.reponse);  // 🔊 L'IA parle sa réponse
     } else {
       ajouterMessage(`⚠️ Erreur : ${data.erreur}`, 'ia');
     }
   } catch (e) {
     retirerChargement();
-    ajouterMessage(`⚠️ Erreur de connexion au serveur...`, 'ia');
+    ajouterMessage('⚠️ Erreur de connexion au serveur...', 'ia');
   }
 
   btnEnvoyer.disabled = false;
+  if (!iaSpeaking) btnMicro.disabled = false;
   inputMessage.focus();
 }
 
-// --- GESTIONNAIRES D'ÉVÉNEMENTS ---
+// ═══════════════════════════════════════════
+// ⌨️ ÉVÉNEMENTS
+// ═══════════════════════════════════════════
 formChat.addEventListener('submit', e => {
   e.preventDefault();
   envoyerMessage(inputMessage.value);
@@ -616,9 +829,7 @@ inputMessage.addEventListener('input', function() {
   this.style.height = Math.min(this.scrollHeight, 120) + 'px';
 });
 
-function poserQuestion(q) {
-  envoyerMessage(q);
-}
+function poserQuestion(q) { envoyerMessage(q); }
 
 // Focus auto au démarrage
 inputMessage.focus();

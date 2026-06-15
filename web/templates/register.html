@@ -1,0 +1,217 @@
+{% extends "base.html" %}
+
+{% block title %}📝 Inscription - NOKIROVA{% endblock %}
+
+{% block contenu %}
+
+<div class="register-page">
+  <div class="register-card">
+    <div class="register-header">
+      <div class="register-logo">🌸</div>
+      <h1>Créer un compte</h1>
+      <p>Rejoins NOKIROVA et réussis tes examens !</p>
+    </div>
+
+    <form id="registerForm">
+      <div class="input-group">
+        <label>📧 Email</label>
+        <input type="email" id="email" placeholder="ton.email@exemple.com" required>
+      </div>
+
+      <div class="input-group">
+        <label>👤 Prénom</label>
+        <input type="text" id="prenom" placeholder="Ton prénom" required>
+      </div>
+
+      <div class="input-group">
+        <label>📛 Nom</label>
+        <input type="text" id="nom" placeholder="Ton nom">
+      </div>
+
+      <div class="input-group">
+        <label>🔒 Mot de passe</label>
+        <input type="password" id="password" placeholder="Au moins 6 caractères" required>
+      </div>
+
+      <div class="input-group">
+        <label>🔒 Confirmer mot de passe</label>
+        <input type="password" id="confirm" placeholder="Retape ton mot de passe" required>
+      </div>
+
+      <button type="submit" class="btn-register">🎉 S'inscrire</button>
+    </form>
+
+    <div class="register-footer">
+      <p>Déjà un compte ? <a href="/login">Se connecter</a></p>
+    </div>
+  </div>
+</div>
+
+<style>
+.register-page {
+  min-height: 80vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+}
+.register-card {
+  max-width: 480px;
+  width: 100%;
+  background: white;
+  border-radius: 32px;
+  padding: 40px;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+  animation: fadeInUp 0.5s ease;
+}
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.register-header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+.register-logo {
+  font-size: 60px;
+  margin-bottom: 15px;
+}
+.register-header h1 {
+  font-size: 28px;
+  color: #1A1D2E;
+  margin-bottom: 8px;
+}
+.register-header p {
+  color: #6B7280;
+  font-size: 14px;
+}
+.input-group {
+  margin-bottom: 18px;
+}
+.input-group label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: #1A1D2E;
+  font-size: 14px;
+}
+.input-group input {
+  width: 100%;
+  padding: 14px 16px;
+  border: 2px solid #E5E7EB;
+  border-radius: 16px;
+  font-size: 14px;
+  transition: all 0.3s;
+}
+.input-group input:focus {
+  outline: none;
+  border-color: #7B61FF;
+  box-shadow: 0 0 0 3px rgba(123,97,255,0.1);
+}
+.btn-register {
+  width: 100%;
+  background: linear-gradient(135deg, #00C853, #059669);
+  color: white;
+  border: none;
+  padding: 14px;
+  border-radius: 30px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s;
+  margin-top: 10px;
+}
+.btn-register:hover {
+  transform: scale(1.02);
+  box-shadow: 0 8px 20px rgba(0,200,83,0.4);
+}
+.register-footer {
+  text-align: center;
+  margin-top: 25px;
+  padding-top: 20px;
+  border-top: 1px solid #F3F4F6;
+}
+.register-footer a {
+  color: #00C853;
+  text-decoration: none;
+  font-weight: 600;
+}
+.register-footer a:hover {
+  text-decoration: underline;
+}
+html[data-mode="sombre"] .register-card {
+  background: #2A2D3E;
+}
+html[data-mode="sombre"] .register-header h1 {
+  color: #F1F5F9;
+}
+html[data-mode="sombre"] .input-group label {
+  color: #F1F5F9;
+}
+html[data-mode="sombre"] .input-group input {
+  background: #1A1D2E;
+  border-color: #3A3D4E;
+  color: #F1F5F9;
+}
+</style>
+
+<script>
+document.getElementById('registerForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+
+  const email = document.getElementById('email').value;
+  const prenom = document.getElementById('prenom').value;
+  const nom = document.getElementById('nom').value;
+  const password = document.getElementById('password').value;
+  const confirm = document.getElementById('confirm').value;
+
+  if (password !== confirm) {
+    alert('❌ Les mots de passe ne correspondent pas');
+    return;
+  }
+
+  if (password.length < 6) {
+    alert('❌ Le mot de passe doit faire au moins 6 caractères');
+    return;
+  }
+
+  const btn = document.querySelector('.btn-register');
+  btn.disabled = true;
+  btn.textContent = '⏳ Inscription...';
+
+  try {
+    const response = await fetch('/api/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, prenom, nom, password })
+    });
+
+    const data = await response.json();
+
+    if (data.succes) {
+      if (typeof afficherNotification === 'function') {
+        afficherNotification('✅ Compte créé ! Connecte-toi', 'succes');
+      } else {
+        alert('✅ Compte créé ! Connecte-toi');
+      }
+      setTimeout(() => {
+        window.location.href = '/login';
+      }, 1000);
+    } else {
+      if (typeof afficherNotification === 'function') {
+        afficherNotification(data.erreur, 'erreur');
+      } else {
+        alert('❌ ' + data.erreur);
+      }
+      btn.disabled = false;
+      btn.textContent = '🎉 S\'inscrire';
+    }
+  } catch (err) {
+    alert('❌ Erreur d\'inscription');
+    btn.disabled = false;
+    btn.textContent = '🎉 S\'inscrire';
+  }
+});
+</script>
+
+{% endblock %}

@@ -1,0 +1,197 @@
+{% extends "base.html" %}
+
+{% block title %}🔐 Connexion - NOKIROVA{% endblock %}
+
+{% block contenu %}
+
+<div class="login-page">
+  <div class="login-card">
+    <div class="login-header">
+      <div class="login-logo">🌸</div>
+      <h1>Connexion</h1>
+      <p>Retrouve ton espace d'apprentissage</p>
+    </div>
+
+    <form id="loginForm">
+      <div class="input-group">
+        <label>📧 Email</label>
+        <input type="email" id="email" placeholder="ton.email@exemple.com" required>
+      </div>
+
+      <div class="input-group">
+        <label>🔒 Mot de passe</label>
+        <input type="password" id="password" placeholder="Ton mot de passe" required>
+      </div>
+
+      <button type="submit" class="btn-login">🚀 Se connecter</button>
+    </form>
+
+    <div class="login-footer">
+      <p>Pas encore de compte ? <a href="/register">Créer un compte</a></p>
+    </div>
+  </div>
+</div>
+
+<style>
+.login-page {
+  min-height: 80vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+}
+.login-card {
+  max-width: 450px;
+  width: 100%;
+  background: white;
+  border-radius: 32px;
+  padding: 40px;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+  animation: fadeInUp 0.5s ease;
+}
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.login-header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+.login-logo {
+  font-size: 60px;
+  margin-bottom: 15px;
+}
+.login-header h1 {
+  font-size: 28px;
+  color: #1A1D2E;
+  margin-bottom: 8px;
+}
+.login-header p {
+  color: #6B7280;
+  font-size: 14px;
+}
+.input-group {
+  margin-bottom: 20px;
+}
+.input-group label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: #1A1D2E;
+  font-size: 14px;
+}
+.input-group input {
+  width: 100%;
+  padding: 14px 16px;
+  border: 2px solid #E5E7EB;
+  border-radius: 16px;
+  font-size: 14px;
+  transition: all 0.3s;
+}
+.input-group input:focus {
+  outline: none;
+  border-color: #7B61FF;
+  box-shadow: 0 0 0 3px rgba(123,97,255,0.1);
+}
+.btn-login {
+  width: 100%;
+  background: linear-gradient(135deg, #7B61FF, #5B21B6);
+  color: white;
+  border: none;
+  padding: 14px;
+  border-radius: 30px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s;
+  margin-top: 10px;
+}
+.btn-login:hover {
+  transform: scale(1.02);
+  box-shadow: 0 8px 20px rgba(123,97,255,0.4);
+}
+.login-footer {
+  text-align: center;
+  margin-top: 25px;
+  padding-top: 20px;
+  border-top: 1px solid #F3F4F6;
+}
+.login-footer a {
+  color: #7B61FF;
+  text-decoration: none;
+  font-weight: 600;
+}
+.login-footer a:hover {
+  text-decoration: underline;
+}
+html[data-mode="sombre"] .login-card {
+  background: #2A2D3E;
+}
+html[data-mode="sombre"] .login-header h1 {
+  color: #F1F5F9;
+}
+html[data-mode="sombre"] .input-group label {
+  color: #F1F5F9;
+}
+html[data-mode="sombre"] .input-group input {
+  background: #1A1D2E;
+  border-color: #3A3D4E;
+  color: #F1F5F9;
+}
+</style>
+
+<script>
+document.getElementById('loginForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+
+  const email = document.getElementById('email').value;
+  const password = document.getElementById('password').value;
+
+  const btn = document.querySelector('.btn-login');
+  btn.disabled = true;
+  btn.textContent = '⏳ Connexion...';
+
+  try {
+    const response = await fetch('/api/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password })
+    });
+
+    const data = await response.json();
+
+    if (data.succes) {
+      // Sauvegarder user dans localStorage
+      localStorage.setItem('nokirova_user', JSON.stringify({
+        user_id: data.user_id,
+        email: data.email,
+        prenom: data.prenom,
+        nom: data.nom
+      }));
+
+      // Afficher notification
+      if (typeof afficherNotification === 'function') {
+        afficherNotification('✅ Connexion réussie !', 'succes');
+      }
+
+      setTimeout(() => {
+        window.location.href = '/';
+      }, 500);
+    } else {
+      if (typeof afficherNotification === 'function') {
+        afficherNotification(data.erreur, 'erreur');
+      } else {
+        alert('❌ ' + data.erreur);
+      }
+      btn.disabled = false;
+      btn.textContent = '🚀 Se connecter';
+    }
+  } catch (err) {
+    alert('❌ Erreur de connexion');
+    btn.disabled = false;
+    btn.textContent = '🚀 Se connecter';
+  }
+});
+</script>
+
+{% endblock %}

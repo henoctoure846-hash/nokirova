@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% block title %}Tâches - NOKIROVA{% endblock %}
+{% block contenu %}
+
+<div class="td-container">
+  <div class="td-header">
+    <div class="td-header-icon">✅</div>
+    <div>
+      <h1 class="td-header-title">Ma To-Do List</h1>
+      <p class="td-header-sub">Gère tes priorités quotidiennes</p>
+    </div>
+  </div>
+
+  <div class="td-input-card">
+    <input type="text" id="input-tache" placeholder="Ajouter une nouvelle tâche..." class="td-input">
+    <button onclick="ajouterTache()" class="td-btn-add">Ajouter</button>
+  </div>
+
+  <div id="liste-taches" class="td-list">
+    </div>
+</div>
+
+<style>
+.td-container { max-width: 600px; margin: 0 auto; padding: 2rem; animation: fadeInUp 0.5s ease; }
+.td-header { display: flex; align-items: center; gap: 1rem; margin-bottom: 2rem; }
+.td-header-icon { font-size: 2.5rem; }
+.td-header-title { font-size: 1.8rem; font-weight: 900; color: #1A1D2E; }
+.td-header-sub { color: #6B7280; }
+
+.td-input-card { display: flex; gap: 0.5rem; margin-bottom: 2rem; }
+.td-input { flex: 1; padding: 1rem; border-radius: 12px; border: 2px solid #E5E7EB; outline: none; transition: border-color 0.2s; }
+.td-input:focus { border-color: #2962FF; }
+.td-btn-add { padding: 0 1.5rem; background: #2962FF; color: white; border-radius: 12px; border: none; font-weight: 700; cursor: pointer; }
+
+.td-item {
+  background: white; padding: 1rem; border-radius: 12px; margin-bottom: 0.8rem;
+  display: flex; align-items: center; justify-content: space-between;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  animation: slideIn 0.3s ease;
+}
+.td-item.done { opacity: 0.6; text-decoration: line-through; }
+.td-actions { display: flex; gap: 0.5rem; }
+.td-btn-del { background: #FEE2E2; color: #EF4444; border: none; padding: 0.5rem; border-radius: 8px; cursor: pointer; }
+
+[data-theme="dark"] .td-header-title { color: #F1F5F9; }
+[data-theme="dark"] .td-input { background: #1E2235; border-color: #374151; color: white; }
+[data-theme="dark"] .td-item { background: #1E2235; color: #F1F5F9; }
+@keyframes slideIn { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: translateX(0); } }
+</style>
+
+<script>
+function ajouterTache() {
+  const input = document.getElementById('input-tache');
+  if (!input.value) return;
+
+  fetch('/api/todo/ajouter', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ texte: input.value })
+  }).then(() => {
+    input.value = '';
+    chargerTaches();
+  });
+}
+
+function chargerTaches() {
+  fetch('/api/todo/liste')
+    .then(r => r.json())
+    .then(d => {
+      const liste = document.getElementById('liste-taches');
+      liste.innerHTML = '';
+      d.taches.forEach(t => {
+        const div = document.createElement('div');
+        div.className = `td-item ${t.terminee ? 'done' : ''}`;
+        div.innerHTML = `
+          <span onclick="toggleTache(${t.id})">${t.texte}</span>
+          <div class="td-actions">
+            <button class="td-btn-del" onclick="supprimerTache(${t.id})">🗑️</button>
+          </div>
+        `;
+        liste.appendChild(div);
+      });
+    });
+}
+
+function toggleTache(id) {
+  fetch('/api/todo/toggle/' + id, { method: 'POST' }).then(chargerTaches);
+}
+
+function supprimerTache(id) {
+  fetch('/api/todo/supprimer/' + id, { method: 'POST' }).then(chargerTaches);
+}
+
+document.addEventListener('DOMContentLoaded', chargerTaches);
+</script>
+
+{% endblock %}

@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% block title %}Dashboard - NOKIROVA{% endblock %}
+{% block contenu %}
+
+<div class="db-container">
+  <div class="db-header">
+    <h1>Bienvenue, Étudiant ! 🚀</h1>
+    <p>Prêt à booster ta productivité aujourd'hui ?</p>
+  </div>
+
+  <div class="db-stats-grid">
+    <div class="db-stat-card">
+      <span class="db-stat-emoji">🍅</span>
+      <div class="db-stat-num" id="stat-pomodoro">0</div>
+      <div class="db-stat-label">Sessions Pomodoro</div>
+    </div>
+    <div class="db-stat-card">
+      <span class="db-stat-emoji">🃏</span>
+      <div class="db-stat-num" id="stat-flashcards">0</div>
+      <div class="db-stat-label">Flashcards créées</div>
+    </div>
+    <div class="db-stat-card">
+      <span class="db-stat-emoji">🔥</span>
+      <div class="db-stat-num" id="stat-streak">0</div>
+      <div class="db-stat-label">Jours de focus</div>
+    </div>
+  </div>
+
+  <div class="db-section">
+    <h2>Accès rapide</h2>
+    <div class="db-nav-grid">
+      <a href="/pomodoro" class="db-nav-item">
+        <span>⏱️</span>
+        <h3>Pomodoro</h3>
+        <p>Gérer ton temps de focus</p>
+      </a>
+      <a href="/flashcards" class="db-nav-item">
+        <span>🃏</span>
+        <h3>Flashcards</h3>
+        <p>Réviser tes cours</p>
+      </a>
+      <a href="/import" class="db-nav-item">
+        <span>📥</span>
+        <h3>Importer</h3>
+        <p>Ajouter un nouveau cours</p>
+      </a>
+    </div>
+  </div>
+</div>
+
+<style>
+.db-container { max-width: 900px; margin: 0 auto; padding: 2rem; }
+.db-header { margin-bottom: 2rem; }
+.db-header h1 { font-size: 2rem; color: #1A1D2E; }
+
+.db-stats-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem; margin-bottom: 2.5rem;
+}
+.db-stat-card {
+  background: white; padding: 1.5rem; border-radius: 20px;
+  text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+}
+.db-stat-emoji { font-size: 2rem; display: block; margin-bottom: 0.5rem; }
+.db-stat-num { font-size: 1.8rem; font-weight: 800; color: #2962FF; }
+.db-stat-label { font-size: 0.85rem; color: #6B7280; margin-top: 0.2rem; }
+
+.db-nav-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.5rem; }
+.db-nav-item {
+  background: white; padding: 1.5rem; border-radius: 20px;
+  text-decoration: none; color: #1A1D2E; transition: transform 0.2s;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+  border: 1px solid #E5E7EB;
+}
+.db-nav-item:hover { transform: translateY(-5px); border-color: #2962FF; }
+.db-nav-item span { font-size: 2rem; }
+.db-nav-item h3 { margin: 0.5rem 0; }
+.db-nav-item p { font-size: 0.9rem; color: #6B7280; }
+
+[data-theme="dark"] .db-stat-card, [data-theme="dark"] .db-nav-item { background: #1E2235; border-color: #374151; }
+[data-theme="dark"] .db-header h1 { color: #F1F5F9; }
+</style>
+
+<script>
+// Appel API pour récupérer les stats globales au chargement
+document.addEventListener('DOMContentLoaded', () => {
+  fetch('/api/dashboard/stats')
+    .then(r => r.json())
+    .then(d => {
+      document.getElementById('stat-pomodoro').textContent = d.pomodoro || 0;
+      document.getElementById('stat-flashcards').textContent = d.flashcards || 0;
+      document.getElementById('stat-streak').textContent = d.streak || 0;
+    });
+});
+</script>
+
+{% endblock %}

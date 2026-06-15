@@ -712,7 +712,7 @@ if (user) {
 }
 
 // ═══════════════════════════════════════════
-// 🎨 PHASE D2 — GÉNÉRATION IMAGE
+// 🎨 PHASE D2 — GÉNÉRATION IMAGE (VERSION CORRIGÉE)
 // ═══════════════════════════════════════════
 
 const MOTS_IMAGE = [
@@ -735,13 +735,8 @@ function extrairePromptImage(texte) {
     prompt = prompt.replace(regex, '').trim();
   });
   prompt = prompt.replace(/^[^a-zA-ZÀ-ÿ0-9]+/, '').trim();
-  return prompt || texte;
-}
-
-function construireUrlImage(prompt) {
-  const promptEncode = encodeURIComponent(prompt);
-  const seed = Math.floor(Math.random() * 99999);
-  return `https://image.pollinations.ai/prompt/${promptEncode}?width=512&height=512&seed=${seed}&nologo=true`;
+  if (!prompt) prompt = "une belle illustration";
+  return prompt;
 }
 
 async function genererImage(prompt) {
@@ -755,49 +750,63 @@ async function genererImage(prompt) {
     <div class="avatar avatar-ia">🌸</div>
     <div class="message-bulle chargement-image">
       <span class="chargement-image-icone">🎨</span>
-      <span class="chargement-image-texte">Génération en cours...<br><small>"${prompt}"</small></span>
+      <span class="chargement-image-texte">Génération en cours...<br><small>"${prompt.substring(0, 50)}"</small></span>
       <div class="chargement-image-barre"><div class="chargement-image-progress"></div></div>
     </div>
   `;
   messagesZone.appendChild(loadDiv);
   messagesZone.scrollTop = messagesZone.scrollHeight;
 
-  const url = construireUrlImage(prompt);
+  const promptEncode = encodeURIComponent(prompt);
+  const url = `https://image.pollinations.ai/prompt/${promptEncode}?width=512&height=512&nologo=true`;
+
   try {
+    const imgTest = new Image();
     await new Promise((resolve, reject) => {
-      const img = new Image();
-      img.onload  = resolve;
-      img.onerror = reject;
-      img.src = url;
-      setTimeout(() => reject(new Error('timeout')), 30000);
+      imgTest.onload = () => resolve(true);
+      imgTest.onerror = () => reject(new Error('Image non trouvée'));
+      imgTest.src = url;
+      setTimeout(() => reject(new Error('Timeout (15s)')), 15000);
     });
+
     loadDiv.remove();
+
     const imgDiv = document.createElement('div');
     imgDiv.className = 'message message-ia message-image';
     imgDiv.innerHTML = `
       <div class="avatar avatar-ia">🌸</div>
       <div class="message-bulle">
         <div class="image-generee-wrapper">
-          <div class="image-generee-label">🎨 Image générée : "${prompt}"</div>
-          <img class="image-generee" src="${url}" alt="${prompt}" onclick="zoomImage('${url}')">
+          <div class="image-generee-label">🎨 Image générée : "${prompt.substring(0, 80)}"</div>
+          <img class="image-generee" src="${url}" alt="${prompt}" onclick="zoomImage('${url}')" loading="lazy">
           <div class="image-generee-actions">
             <button class="btn-image-action" onclick="zoomImage('${url}')">🔍 Agrandir</button>
-            <a class="btn-image-action telecharger" href="${url}" download="nokirova-image.jpg">⬇️ Télécharger</a>
-            <button class="btn-image-action" onclick="poserQuestion('génère une autre image de ${prompt}')">🔄 Regénérer</button>
+            <a class="btn-image-action telecharger" href="${url}" download="nokirova-image.jpg" target="_blank">⬇️ Télécharger</a>
+            <button class="btn-image-action" onclick="poserQuestion('génère une autre image de ${prompt.replace(/'/g, "\\'")}')">🔄 Regénérer</button>
           </div>
         </div>
       </div>
     `;
     messagesZone.appendChild(imgDiv);
+    messagesZone.scrollTop = messagesZone.scrollHeight;
     lireVoix(`Voilà, j'ai généré une image de ${prompt}`);
+
   } catch(e) {
     loadDiv.remove();
+    console.error('Erreur image:', e);
+
     const errDiv = document.createElement('div');
     errDiv.className = 'message message-ia';
-    errDiv.innerHTML = `<div class="avatar avatar-ia">🌸</div><div class="message-bulle" style="background:#FEF3C7;color:#92400E;">⚠️ Erreur génération d'image</div></div>`;
+    errDiv.innerHTML = `
+      <div class="avatar avatar-ia">🌸</div>
+      <div class="message-bulle" style="background:#FEF3C7;color:#92400E;border:1px solid #F59E0B;">
+        ⚠️ Désolé, je n'ai pas pu générer l'image.<br>
+        💡 Astuce : Essaie une description plus simple comme "un chat" ou "une fleur"
+      </div>
+    `;
     messagesZone.appendChild(errDiv);
+    messagesZone.scrollTop = messagesZone.scrollHeight;
   }
-  messagesZone.scrollTop = messagesZone.scrollHeight;
 }
 
 function zoomImage(src) {
@@ -892,7 +901,7 @@ if (btnScan) {
     const input = document.createElement('input');
     input.type = 'file';
     input.accept = 'image/*';
-    input.capture = 'environment'; // Ouvre camera direct sur mobile
+    input.capture = 'environment';
 
     input.onchange = async (e) => {
       const file = e.target.files[0];
@@ -908,7 +917,6 @@ if (btnScan) {
       formData.append('langue', 'fra');
       formData.append('expliquer', 'true');
 
-      // Message chargement IA
       const loadingId = 'loading_' + Date.now();
       const loadDiv = document.createElement('div');
       loadDiv.id = loadingId;
@@ -934,7 +942,6 @@ if (btnScan) {
             ajouterMessage(`💡 **Explication IA :**\n\n${data.explication}`, 'ia');
             lireVoix(data.explication);
           } else {
-            // Envoyer à l'IA pour correction
             envoyerMessage(`Voici une copie manuscrite à corriger :\n\n${data.texte}\n\nCorrige cette copie en donnant une note sur 20 et des conseils.`);
           }
         } else {

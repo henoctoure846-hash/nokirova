@@ -23,7 +23,7 @@
       <p class="sn-header-sub">Choisis le son joué à la fin d'un Pomodoro 🍅</p>
     </div>
     <div class="sn-header-badge">
-      <span>🎵</span> Son IA
+      <span>🎵</span> Sons intégrés
     </div>
   </div>
 
@@ -36,7 +36,7 @@
       </div>
       <div>
         <h2 class="sn-card-title">Choisis ta sonnerie</h2>
-        <p class="sn-card-sub">Clique pour sélectionner et écouter</p>
+        <p class="sn-card-sub">Clique pour sélectionner et écouter (sons générés par l'app)</p>
       </div>
     </div>
 
@@ -47,7 +47,7 @@
         <div class="sn-emoji">🔔</div>
         <strong class="sn-nom">Cloche</strong>
         <small class="sn-desc">Son classique apaisant</small>
-        <button onclick="event.stopPropagation(); jouer('bell')"
+        <button onclick="event.stopPropagation(); jouerSon('bell')"
                 class="sn-btn-ecouter">▶️ Écouter</button>
       </div>
 
@@ -56,7 +56,7 @@
         <div class="sn-emoji">✨</div>
         <strong class="sn-nom">Ding</strong>
         <small class="sn-desc">Petit son cristallin</small>
-        <button onclick="event.stopPropagation(); jouer('ding')"
+        <button onclick="event.stopPropagation(); jouerSon('ding')"
                 class="sn-btn-ecouter">▶️ Écouter</button>
       </div>
 
@@ -65,7 +65,7 @@
         <div class="sn-emoji">⏰</div>
         <strong class="sn-nom">Alarme</strong>
         <small class="sn-desc">Son réveil énergique</small>
-        <button onclick="event.stopPropagation(); jouer('alarm')"
+        <button onclick="event.stopPropagation(); jouerSon('alarm')"
                 class="sn-btn-ecouter">▶️ Écouter</button>
       </div>
 
@@ -74,7 +74,7 @@
         <div class="sn-emoji">🧘</div>
         <strong class="sn-nom">Zen</strong>
         <small class="sn-desc">Gong méditation</small>
-        <button onclick="event.stopPropagation(); jouer('zen')"
+        <button onclick="event.stopPropagation(); jouerSon('zen')"
                 class="sn-btn-ecouter">▶️ Écouter</button>
       </div>
 
@@ -83,7 +83,7 @@
         <div class="sn-emoji">🎮</div>
         <strong class="sn-nom">Game</strong>
         <small class="sn-desc">Victoire jeu vidéo</small>
-        <button onclick="event.stopPropagation(); jouer('game')"
+        <button onclick="event.stopPropagation(); jouerSon('game')"
                 class="sn-btn-ecouter">▶️ Écouter</button>
       </div>
 
@@ -388,18 +388,109 @@
 </style>
 
 <script>
-const SONS = {
-  bell  : 'https://www.soundjay.com/buttons/bell-ringing-05.mp3',
-  ding  : 'https://www.soundjay.com/buttons/button-09.mp3',
-  alarm : 'https://www.soundjay.com/clocks/sound-effects/alarm-clock-01.mp3',
-  zen   : 'https://www.soundjay.com/buttons/sounds/gong-1.mp3',
-  game  : 'https://www.soundjay.com/buttons/sounds/button-3.mp3'
-};
-
 let volumeActuel = 0.8;
 let sonActuel    = 'bell';
+let audioCtx = null;
 
-document.addEventListener('DOMContentLoaded', charger);
+/* ── GÉNÉRATION DE SONS AVEC WEB AUDIO API ── */
+function genererSonBell() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  const now = audioCtx.currentTime;
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.connect(gain);
+  gain.connect(audioCtx.destination);
+  osc.frequency.value = 880;
+  osc.type = 'sine';
+  gain.gain.setValueAtTime(0, now);
+  gain.gain.linearRampToValueAtTime(volumeActuel * 0.5, now + 0.01);
+  gain.gain.exponentialRampToValueAtTime(0.0001, now + 1.5);
+  osc.start(now);
+  osc.stop(now + 1.5);
+}
+
+function genererSonDing() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  const now = audioCtx.currentTime;
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.connect(gain);
+  gain.connect(audioCtx.destination);
+  osc.frequency.value = 1046.5;
+  osc.type = 'sine';
+  gain.gain.setValueAtTime(0, now);
+  gain.gain.linearRampToValueAtTime(volumeActuel * 0.4, now + 0.02);
+  gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.8);
+  osc.start(now);
+  osc.stop(now + 0.8);
+}
+
+function genererSonAlarm() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  const now = audioCtx.currentTime;
+  for (let i = 0; i < 3; i++) {
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.frequency.value = 880;
+    osc.type = 'square';
+    gain.gain.setValueAtTime(0, now + i * 0.5);
+    gain.gain.linearRampToValueAtTime(volumeActuel * 0.3, now + i * 0.5 + 0.05);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + i * 0.5 + 0.4);
+    osc.start(now + i * 0.5);
+    osc.stop(now + i * 0.5 + 0.4);
+  }
+}
+
+function genererSonZen() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  const now = audioCtx.currentTime;
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.connect(gain);
+  gain.connect(audioCtx.destination);
+  osc.frequency.value = 440;
+  osc.type = 'sine';
+  gain.gain.setValueAtTime(0, now);
+  gain.gain.linearRampToValueAtTime(volumeActuel * 0.4, now + 0.5);
+  gain.gain.exponentialRampToValueAtTime(0.0001, now + 3);
+  osc.start(now);
+  osc.stop(now + 3);
+}
+
+function genererSonGame() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  const now = audioCtx.currentTime;
+  const notes = [523.25, 659.25, 783.99];
+  notes.forEach((freq, i) => {
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.frequency.value = freq;
+    osc.type = 'triangle';
+    gain.gain.setValueAtTime(0, now + i * 0.15);
+    gain.gain.linearRampToValueAtTime(volumeActuel * 0.3, now + i * 0.15 + 0.05);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + i * 0.15 + 0.6);
+    osc.start(now + i * 0.15);
+    osc.stop(now + i * 0.15 + 0.6);
+  });
+}
+
+function jouerSon(son) {
+  if (son === 'aucun') return;
+  if (audioCtx && audioCtx.state === 'suspended') {
+    audioCtx.resume();
+  }
+  switch(son) {
+    case 'bell': genererSonBell(); break;
+    case 'ding': genererSonDing(); break;
+    case 'alarm': genererSonAlarm(); break;
+    case 'zen': genererSonZen(); break;
+    case 'game': genererSonGame(); break;
+  }
+}
 
 /* ── TOAST ── */
 function toast(msg, type = 'info') {
@@ -450,17 +541,7 @@ function choisir(son, el) {
   }).then(() => toast('🔔 Sonnerie sauvegardée !', 'succes'))
     .catch(() => toast('❌ Erreur sauvegarde', 'erreur'));
 
-  if (son !== 'aucun') jouer(son);
-}
-
-/* ── JOUER ── */
-function jouer(son) {
-  if (son === 'aucun' || !SONS[son]) return;
-  try {
-    const audio   = new Audio(SONS[son]);
-    audio.volume  = volumeActuel;
-    audio.play().catch(() => {});
-  } catch(e) {}
+  if (son !== 'aucun') jouerSon(son);
 }
 
 /* ── VOLUME ── */
@@ -489,6 +570,8 @@ function majVisu(vol) {
     bar.style.opacity = actif ? '1' : '0.2';
   });
 }
+
+document.addEventListener('DOMContentLoaded', charger);
 </script>
 
 {% endblock %}

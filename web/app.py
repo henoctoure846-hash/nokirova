@@ -1615,6 +1615,149 @@ def api_dashboard_stats():
             except Exception as e:
                 return jsonify({"succes": False, "erreur": str(e)})
 
+            # ═══════════════════════════════════════════
+            # 📄 EXPORT PDF PROFESSIONNEL
+            # ═══════════════════════════════════════════
+
+            @app.route('/api/export-pdf', methods=['POST'])
+            def api_export_pdf():
+                try:
+                    data = request.get_json()
+                    contenu = data.get('contenu', '')
+                    titre = data.get('titre', 'Document NOKIROVA')
+                    type_doc = data.get('type', 'document')  # exercice, resume, explication, qcm, examen
+
+                    if not contenu:
+                        return jsonify({"succes": False, "erreur": "Aucun contenu à exporter"})
+
+                    from export_pdf import exporter_en_pdf
+                    import uuid
+
+                    # Récupérer les infos du cours et utilisateur
+                    nom_cours = session_data.get('nom_cours', 'Sans titre')
+                    matiere = session_data.get('matiere_detectee', '📚 Général')
+
+                    user = request.cookies.get('nokirova_user_id')
+                    from db.base import get_user_info
+                    etudiant = "Étudiant NOKIROVA"
+                    if user:
+                        user_info = get_user_info(int(user))
+                        if user_info:
+                            etudiant = f"{user_info.get('prenom', '')} {user_info.get('nom', '')}".strip() or etudiant
+
+                    # Générer un nom de fichier unique
+                    nom_fichier = f"{type_doc}_{datetime.now().strftime('%Y%m%d_%H%M%S')}_{uuid.uuid4().hex[:6]}.pdf"
+
+                    resultat = exporter_en_pdf(
+                        contenu=contenu,
+                        titre=titre,
+                        nom_fichier=nom_fichier,
+                        nom_cours=nom_cours,
+                        matiere=matiere,
+                        etudiant=etudiant
+                    )
+
+                    if "Erreur" in resultat:
+                        return jsonify({"succes": False, "erreur": resultat})
+
+                    # Retourner les URLs des PDFs générés
+                    import os
+                    outputs_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'outputs')
+
+                    if "2 PDFs" in resultat:
+                        # Deux fichiers ont été générés (exercices + correction)
+                        base_name = nom_fichier.replace('.pdf', '')
+                        url_exos = f"/download-pdf/{base_name}_EXERCICES.pdf"
+                        url_corr = f"/download-pdf/{base_name}_CORRECTION.pdf"
+                        return jsonify({
+                            "succes": True,
+                            "pdfs": [
+                                {"nom": f"{titre} - Exercices", "url": url_exos},
+                                {"nom": f"{titre} - Corrigé", "url": url_corr}
+                            ],
+                            "message": "2 PDFs générés : exercices et corrigé"
+                        })
+                    else:
+                        # Un seul fichier
+                        url_pdf = f"/download-pdf/{nom_fichier}"
+                        return jsonify({
+                            "succes": True,
+                            "pdfs": [{"nom": titre, "url": url_pdf}],
+                            "message": "PDF généré avec succès"
+                        })
+
+                except Exception as e:
+                    return jsonify({"succes": False, "erreur": str(e)})
+
+            @app.route('/download-pdf/<nom_fichier>')
+            def download_pdf(nom_fichier):
+                """Télécharger un PDF généré"""
+                import os
+                from flask import send_file
+                dossier = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'outputs')
+                chemin = os.path.join(dossier, nom_fichier)
+                if os.path.exists(chemin):
+                    return send_file(chemin, as_attachment=True, download_name=nom_fichier)
+                return "Fichier non trouvé", 404
+
+            @app.route('/api/export-pdf-qcm', methods=['POST'])
+            def api_export_pdf_qcm():
+                """Export spécial pour QCM avec formatage"""
+                try:
+                    data = request.get_json()
+                    qcm_texte = data.get('qcm_texte', '')
+                    titre = data.get('titre', 'QCM NOKIROVA')
+
+                    if not qcm_texte:
+                        return jsonify({"succes": False, "erreur": "Aucun QCM à exporter"})
+
+                    # Formater le QCM pour le PDF
+                    contenu_formate = f"""
+            **{titre}**
+
+            {qcm_texte}
+
+            ---
+            📅 Généré par NOKIROVA - Ton professeur IA
+                    """
+
+                    from export_pdf import exporter_en_pdf
+                    import uuid
+
+                    nom_cours = session_data.get('nom_cours', 'QCM')
+                    matiere = session_data.get('matiere_detectee', '📚 Général')
+
+                    user = request.cookies.get('nokirova_user_id')
+                    from db.base import get_user_info
+                    etudiant = "Étudiant NOKIROVA"
+                    if user:
+                        user_info = get_user_info(int(user))
+                        if user_info:
+                            etudiant = f"{user_info.get('prenom', '')} {user_info.get('nom', '')}".strip() or etudiant
+
+                    nom_fichier = f"qcm_{datetime.now().strftime('%Y%m%d_%H%M%S')}_{uuid.uuid4().hex[:6]}.pdf"
+
+                    resultat = exporter_en_pdf(
+                        contenu=contenu_formate,
+                        titre=titre,
+                        nom_fichier=nom_fichier,
+                        nom_cours=nom_cours,
+                        matiere=matiere,
+                        etudiant=etudiant
+                    )
+
+                    if "Erreur" in resultat:
+                        return jsonify({"succes": False, "erreur": resultat})
+
+                    return jsonify({
+                        "succes": True,
+                        "url": f"/download-pdf/{nom_fichier}",
+                        "message": "QCM exporté en PDF"
+                    })
+
+                except Exception as e:
+                    return jsonify({"succes": False, "erreur": str(e)})
+
 # ═══════════════════════════════════════════
 # 🚀 LANCEMENT
 # ═══════════════════════════════════════════

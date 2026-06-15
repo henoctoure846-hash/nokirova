@@ -106,8 +106,8 @@ if huggingface_ready:
 # ═══════════════════════════════════════════
 MODELE_GROQ_RAPIDE = "llama-3.1-8b-instant"
 MODELE_GROQ_QUALITE = "llama-3.3-70b-versatile"
-MODELE_CEREBRAS = "llama3.1-8b"  # ✅ CORRIGÉ
-MODELE_OPENROUTER = "meta-llama/llama-3.2-3b-instruct:free"  # ✅ CORRIGÉ
+MODELE_CEREBRAS = "llama3.1-8b"
+MODELE_OPENROUTER = "meta-llama/llama-3.2-3b-instruct:free"
 MODELE_TOGETHER = "meta-llama/Llama-3.3-70B-Instruct-Turbo-Free"
 MODELE_HF = "mistralai/Mistral-7B-Instruct-v0.3"
 
@@ -125,7 +125,7 @@ def demander_ia_brut(prompt: str, temperature: float = 0.7, rapide: bool = False
                 model=MODELE_CEREBRAS,
                 messages=[{"role": "user", "content": prompt}],
                 temperature=temperature,
-                max_tokens=3000
+                max_tokens=6000  # AUGMENTÉ
             )
             return response.choices[0].message.content
         except Exception as e:
@@ -140,7 +140,7 @@ def demander_ia_brut(prompt: str, temperature: float = 0.7, rapide: bool = False
                 model=modele,
                 messages=[{"role": "user", "content": prompt}],
                 temperature=temperature,
-                max_tokens=3000
+                max_tokens=6000  # AUGMENTÉ
             )
             return response.choices[0].message.content
         except Exception as e:
@@ -163,7 +163,7 @@ def demander_ia_brut(prompt: str, temperature: float = 0.7, rapide: bool = False
                 model=MODELE_TOGETHER,
                 messages=[{"role": "user", "content": prompt}],
                 temperature=temperature,
-                max_tokens=3000
+                max_tokens=6000  # AUGMENTÉ
             )
             return response.choices[0].message.content
         except Exception as e:
@@ -183,7 +183,7 @@ def demander_ia_brut(prompt: str, temperature: float = 0.7, rapide: bool = False
                 "model": MODELE_OPENROUTER,
                 "messages": [{"role": "user", "content": prompt}],
                 "temperature": temperature,
-                "max_tokens": 3000
+                "max_tokens": 6000  # AUGMENTÉ
             }
             r = requests.post(
                 "https://openrouter.ai/api/v1/chat/completions",
@@ -204,14 +204,14 @@ def demander_ia_brut(prompt: str, temperature: float = 0.7, rapide: bool = False
                     model="mistral-large-latest",
                     messages=[ChatMessage(role="user", content=prompt)],
                     temperature=temperature,
-                    max_tokens=3000
+                    max_tokens=6000  # AUGMENTÉ
                 )
             except ImportError:
                 response = mistral_client.chat.complete(
                     model="mistral-large-latest",
                     messages=[{"role": "user", "content": prompt}],
                     temperature=temperature,
-                    max_tokens=3000
+                    max_tokens=6000  # AUGMENTÉ
                 )
             return response.choices[0].message.content
         except Exception as e:
@@ -225,7 +225,7 @@ def demander_ia_brut(prompt: str, temperature: float = 0.7, rapide: bool = False
             data = {
                 "inputs": prompt,
                 "parameters": {
-                    "max_new_tokens": 2000,
+                    "max_new_tokens": 5000,  # AUGMENTÉ
                     "temperature": temperature,
                     "return_full_text": False
                 }
@@ -250,91 +250,98 @@ def demander_ia_brut(prompt: str, temperature: float = 0.7, rapide: bool = False
 
 
 # ═══════════════════════════════════════════
-# 💬 QUESTION LIBRE
+# 💬 QUESTION LIBRE (PROMPT AMÉLIORÉ)
 # ═══════════════════════════════════════════
 def demander_ia(prompt: str) -> str:
     prompt_complet = f"""Tu es NOKIROVA, un professeur intelligent universel.
-Tu enseignes TOUTES les matières. Tu réponds TOUJOURS en français.
-Tu utilises des phrases courtes, beaucoup d'emojis, des exemples concrets.
-Ton encourageant et motivant.
 
-QUESTION : {prompt}
+📋 **RÈGLES STRICTES :**
+- Tu enseignes TOUTES les matières
+- Tu réponds TOUJOURS en français
+- Tu utilises des phrases COURTES et CLAIRES
+- Tu donnes des EXEMPLES CONCRETS
+- Tu es ENCOURAGEANT et MOTIVANT
+- Tu STRUCTURES ta réponse avec des titres et des listes
+- Tu utilises des emojis pour rendre la lecture agréable
 
-RÉPONSE :"""
+📚 **LA QUESTION DE L'ÉTUDIANT :**
+{prompt}
+
+🎯 **TA RÉPONSE :**"""
     return demander_ia_brut(prompt_complet, rapide=False)
 
 
 # ═══════════════════════════════════════════
-# 💡 EXPLICATION SIMPLIFIÉE
+# 💡 EXPLICATION SIMPLIFIÉE (AMÉLIORÉE)
 # ═══════════════════════════════════════════
 def expliquer_simplement(texte: str) -> str:
-    prompt = f"""Tu es NOKIROVA, prof intelligent universel. Explique ce contenu à un étudiant qui apprend lentement.
+    prompt = f"""Tu es NOKIROVA, professeur universel. Explique ce contenu SIMPLEMENT.
 
-📋 FORMAT OBLIGATOIRE :
+📋 **FORMAT OBLIGATOIRE :**
 
-**CE QU'IL FAUT COMPRENDRE**
-(2-3 phrases ultra simples)
+## **📖 CE QU'IL FAUT COMPRENDRE**
+(2-3 phrases ultra simples, comme si tu parlais à un débutant)
 
-**EXPLICATION ÉTAPE PAR ÉTAPE**
+## **📝 EXPLICATION ÉTAPE PAR ÉTAPE**
 1. ...
 2. ...
 3. ...
 
-**EXEMPLE CONCRET**
-(de la vie quotidienne)
+## **💡 EXEMPLE CONCRET**
+(Tire de la vie quotidienne, avec des chiffres si possible)
 
-**ASTUCE POUR RETENIR**
-(mnémotechnique)
+## **🎯 ASTUCE POUR RETENIR**
+(Phrase mnémotechnique ou image mentale)
 
-**PIÈGES À ÉVITER**
-- ...
+## **⚠️ PIÈGES À ÉVITER**
+- Piège 1 : ...
+- Piège 2 : ...
 
-**TU PEUX LE FAIRE !** (encouragement)
+## **💪 POUR L'EXAMEN**
+(Conseils pratiques pour le jour J)
 
-Utilise BEAUCOUP d'emojis 🎯📚💡, phrases COURTES, ton encourageant.
+---
 
-CONTENU :
-{texte}
+**📄 CONTENU À EXPLIQUER :**
+{texte[:8000]}
 
-RÉPONSE :"""
+**🎓 RÉPONSE DÉTAILLÉE :**"""
     return demander_ia_brut(prompt, rapide=False)
 
 
 # ═══════════════════════════════════════════
-# 📝 RÉSUMÉ
+# 📝 RÉSUMÉ (AMÉLIORÉ)
 # ═══════════════════════════════════════════
 def creer_resume(texte: str) -> str:
-    prompt = f"""Tu es NOKIROVA, prof intelligent. Résume ce cours pour un étudiant qui révise.
+    prompt = f"""Tu es NOKIROVA, professeur universel. Résume ce cours.
 
-📋 FORMAT OBLIGATOIRE :
+📋 **FORMAT OBLIGATOIRE :**
 
-**OBJECTIF DU COURS**
+## **🎯 OBJECTIF DU COURS**
 (1-2 phrases)
 
-**LES 3-5 IDÉES PRINCIPALES**
-1. ...
-2. ...
-3. ...
+## **💡 LES 3-5 IDÉES PRINCIPALES**
+1. **Idée 1** : Explication claire
+2. **Idée 2** : Explication claire
+3. **Idée 3** : Explication claire
 
-**DÉFINITIONS / FORMULES IMPORTANTES**
-(à connaître par cœur)
+## **📚 DÉFINITIONS / FORMULES IMPORTANTES**
+- **Terme 1** : Définition simple
+- **Formule 1** : Explication
 
-**À RETENIR ABSOLUMENT**
-- ...
-- ...
+## **⚠️ PIÈGES À ÉVITER**
+- Piège fréquent 1
+- Piège fréquent 2
 
-**PIÈGES À ÉVITER**
-- ...
+## **🎓 POUR L'EXAMEN**
+(Conseils ciblés et incontournables)
 
-**POUR L'EXAMEN**
-(conseils ciblés)
+---
 
-Réponds en français, avec emojis, phrases courtes, ton encourageant.
+**📄 CONTENU DU COURS :**
+{texte[:8000]}
 
-COURS :
-{texte}
-
-RÉSUMÉ :"""
+**📝 RÉSUMÉ COMPLET :**"""
     return demander_ia_brut(prompt, rapide=False)
 
 

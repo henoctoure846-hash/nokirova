@@ -1,749 +1,543 @@
 {% extends "base.html" %}
 
-{% block title %}🎯 QCM Interactif - NOKIROVA{% endblock %}
+{% block title %}📝 QCM Interactif - NOKIROVA{% endblock %}
 
 {% block contenu %}
+
 <div class="qcm-page">
 
-  <!-- HEADER MODERNE ROSE -->
+  <!-- HEADER -->
   <div class="qcm-header">
-    <div class="qcm-header-bg">🎯</div>
-    <div class="qcm-header-icone">🎯</div>
+    <div class="qcm-header-bg">📝</div>
+    <div class="qcm-header-icone">📝</div>
     <div class="qcm-header-texte">
       <h1>QCM Interactif</h1>
-      <p>✨ Teste tes connaissances avec l'IA</p>
+      <p>Teste tes connaissances avec des questions générées par l'IA 🎯</p>
     </div>
   </div>
 
-  <!-- ALERTE PAS DE COURS -->
+  <!-- ALERTE AUCUN COURS -->
   <div id="alerte-cours" class="qcm-alerte" style="display:none;">
-    <div class="qcm-alerte-icone">⚠️</div>
-    <div class="qcm-alerte-contenu">
+    <span>⚠️</span>
+    <div>
       <strong>Aucun cours chargé !</strong>
       <p>Importe un cours pour générer des QCM personnalisés.</p>
-      <a href="/import" class="qcm-alerte-btn">📥 Importer un cours</a>
+      <a href="/import" class="qcm-btn-alerte">📥 Importer un cours</a>
     </div>
   </div>
 
   <!-- STATUT COURS -->
   <div id="statut-cours" class="qcm-statut" style="display:none;">
-    <div class="qcm-statut-icone">📚</div>
-    <div class="qcm-statut-texte">
-      <span class="qcm-statut-label">Cours chargé</span>
-      <span id="nom-cours-affiche" class="qcm-statut-nom"></span>
+    <div class="qcm-statut-icon">📚</div>
+    <div class="qcm-statut-info">
+      <span class="qcm-statut-label">Cours actif</span>
+      <span id="nom-cours" class="qcm-statut-nom"></span>
     </div>
-    <div class="qcm-statut-badge">✅ Prêt</div>
+    <div class="qcm-badge">✅ Prêt</div>
   </div>
 
-  <!-- PANNEAU CONTRÔLE -->
-  <div class="qcm-panel">
-    <h2 class="qcm-panel-titre">
-      <span class="qcm-panel-icon">⚙️</span>
-      Paramètres du QCM
-    </h2>
-
-    <div class="qcm-slider-zone">
-      <div class="qcm-slider-label">
-        <span>📊 Nombre de questions</span>
-        <span id="valeur-slider" class="qcm-slider-value">5</span>
+  <!-- PARAMÈTRES -->
+  <div class="qcm-card">
+    <div class="qcm-card-header">
+      <div class="qcm-card-icon">⚙️</div>
+      <div>
+        <h3>Paramètres du QCM</h3>
+        <p>Personnalise ton questionnaire</p>
       </div>
-      <input type="range" id="slider-qcm" min="3" max="20" value="5"
-             class="qcm-slider" oninput="majSlider(this.value)"/>
-      <div class="qcm-slider-marks">
-        <span>3 ⚡</span>
-        <span>10 📚</span>
-        <span>20 💎</span>
+    </div>
+
+    <div class="qcm-params">
+      <div class="qcm-param">
+        <label>📊 Nombre de questions</label>
+        <div class="qcm-nb-control">
+          <button onclick="changerNb(-1)" class="qcm-nb-btn">-</button>
+          <span id="nb-questions" class="qcm-nb-value">5</span>
+          <button onclick="changerNb(1)" class="qcm-nb-btn">+</button>
+        </div>
+      </div>
+      <div class="qcm-param">
+        <label>🎯 Difficulté</label>
+        <select id="difficulte" class="qcm-select">
+          <option value="facile">🌟 Facile</option>
+          <option value="moyen" selected>📚 Moyen</option>
+          <option value="difficile">💪 Difficile</option>
+        </select>
       </div>
     </div>
 
     <button id="btn-generer" onclick="genererQCM()" class="qcm-btn-generer">
-      <span class="qcm-btn-icone">🎯</span>
-      <span class="qcm-btn-texte">Générer les QCM</span>
+      <span>🎯</span>
+      Générer le QCM
     </button>
   </div>
 
-  <!-- LOADING -->
-  <div id="loading-qcm" class="qcm-loading" style="display:none;">
+  <!-- ZONE DE CHARGEMENT -->
+  <div id="loading" class="qcm-loading" style="display:none;">
     <div class="qcm-spinner"></div>
-    <div class="qcm-loading-texte">
-      <p class="qcm-loading-titre">🎯 Génération en cours...</p>
-      <p class="qcm-loading-sous">L'IA prépare tes questions ✨</p>
-    </div>
+    <p>Génération des questions en cours...</p>
+    <small>L'IA travaille pour toi ⏳</small>
   </div>
 
-  <!-- RÉSULTAT -->
-  <div id="zone-resultat" style="display:none;">
-
-    <div class="qcm-actions">
-      <div class="qcm-actions-titre">
-        <span>✅</span> QCM générés avec succès !
-      </div>
-      <div class="qcm-actions-btns">
-        <button onclick="copierQCM()" class="qcm-action-btn qcm-copy">
-          <span>📋</span> Copier
-        </button>
-        <button onclick="telechargerQCMPDF()" class="qcm-action-btn qcm-pdf">
-          <span>📄</span> PDF
-        </button>
-        <button onclick="partagerQCM()" class="qcm-action-btn qcm-partage">
-          <span>🤝</span> Partager
-        </button>
-        <button onclick="genererQCM()" class="qcm-action-btn qcm-regen">
-          <span>🔄</span> Régénérer
+  <!-- ZONE RÉSULTAT QCM -->
+  <div id="zone-qcm" class="qcm-result" style="display:none;">
+    <div class="qcm-result-header">
+      <h3>📋 Questionnaire généré</h3>
+      <div class="qcm-actions">
+        <button onclick="exporterQCM()" class="qcm-btn-pdf">
+          📄 Exporter PDF
         </button>
       </div>
     </div>
 
-    <div id="qcm-display" class="qcm-display"></div>
-    <textarea id="qcm-brut" style="display:none;"></textarea>
+    <div id="contenu-qcm" class="qcm-contenu"></div>
+
+    <div class="qcm-footer-actions">
+      <button onclick="genererQCM()" class="qcm-btn-regen">
+        🔄 Générer un nouveau QCM
+      </button>
+      <button onclick="exporterQCM()" class="qcm-btn-pdf-footer">
+        📄 Télécharger PDF
+      </button>
+    </div>
   </div>
 
 </div>
 
-<div id="toastGlobal" class="toast-notif"></div>
-
 <style>
-  /* ═══════════════════════════════════════════
-     🎯 PAGE QCM REDESIGN PRO
-     ═══════════════════════════════════════════ */
-  .qcm-page {
-    max-width: 1100px;
-    margin: 0 auto;
-    animation: fadeInUp 0.5s ease;
-  }
-  @keyframes fadeInUp {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
+.qcm-page {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 20px;
+  animation: fadeInUp 0.5s ease;
+}
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
 
-  /* HEADER */
-  .qcm-header {
-    position: relative;
-    background: linear-gradient(135deg, #FF6B9D, #C2185B);
-    border-radius: 28px;
-    padding: 28px 30px;
-    margin-bottom: 20px;
-    display: flex;
-    align-items: center;
-    gap: 20px;
-    color: white;
-    box-shadow: 0 10px 30px rgba(255,107,157,0.3);
-    overflow: hidden;
-  }
-  .qcm-header-bg {
-    position: absolute;
-    top: -30px; right: -20px;
-    font-size: 200px;
-    opacity: 0.15;
-    transform: rotate(15deg);
-    pointer-events: none;
-  }
-  .qcm-header-icone {
-    width: 70px; height: 70px;
-    background: white;
-    border-radius: 22px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 36px;
-    box-shadow: 0 6px 20px rgba(0,0,0,0.2);
-    z-index: 1;
-  }
-  .qcm-header-texte { z-index: 1; }
-  .qcm-header-texte h1 {
-    font-size: 28px;
-    font-weight: 900;
-    margin: 0;
-    letter-spacing: -0.5px;
-  }
-  .qcm-header-texte p {
-    font-size: 14px;
-    opacity: 0.92;
-    margin-top: 4px;
-    font-weight: 500;
-  }
+/* HEADER */
+.qcm-header {
+  position: relative;
+  background: linear-gradient(135deg, #FF6B9D, #EC4899);
+  border-radius: 28px;
+  padding: 30px;
+  margin-bottom: 25px;
+  color: white;
+  overflow: hidden;
+}
+.qcm-header-bg {
+  position: absolute;
+  top: -30px; right: -20px;
+  font-size: 180px;
+  opacity: 0.15;
+  pointer-events: none;
+}
+.qcm-header-icone {
+  width: 70px; height: 70px;
+  background: rgba(255,255,255,0.2);
+  border-radius: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 36px;
+  margin-bottom: 15px;
+}
+.qcm-header-texte h1 {
+  font-size: 28px;
+  margin: 0;
+  font-weight: 900;
+}
+.qcm-header-texte p {
+  margin: 8px 0 0;
+  opacity: 0.9;
+}
 
-  /* ALERTE */
-  .qcm-alerte {
-    display: flex;
-    gap: 16px;
-    background: linear-gradient(135deg, #FEF3C7, #FDE68A);
-    border-radius: 20px;
-    padding: 20px;
-    margin-bottom: 20px;
-    border-left: 5px solid #F59E0B;
-    animation: shake 0.5s ease;
-  }
-  @keyframes shake {
-    0%,100% { transform: translateX(0); }
-    25% { transform: translateX(-5px); }
-    75% { transform: translateX(5px); }
-  }
-  .qcm-alerte-icone {
-    font-size: 32px;
-    flex-shrink: 0;
-  }
-  .qcm-alerte-contenu { flex: 1; }
-  .qcm-alerte-contenu strong {
-    color: #92400E;
-    font-size: 16px;
-  }
-  .qcm-alerte-contenu p {
-    color: #B45309;
-    font-size: 14px;
-    margin: 6px 0 12px;
-  }
-  .qcm-alerte-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    background: linear-gradient(135deg, #F59E0B, #D97706);
-    color: white;
-    font-weight: 700;
-    padding: 8px 18px;
-    border-radius: 50px;
-    text-decoration: none;
-    font-size: 13px;
-    box-shadow: 0 4px 12px rgba(245,158,11,0.35);
-    transition: all 0.3s;
-  }
-  .qcm-alerte-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 18px rgba(245,158,11,0.5);
-  }
+/* ALERTE */
+.qcm-alerte {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  background: #FFFBEB;
+  border: 2px solid #FFD93D;
+  border-radius: 20px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+.qcm-alerte span { font-size: 32px; }
+.qcm-alerte strong { color: #92400E; }
+.qcm-alerte p { color: #6B7280; margin: 5px 0 10px; }
+.qcm-btn-alerte {
+  background: linear-gradient(135deg, #FFD93D, #F59E0B);
+  color: #374151;
+  padding: 8px 20px;
+  border-radius: 30px;
+  text-decoration: none;
+  font-weight: 700;
+  display: inline-block;
+}
 
-  /* STATUT */
-  .qcm-statut {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    background: white;
-    border-radius: 20px;
-    padding: 16px 20px;
-    margin-bottom: 20px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-    border-left: 5px solid #FF6B9D;
-  }
-  .qcm-statut-icone {
-    width: 50px; height: 50px;
-    background: linear-gradient(135deg, #FFC9DE, #FF6B9D);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 24px;
-    color: white;
-    flex-shrink: 0;
-  }
-  .qcm-statut-texte { flex: 1; display: flex; flex-direction: column; gap: 2px; }
-  .qcm-statut-label {
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    color: #9CA3AF;
-    font-weight: 700;
-  }
-  .qcm-statut-nom {
-    color: #1A1D2E;
-    font-weight: 700;
-    font-size: 14px;
-  }
-  .qcm-statut-badge {
-    background: linear-gradient(135deg, #00C853, #2E7D32);
-    color: white;
-    padding: 6px 14px;
-    border-radius: 50px;
-    font-weight: 700;
-    font-size: 12px;
-    box-shadow: 0 3px 10px rgba(0,200,83,0.3);
-  }
+/* STATUT */
+.qcm-statut {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  background: #EDE9FE;
+  border: 2px solid #DDD6FE;
+  border-radius: 20px;
+  padding: 15px 20px;
+  margin-bottom: 20px;
+}
+.qcm-statut-icon { font-size: 28px; }
+.qcm-statut-label {
+  display: block;
+  font-size: 12px;
+  color: #6B7280;
+}
+.qcm-statut-nom {
+  font-weight: 800;
+  color: #5B21B6;
+}
+.qcm-badge {
+  margin-left: auto;
+  background: linear-gradient(135deg, #00C853, #7ED321);
+  color: white;
+  padding: 5px 15px;
+  border-radius: 30px;
+  font-weight: 700;
+  font-size: 13px;
+}
 
-  /* PANEL */
-  .qcm-panel {
-    background: white;
-    border-radius: 24px;
-    padding: 28px;
-    margin-bottom: 20px;
-    box-shadow: 0 6px 25px rgba(0,0,0,0.06);
-    border-top: 5px solid #FF6B9D;
-  }
-  .qcm-panel-titre {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-size: 18px;
-    font-weight: 800;
-    color: #1A1D2E;
-    margin-bottom: 20px;
-  }
-  .qcm-panel-icon {
-    width: 36px; height: 36px;
-    background: linear-gradient(135deg, #FF6B9D, #C2185B);
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    font-size: 18px;
-  }
+/* CARD PARAMÈTRES */
+.qcm-card {
+  background: white;
+  border-radius: 24px;
+  padding: 25px;
+  margin-bottom: 25px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+  border-top: 5px solid #FF6B9D;
+}
+.qcm-card-header {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+.qcm-card-icon {
+  width: 50px;
+  height: 50px;
+  background: linear-gradient(135deg, #FF6B9D, #EC4899);
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+}
+.qcm-card-header h3 {
+  margin: 0;
+  font-size: 18px;
+}
+.qcm-card-header p {
+  margin: 5px 0 0;
+  font-size: 13px;
+  color: #6B7280;
+}
+.qcm-params {
+  display: flex;
+  gap: 30px;
+  flex-wrap: wrap;
+  margin-bottom: 25px;
+}
+.qcm-param label {
+  display: block;
+  font-weight: 700;
+  margin-bottom: 10px;
+  color: #374151;
+}
+.qcm-nb-control {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+.qcm-nb-btn {
+  width: 40px;
+  height: 40px;
+  background: #F3F4F6;
+  border: none;
+  border-radius: 12px;
+  font-size: 20px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.qcm-nb-btn:hover {
+  background: #FF6B9D;
+  color: white;
+}
+.qcm-nb-value {
+  font-size: 24px;
+  font-weight: 800;
+  min-width: 40px;
+  text-align: center;
+}
+.qcm-select {
+  padding: 10px 15px;
+  border: 2px solid #E5E7EB;
+  border-radius: 12px;
+  font-size: 14px;
+  background: white;
+  cursor: pointer;
+}
+.qcm-btn-generer {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background: linear-gradient(135deg, #FF6B9D, #EC4899);
+  color: white;
+  border: none;
+  padding: 14px;
+  border-radius: 50px;
+  font-weight: 800;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+.qcm-btn-generer:hover {
+  transform: scale(1.02);
+  box-shadow: 0 8px 20px rgba(236,72,153,0.4);
+}
 
-  .qcm-slider-zone {
-    background: #FFF5F9;
-    border-radius: 18px;
-    padding: 20px;
-    margin-bottom: 20px;
-  }
-  .qcm-slider-label {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 14px;
-  }
-  .qcm-slider-label span:first-child {
-    font-weight: 700;
-    color: #1A1D2E;
-    font-size: 14px;
-  }
-  .qcm-slider-value {
-    background: linear-gradient(135deg, #FF6B9D, #C2185B);
-    color: white;
-    font-weight: 900;
-    padding: 6px 16px;
-    border-radius: 50px;
-    font-size: 18px;
-    box-shadow: 0 3px 10px rgba(255,107,157,0.4);
-    min-width: 50px;
-    text-align: center;
-  }
-  .qcm-slider {
-    width: 100%;
-    height: 10px;
-    border-radius: 10px;
-    background: #FFE5EF;
-    outline: none;
-    cursor: pointer;
-    -webkit-appearance: none;
-  }
-  .qcm-slider::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    width: 28px; height: 28px;
-    border-radius: 50%;
-    background: white;
-    border: 4px solid #FF6B9D;
-    cursor: pointer;
-    box-shadow: 0 4px 12px rgba(255,107,157,0.4);
-    transition: all 0.2s;
-  }
-  .qcm-slider::-webkit-slider-thumb:hover { transform: scale(1.2); }
-  .qcm-slider-marks {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 10px;
-    font-size: 11px;
-    color: #9CA3AF;
-    font-weight: 600;
-  }
+/* LOADING */
+.qcm-loading {
+  text-align: center;
+  padding: 40px;
+  background: white;
+  border-radius: 24px;
+}
+.qcm-spinner {
+  width: 50px;
+  height: 50px;
+  border: 4px solid #F3F4F6;
+  border-top-color: #FF6B9D;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 20px;
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
 
-  /* BOUTON GÉNÉRER */
-  .qcm-btn-generer {
-    width: 100%;
-    background: linear-gradient(135deg, #FF6B9D, #C2185B);
-    color: white;
-    border: none;
-    padding: 16px;
-    border-radius: 50px;
-    font-size: 16px;
-    font-weight: 800;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    box-shadow: 0 8px 25px rgba(255,107,157,0.4);
-    transition: all 0.3s;
-    letter-spacing: 0.5px;
-    text-transform: uppercase;
-  }
-  .qcm-btn-generer:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 12px 35px rgba(255,107,157,0.55);
-  }
-  .qcm-btn-generer:disabled {
-    background: #D1D5DB;
-    box-shadow: none;
-    transform: none;
-    cursor: not-allowed;
-  }
-  .qcm-btn-icone {
-    width: 32px; height: 32px;
-    background: white;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 16px;
-  }
+/* RÉSULTAT */
+.qcm-result {
+  background: white;
+  border-radius: 24px;
+  padding: 25px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+}
+.qcm-result-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 2px solid #F3F4F6;
+}
+.qcm-result-header h3 {
+  margin: 0;
+  font-size: 18px;
+}
+.qcm-actions {
+  display: flex;
+  gap: 10px;
+}
+.qcm-btn-pdf, .qcm-btn-pdf-footer {
+  background: linear-gradient(135deg, #EF4444, #DC2626);
+  color: white;
+  border: none;
+  padding: 8px 18px;
+  border-radius: 30px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+.qcm-btn-pdf:hover, .qcm-btn-pdf-footer:hover {
+  transform: scale(1.02);
+}
+.qcm-contenu {
+  max-height: 500px;
+  overflow-y: auto;
+  padding: 15px;
+  background: #F9FAFB;
+  border-radius: 16px;
+  margin-bottom: 20px;
+  font-family: monospace;
+  white-space: pre-wrap;
+  font-size: 14px;
+  line-height: 1.6;
+}
+.qcm-footer-actions {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+}
+.qcm-btn-regen {
+  background: linear-gradient(135deg, #6B7280, #4B5563);
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 30px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+.qcm-btn-regen:hover {
+  transform: scale(1.02);
+}
 
-  /* LOADING */
-  .qcm-loading {
-    display: flex;
-    align-items: center;
-    gap: 20px;
-    background: white;
-    border-radius: 24px;
-    padding: 28px;
-    margin-bottom: 20px;
-    box-shadow: 0 6px 25px rgba(0,0,0,0.06);
-    border-left: 5px solid #FF6B9D;
-    animation: pulse 2s ease-in-out infinite;
-  }
-  @keyframes pulse {
-    0%,100% { box-shadow: 0 6px 25px rgba(0,0,0,0.06); }
-    50% { box-shadow: 0 6px 30px rgba(255,107,157,0.25); }
-  }
-  .qcm-spinner {
-    width: 60px; height: 60px;
-    border: 5px solid #FFE5EF;
-    border-top-color: #FF6B9D;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-    flex-shrink: 0;
-  }
-  @keyframes spin { to { transform: rotate(360deg); } }
-  .qcm-loading-titre {
-    font-size: 16px;
-    font-weight: 800;
-    color: #C2185B;
-    margin: 0;
-  }
-  .qcm-loading-sous {
-    font-size: 13px;
-    color: #9CA3AF;
-    margin-top: 4px;
-  }
+/* MODE SOMBRE */
+html[data-mode="sombre"] .qcm-card,
+html[data-mode="sombre"] .qcm-result,
+html[data-mode="sombre"] .qcm-loading {
+  background: #2A2D3E;
+}
+html[data-mode="sombre"] .qcm-param label {
+  color: #F1F5F9;
+}
+html[data-mode="sombre"] .qcm-select {
+  background: #1A1D2E;
+  border-color: #3A3D4E;
+  color: #F1F5F9;
+}
+html[data-mode="sombre"] .qcm-nb-btn {
+  background: #1A1D2E;
+  color: #F1F5F9;
+}
+html[data-mode="sombre"] .qcm-contenu {
+  background: #1A1D2E;
+  color: #F1F5F9;
+}
 
-  /* ACTIONS */
-  .qcm-actions {
-    background: white;
-    border-radius: 20px;
-    padding: 18px 22px;
-    margin-bottom: 20px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-    border-left: 5px solid #FF6B9D;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 14px;
-  }
-  .qcm-actions-titre {
-    font-weight: 800;
-    color: #C2185B;
-    font-size: 15px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-  .qcm-actions-btns {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-  }
-  .qcm-action-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 8px 16px;
-    border-radius: 50px;
-    font-weight: 700;
-    font-size: 13px;
-    cursor: pointer;
-    border: none;
-    transition: all 0.3s;
-    color: white;
-  }
-  .qcm-action-btn:hover { transform: translateY(-2px); }
-  .qcm-copy { background: linear-gradient(135deg, #7B61FF, #5B21B6); box-shadow: 0 4px 12px rgba(123,97,255,0.3); }
-  .qcm-pdf { background: linear-gradient(135deg, #2962FF, #1E40AF); box-shadow: 0 4px 12px rgba(41,98,255,0.3); }
-  .qcm-partage { background: linear-gradient(135deg, #00C853, #2E7D32); box-shadow: 0 4px 12px rgba(0,200,83,0.3); }
-  .qcm-regen { background: linear-gradient(135deg, #F59E0B, #B45309); box-shadow: 0 4px 12px rgba(245,158,11,0.3); }
-
-  /* CARTES QCM */
-  .qcm-display {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-  }
-  .qcm-card {
-    background: white;
-    border-radius: 22px;
-    padding: 22px;
-    box-shadow: 0 4px 18px rgba(0,0,0,0.06);
-    border-top: 4px solid #FF6B9D;
-    transition: all 0.3s;
-    animation: slideIn 0.5s ease;
-  }
-  .qcm-card:nth-child(2) { animation-delay: 0.1s; }
-  .qcm-card:nth-child(3) { animation-delay: 0.2s; }
-  .qcm-card:nth-child(4) { animation-delay: 0.3s; }
-  .qcm-card:nth-child(5) { animation-delay: 0.4s; }
-  @keyframes slideIn {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-  .qcm-card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 8px 25px rgba(255,107,157,0.15);
-  }
-  .qcm-numero {
-    display: inline-block;
-    background: linear-gradient(135deg, #FF6B9D, #C2185B);
-    color: white;
-    font-weight: 800;
-    font-size: 12px;
-    padding: 5px 14px;
-    border-radius: 50px;
-    margin-bottom: 12px;
-    box-shadow: 0 3px 10px rgba(255,107,157,0.3);
-  }
-  .qcm-question {
-    font-weight: 700;
-    color: #1A1D2E;
-    font-size: 16px;
-    margin-bottom: 16px;
-    line-height: 1.5;
-  }
-  .qcm-options {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-    margin-bottom: 16px;
-  }
-  .qcm-option {
-    background: #FFF5F9;
-    border: 2px solid #FFE5EF;
-    border-radius: 14px;
-    padding: 12px 14px;
-    font-size: 14px;
-    color: #1A1D2E;
-    transition: all 0.3s;
-    cursor: pointer;
-  }
-  .qcm-option:hover {
-    background: #FFE5EF;
-    border-color: #FF6B9D;
-    transform: translateX(3px);
-  }
-  .qcm-option strong {
-    color: #C2185B;
-    margin-right: 6px;
-  }
-  .qcm-reponse {
-    background: linear-gradient(135deg, #D1FAE5, #A7F3D0);
-    border: 2px solid #00C853;
-    border-radius: 14px;
-    padding: 12px 16px;
-    font-size: 14px;
-    color: #065F46;
-    margin-bottom: 10px;
-    font-weight: 600;
-  }
-  .qcm-reponse strong { color: #047857; }
-  .qcm-explication {
-    background: linear-gradient(135deg, #EFF6FF, #DBEAFE);
-    border-left: 4px solid #2962FF;
-    border-radius: 0 14px 14px 0;
-    padding: 12px 16px;
-    font-size: 13px;
-    color: #1E40AF;
-    font-style: italic;
-  }
-
-  /* TOAST */
-  .toast-notif {
-    position: fixed;
-    bottom: 30px;
-    right: 30px;
-    background: #1A1D2E;
-    color: white;
-    padding: 14px 22px;
-    border-radius: 14px;
-    font-weight: 700;
-    font-size: 14px;
-    z-index: 9999;
-    opacity: 0;
-    transform: translateY(20px);
-    transition: all 0.4s ease;
-    box-shadow: 0 8px 25px rgba(0,0,0,0.25);
-    pointer-events: none;
-  }
-  .toast-notif.show { opacity: 1; transform: translateY(0); }
-
-  /* MODE SOMBRE */
-  html[data-mode="sombre"] .qcm-statut,
-  html[data-mode="sombre"] .qcm-panel,
-  html[data-mode="sombre"] .qcm-loading,
-  html[data-mode="sombre"] .qcm-actions,
-  html[data-mode="sombre"] .qcm-card {
-    background: #1A1D2E !important;
-    color: #F1F5F9 !important;
-  }
-  html[data-mode="sombre"] .qcm-statut-nom,
-  html[data-mode="sombre"] .qcm-panel-titre,
-  html[data-mode="sombre"] .qcm-question {
-    color: #F1F5F9 !important;
-  }
-  html[data-mode="sombre"] .qcm-slider-zone { background: #2A2D3E !important; }
-  html[data-mode="sombre"] .qcm-option {
-    background: #2A2D3E !important;
-    border-color: #3A3D4E !important;
-    color: #F1F5F9 !important;
-  }
-
-  /* RESPONSIVE */
-  @media (max-width: 768px) {
-    .qcm-header { flex-direction: column; text-align: center; padding: 24px; }
-    .qcm-header-texte h1 { font-size: 22px; }
-    .qcm-actions { flex-direction: column; align-items: stretch; }
-    .qcm-actions-btns { justify-content: center; }
-    .qcm-options { grid-template-columns: 1fr; }
-    .qcm-statut { flex-wrap: wrap; }
-    .qcm-statut-badge { margin-left: auto; }
-  }
+@media (max-width: 640px) {
+  .qcm-page { padding: 10px; }
+  .qcm-header { padding: 20px; }
+  .qcm-header h1 { font-size: 22px; }
+  .qcm-params { flex-direction: column; gap: 15px; }
+  .qcm-footer-actions { flex-direction: column; }
+}
 </style>
 
 <script>
-let qcmBrut = '';
-let nomCours = '';
+let nbQuestions = 5;
 
-function showToast(msg, couleur = '#1A1D2E') {
-  const toast = document.getElementById('toastGlobal');
-  toast.style.background = couleur;
-  toast.textContent = msg;
-  toast.classList.add('show');
-  setTimeout(() => toast.classList.remove('show'), 3000);
-}
-
-document.addEventListener('DOMContentLoaded', verifierCours);
-
-function verifierCours() {
-  fetch('/api/statut-cours').then(r => r.json()).then(data => {
-    if (data.cours_charge) {
-      nomCours = data.nom_cours;
-      document.getElementById('nom-cours-affiche').textContent = nomCours;
-      document.getElementById('statut-cours').style.display = 'flex';
-      document.getElementById('alerte-cours').style.display = 'none';
-      document.getElementById('btn-generer').disabled = false;
-    } else {
+// Vérifier si cours chargé
+document.addEventListener('DOMContentLoaded', () => {
+  fetch('/api/statut-cours')
+    .then(r => r.json())
+    .then(data => {
+      if (data.cours_charge) {
+        document.getElementById('nom-cours').textContent = data.nom_cours;
+        document.getElementById('statut-cours').style.display = 'flex';
+        document.getElementById('alerte-cours').style.display = 'none';
+        document.getElementById('btn-generer').disabled = false;
+      } else {
+        document.getElementById('alerte-cours').style.display = 'flex';
+        document.getElementById('statut-cours').style.display = 'none';
+        document.getElementById('btn-generer').disabled = true;
+      }
+    })
+    .catch(() => {
       document.getElementById('alerte-cours').style.display = 'flex';
-      document.getElementById('statut-cours').style.display = 'none';
-      document.getElementById('btn-generer').disabled = true;
-    }
-  });
-}
-
-function majSlider(val) {
-  document.getElementById('valeur-slider').textContent = val;
-}
-
-function genererQCM() {
-  const nombre = document.getElementById('slider-qcm').value;
-  document.getElementById('zone-resultat').style.display = 'none';
-  document.getElementById('loading-qcm').style.display = 'flex';
-  document.getElementById('btn-generer').disabled = true;
-
-  fetch('/api/qcm', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ nombre: parseInt(nombre) })
-  })
-  .then(r => r.json())
-  .then(data => {
-    document.getElementById('loading-qcm').style.display = 'none';
-    document.getElementById('btn-generer').disabled = false;
-    if (data.succes) {
-      qcmBrut = data.qcm;
-      document.getElementById('qcm-brut').value = qcmBrut;
-      afficherQCM(data.qcm_parse || [], data.qcm);
-      document.getElementById('zone-resultat').style.display = 'block';
-      document.getElementById('zone-resultat').scrollIntoView({ behavior: 'smooth' });
-    } else {
-      showToast('❌ ' + (data.erreur || 'Erreur'), '#EF4444');
-    }
-  })
-  .catch(err => {
-    document.getElementById('loading-qcm').style.display = 'none';
-    document.getElementById('btn-generer').disabled = false;
-    showToast('❌ ' + err.message, '#EF4444');
-  });
-}
-
-function afficherQCM(qcmsParse, qcmBrutTexte) {
-  const container = document.getElementById('qcm-display');
-  container.innerHTML = '';
-  if (qcmsParse && qcmsParse.length > 0) {
-    qcmsParse.forEach((qcm, i) => {
-      const card = document.createElement('div');
-      card.className = 'qcm-card';
-      card.innerHTML = `
-        <span class="qcm-numero">QCM N°${i + 1}</span>
-        <p class="qcm-question">❓ ${escapeHtml(qcm.question || '')}</p>
-        <div class="qcm-options">
-          ${qcm.options ? qcm.options.map(opt => `
-            <div class="qcm-option">
-              <strong>${escapeHtml(opt.lettre || '')})</strong>
-              ${escapeHtml(opt.texte || '')}
-            </div>
-          `).join('') : ''}
-        </div>
-        <div class="qcm-reponse">
-          🔒 <strong>Bonne réponse :</strong> ${escapeHtml(qcm.reponse || '')}
-        </div>
-        ${qcm.explication ? `
-        <div class="qcm-explication">
-          💡 <em>${escapeHtml(qcm.explication)}</em>
-        </div>` : ''}
-      `;
-      container.appendChild(card);
     });
-  } else {
-    const pre = document.createElement('pre');
-    pre.style.cssText = 'background:white;border-radius:22px;padding:22px;white-space:pre-wrap;font-family:inherit;font-size:14px;color:#1A1D2E;line-height:1.7;box-shadow:0 4px 18px rgba(0,0,0,0.06);border-top:4px solid #FF6B9D;';
-    pre.textContent = qcmBrutTexte;
-    container.appendChild(pre);
+});
+
+function changerNb(delta) {
+  let newNb = nbQuestions + delta;
+  if (newNb >= 3 && newNb <= 20) {
+    nbQuestions = newNb;
+    document.getElementById('nb-questions').textContent = nbQuestions;
   }
 }
 
-function copierQCM() {
-  navigator.clipboard.writeText(document.getElementById('qcm-brut').value)
-    .then(() => showToast('✅ QCM copié !', '#00C853'));
+async function genererQCM() {
+  const btn = document.getElementById('btn-generer');
+  const loading = document.getElementById('loading');
+  const zoneQCM = document.getElementById('zone-qcm');
+
+  btn.disabled = true;
+  btn.innerHTML = '<span>⏳</span> Génération en cours...';
+  loading.style.display = 'block';
+  zoneQCM.style.display = 'none';
+
+  const difficulte = document.getElementById('difficulte').value;
+
+  try {
+    const response = await fetch('/api/qcm', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ nombre: nbQuestions, niveau: difficulte })
+    });
+
+    const data = await response.json();
+
+    if (data.succes) {
+      const contenuDiv = document.getElementById('contenu-qcm');
+      contenuDiv.innerHTML = data.qcm.replace(/\n/g, '<br>');
+      zoneQCM.style.display = 'block';
+      zoneQCM.scrollIntoView({ behavior: 'smooth' });
+    } else {
+      alert('❌ ' + (data.erreur || 'Erreur lors de la génération'));
+    }
+  } catch (err) {
+    alert('❌ Erreur réseau : ' + err.message);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<span>🎯</span> Générer le QCM';
+    loading.style.display = 'none';
+  }
 }
 
-function telechargerQCMPDF() {
-  if (!qcmBrut) return showToast('⚠️ Génère d\'abord !', '#F59E0B');
-  window.telechargerPDF('🎯 QCM Interactif', qcmBrut, {
-    couleur: [194, 24, 91], matiere: nomCours || 'Cours', emoji: '🎯'
-  });
-  showToast('📄 PDF généré !', '#C2185B');
-}
-
-async function partagerQCM() {
-  if (!qcmBrut) return showToast('⚠️ Génère d\'abord !', '#F59E0B');
-  if (navigator.share) {
-    try {
-      await navigator.share({ title: '🎯 QCM NOKIROVA', text: qcmBrut });
-      showToast('✅ Partagé !', '#00C853');
-    } catch (e) {}
+async function exporterQCM() {
+  const qcmText = document.getElementById('contenu-qcm').innerHTML.replace(/<br>/g, '\n');
+  if (!qcmText || qcmText === 'Aucun QCM généré') {
+    alert('⚠️ Aucun QCM à exporter. Génère d\'abord un QCM !');
     return;
   }
-  navigator.clipboard.writeText(qcmBrut);
-  showToast('📋 Copié !', '#7B61FF');
-}
 
-function escapeHtml(text) {
-  const d = document.createElement('div');
-  d.appendChild(document.createTextNode(text));
-  return d.innerHTML;
+  const btn = document.querySelector('.qcm-btn-pdf');
+  const originalText = btn?.innerHTML;
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = '⏳ Export...';
+  }
+
+  try {
+    const response = await fetch('/api/export-pdf-qcm', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        qcm_texte: qcmText,
+        titre: 'QCM - ' + new Date().toLocaleDateString()
+      })
+    });
+
+    const data = await response.json();
+
+    if (data.succes) {
+      window.open(data.url, '_blank');
+      alert('✅ PDF généré avec succès !');
+    } else {
+      alert('❌ ' + (data.erreur || 'Erreur lors de l\'export'));
+    }
+  } catch (err) {
+    alert('❌ Erreur réseau : ' + err.message);
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = originalText || '📄 Exporter PDF';
+    }
+  }
 }
 </script>
 

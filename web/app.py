@@ -1343,3 +1343,32 @@ if __name__ == '__main__':
     print(f"🚀 Port : {port}")
     print("=" * 60 + "\n")
     app.run(host='0.0.0.0', port=port, debug=debug)
+
+
+    @app.route('/api/ocr', methods=['POST'])
+    def api_ocr():
+        data = request.get_json()
+        image_b64 = data.get('image', '')
+
+        # Extraire le base64
+        if ',' in image_b64:
+            image_b64 = image_b64.split(',')[1]
+
+        # === Option A : Gemini (recommandé, simple) ===
+        # import google.generativeai as genai
+        # model = genai.GenerativeModel('gemini-1.5-flash')
+        # response = model.generate_content([
+        #     "Transcris ce texte manuscrit en français :",
+        #     {"mime_type": "image/png", "data": image_b64}
+        # ])
+        # return jsonify({"succes": True, "texte": response.text})
+
+        # === Option B : Tesseract (gratuit, offline) ===
+        # import pytesseract
+        # from PIL import Image
+        # import io, base64
+        # image = Image.open(io.BytesIO(base64.b64decode(image_b64)))
+        # texte = pytesseract.image_to_string(image, lang='fra')
+        # return jsonify({"succes": True, "texte": texte})
+
+        return jsonify({"succes": True, "texte": "Texte de test (implémenter l'OCR)"})

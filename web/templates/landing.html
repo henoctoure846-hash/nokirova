@@ -1,0 +1,491 @@
+{% extends "base.html" %}
+
+{% block title %}🌸 NOKIROVA - Révise intelligemment, réussis tes examens !{% endblock %}
+
+{% block contenu %}
+
+<div class="landing-page">
+
+  <!-- SECTION HERO -->
+  <section class="hero-landing">
+    <div class="hero-bg-particles"></div>
+    <div class="hero-content">
+      <div class="hero-logo">🌸</div>
+      <h1>NOKIROVA</h1>
+      <p class="hero-subtitle">L'IA qui révolutionne tes révisions à Bouaké 🇨🇮</p>
+      <div class="hero-buttons">
+        <a href="/register" class="btn-primary">🚀 Commencer gratuitement</a>
+        <a href="#features" class="btn-secondary">✨ Découvrir</a>
+      </div>
+      <div class="hero-stats">
+        <div class="stat-item">
+          <span class="stat-number">500+</span>
+          <span class="stat-label">Étudiants actifs</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-number">1000+</span>
+          <span class="stat-label">Cours importés</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-number">24/7</span>
+          <span class="stat-label">Disponible</span>
+        </div>
+      </div>
+    </div>
+    <div class="hero-phone-mockup">
+      <img src="/static/images/phone-mockup.png" alt="NOKIROVA sur mobile" onerror="this.style.display='none'">
+      <div class="mockup-badge">📱 Installable sur Android</div>
+    </div>
+  </section>
+
+  <!-- SECTION FONCTIONNALITÉS -->
+  <section id="features" class="features-landing">
+    <h2>🌟 Pourquoi choisir NOKIROVA ?</h2>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-emoji">🧠</div>
+        <h3>IA Intelligente</h3>
+        <p>Répond à toutes tes questions 24h/24</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-emoji">🎤</div>
+        <h3>Chat Vocal</h3>
+        <p>Parle avec l'IA, elle te répond en voix</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-emoji">📷</div>
+        <h3>Scan Copie</h3>
+        <p>Prends en photo ton devoir, l'IA le corrige</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-emoji">🎨</div>
+        <h3>Génération Images</h3>
+        <p>Visualise tes cours en images</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-emoji">📚</div>
+        <h3>QCM + Flashcards</h3>
+        <p>Teste tes connaissances</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-emoji">🌍</div>
+        <h3>Gratuit</h3>
+        <p>100% gratuit pour les étudiants ivoiriens</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION TÉMOIGNAGES -->
+  <section class="testimonials-landing">
+    <h2>💬 Ils utilisent NOKIROVA</h2>
+    <div class="testimonials-grid">
+      <div class="testimonial-card">
+        <p>"NOKIROVA m'a sauvé mes examens ! L'IA explique mieux que certains profs."</p>
+        <div class="testimonial-author">
+          <strong>Koffi A.</strong> - Université de Bouaké
+        </div>
+      </div>
+      <div class="testimonial-card">
+        <p>"Le scan de copie manuscrite est incroyable. Je prends en photo, l'IA corrige direct !"</p>
+        <div class="testimonial-author">
+          <strong>Mariam K.</strong> - ESATIC
+        </div>
+      </div>
+      <div class="testimonial-card">
+        <p>"Gratuit, rapide, efficace. Je le recommande à tous mes camarades !"</p>
+        <div class="testimonial-author">
+          <strong>Jean M.</strong> - ICK Bouaké
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION PARTAGE VIRAL -->
+  <section class="share-landing">
+    <h2>📢 Parle de NOKIROVA à tes amis</h2>
+    <p>Chaque partage aide un étudiant à réussir !</p>
+    <div class="share-buttons">
+      <button onclick="partagerWhatsApp()" class="share-whatsapp">
+        📱 Partager sur WhatsApp
+      </button>
+      <button onclick="partagerFacebook()" class="share-facebook">
+        📘 Partager sur Facebook
+      </button>
+      <button onclick="copierLien()" class="share-link">
+        🔗 Copier le lien
+      </button>
+    </div>
+    <div class="qr-code" id="qrCode">
+      <canvas id="qrCanvas"></canvas>
+      <p>Scanne pour installer NOKIROVA</p>
+    </div>
+  </section>
+
+  <!-- SECTION APPEL ACTION FINAL -->
+  <section class="cta-landing">
+    <h2>Prêt à réussir ?</h2>
+    <p>Rejoins des milliers d'étudiants qui révisent mieux avec NOKIROVA</p>
+    <a href="/register" class="btn-cta">🎓 Créer mon compte gratuitement</a>
+  </section>
+
+</div>
+
+<style>
+.landing-page {
+  width: 100%;
+  overflow-x: hidden;
+}
+
+/* HERO */
+.hero-landing {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 60px 20px 80px;
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 40px;
+}
+.hero-bg-particles {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: radial-gradient(circle at 10% 20%, rgba(255,255,255,0.1) 1px, transparent 1px);
+  background-size: 30px 30px;
+  pointer-events: none;
+}
+.hero-content {
+  flex: 1;
+  min-width: 280px;
+  position: relative;
+  z-index: 1;
+  text-align: center;
+}
+.hero-logo {
+  font-size: 80px;
+  margin-bottom: 20px;
+  animation: float 3s ease-in-out infinite;
+}
+@keyframes float {
+  0%,100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+.hero-content h1 {
+  font-size: 48px;
+  margin: 0 0 15px;
+  font-weight: 900;
+  letter-spacing: -1px;
+}
+.hero-subtitle {
+  font-size: 20px;
+  margin-bottom: 30px;
+  opacity: 0.95;
+}
+.hero-buttons {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.btn-primary, .btn-secondary {
+  padding: 14px 32px;
+  border-radius: 50px;
+  text-decoration: none;
+  font-weight: bold;
+  transition: all 0.3s;
+}
+.btn-primary {
+  background: white;
+  color: #764ba2;
+}
+.btn-primary:hover {
+  transform: scale(1.05);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+}
+.btn-secondary {
+  background: rgba(255,255,255,0.2);
+  color: white;
+  backdrop-filter: blur(10px);
+}
+.btn-secondary:hover {
+  background: rgba(255,255,255,0.3);
+  transform: scale(1.05);
+}
+.hero-stats {
+  display: flex;
+  justify-content: center;
+  gap: 40px;
+  margin-top: 50px;
+  flex-wrap: wrap;
+}
+.stat-item {
+  text-align: center;
+}
+.stat-number {
+  font-size: 32px;
+  font-weight: 900;
+  display: block;
+}
+.stat-label {
+  font-size: 14px;
+  opacity: 0.8;
+}
+.hero-phone-mockup {
+  flex: 1;
+  min-width: 250px;
+  text-align: center;
+  position: relative;
+  z-index: 1;
+}
+.mockup-badge {
+  background: rgba(255,255,255,0.2);
+  backdrop-filter: blur(10px);
+  padding: 10px 20px;
+  border-radius: 30px;
+  margin-top: 20px;
+  display: inline-block;
+}
+
+/* FEATURES */
+.features-landing {
+  padding: 80px 20px;
+  background: #f8f9fa;
+  text-align: center;
+}
+html[data-mode="sombre"] .features-landing {
+  background: #1a1d2e;
+}
+.features-landing h2 {
+  font-size: 36px;
+  margin-bottom: 50px;
+  color: #1A1D2E;
+}
+html[data-mode="sombre"] .features-landing h2 {
+  color: white;
+}
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 30px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+.feature-card {
+  background: white;
+  padding: 30px 20px;
+  border-radius: 24px;
+  box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+  transition: all 0.3s;
+}
+html[data-mode="sombre"] .feature-card {
+  background: #2A2D3E;
+}
+.feature-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+}
+.feature-emoji {
+  font-size: 50px;
+  margin-bottom: 15px;
+}
+.feature-card h3 {
+  font-size: 20px;
+  margin-bottom: 10px;
+  color: #1A1D2E;
+}
+html[data-mode="sombre"] .feature-card h3 {
+  color: white;
+}
+.feature-card p {
+  color: #6B7280;
+  font-size: 14px;
+}
+html[data-mode="sombre"] .feature-card p {
+  color: #9CA3AF;
+}
+
+/* TESTIMONIALS */
+.testimonials-landing {
+  padding: 80px 20px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  text-align: center;
+}
+.testimonials-landing h2 {
+  font-size: 36px;
+  margin-bottom: 50px;
+}
+.testimonials-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 30px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+.testimonial-card {
+  background: rgba(255,255,255,0.1);
+  backdrop-filter: blur(10px);
+  padding: 25px;
+  border-radius: 20px;
+  text-align: left;
+}
+.testimonial-card p {
+  font-size: 15px;
+  line-height: 1.6;
+  margin-bottom: 15px;
+  font-style: italic;
+}
+.testimonial-author {
+  font-size: 13px;
+  opacity: 0.8;
+}
+
+/* SHARE */
+.share-landing {
+  padding: 80px 20px;
+  text-align: center;
+  background: #f8f9fa;
+}
+html[data-mode="sombre"] .share-landing {
+  background: #1a1d2e;
+}
+.share-landing h2 {
+  font-size: 32px;
+  margin-bottom: 15px;
+  color: #1A1D2E;
+}
+html[data-mode="sombre"] .share-landing h2 {
+  color: white;
+}
+.share-buttons {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin: 30px 0;
+}
+.share-whatsapp, .share-facebook, .share-link {
+  padding: 12px 28px;
+  border: none;
+  border-radius: 50px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+.share-whatsapp {
+  background: #25D366;
+  color: white;
+}
+.share-whatsapp:hover {
+  transform: scale(1.05);
+  box-shadow: 0 5px 15px rgba(37,211,102,0.4);
+}
+.share-facebook {
+  background: #1877F2;
+  color: white;
+}
+.share-facebook:hover {
+  transform: scale(1.05);
+  box-shadow: 0 5px 15px rgba(24,119,242,0.4);
+}
+.share-link {
+  background: #6B7280;
+  color: white;
+}
+.share-link:hover {
+  transform: scale(1.05);
+  background: #4B5563;
+}
+.qr-code {
+  margin-top: 40px;
+  text-align: center;
+}
+#qrCanvas {
+  width: 200px;
+  height: 200px;
+  margin: 0 auto;
+  display: inline-block;
+}
+
+/* CTA */
+.cta-landing {
+  padding: 80px 20px;
+  text-align: center;
+  background: linear-gradient(135deg, #00C853, #059669);
+  color: white;
+}
+.cta-landing h2 {
+  font-size: 36px;
+  margin-bottom: 15px;
+}
+.cta-landing p {
+  font-size: 18px;
+  margin-bottom: 30px;
+  opacity: 0.95;
+}
+.btn-cta {
+  background: white;
+  color: #059669;
+  padding: 16px 40px;
+  border-radius: 50px;
+  text-decoration: none;
+  font-weight: bold;
+  font-size: 18px;
+  transition: all 0.3s;
+  display: inline-block;
+}
+.btn-cta:hover {
+  transform: scale(1.05);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+}
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+  .hero-content h1 { font-size: 32px; }
+  .hero-subtitle { font-size: 16px; }
+  .btn-primary, .btn-secondary { padding: 10px 20px; font-size: 14px; }
+  .features-landing h2, .testimonials-landing h2, .share-landing h2, .cta-landing h2 { font-size: 28px; }
+}
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+<script>
+// QR Code
+if (document.getElementById('qrCanvas')) {
+  new QRCode(document.getElementById('qrCanvas'), {
+    text: window.location.origin,
+    width: 200,
+    height: 200,
+    colorDark: "#000000",
+    colorLight: "#ffffff",
+    correctLevel: QRCode.CorrectLevel.H
+  });
+}
+
+// Fonctions de partage
+function partagerWhatsApp() {
+  const url = encodeURIComponent(window.location.origin);
+  const texte = encodeURIComponent("🌸 NOKIROVA - L'IA qui révolutionne les révisions ! Gratuit, avec chat vocal, scan copie et plus encore. Rejoins-nous :");
+  window.open(`https://wa.me/?text=${texte}%20${url}`, '_blank');
+}
+
+function partagerFacebook() {
+  window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.origin)}`, '_blank');
+}
+
+function copierLien() {
+  navigator.clipboard.writeText(window.location.origin);
+  if (typeof afficherNotification === 'function') {
+    afficherNotification('✅ Lien copié ! Partage-le avec tes amis', 'succes');
+  } else {
+    alert('✅ Lien copié !');
+  }
+}
+</script>
+
+{% endblock %}

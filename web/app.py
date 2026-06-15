@@ -1399,6 +1399,11 @@ def api_check_auth():
         return jsonify({"succes": True, "logged_in": True, "user": user_info})
     return jsonify({"succes": True, "logged_in": False})
 
+
+@app.route('/landing')
+def page_landing():
+    return render_template('landing.html')
+
 # ═══════════════════════════════════════════
 # 🚀 LANCEMENT
 # ═══════════════════════════════════════════

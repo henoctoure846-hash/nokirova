@@ -6,6 +6,12 @@ import threading
 import bcrypt
 from datetime import datetime
 
+# ═══════════════════════════════════════════
+# ⚙️ CONFIGURATION
+# ═══════════════════════════════════════════
+
+DB_FILE = "nokirova_memory.db"  # ← AJOUTÉ POUR COMPATIBILITÉ
+
 # Stockage du user_id en cours (par thread)
 _current_user = threading.local()
 
@@ -277,6 +283,15 @@ def _init_db_file(db_file: str):
             statut TEXT DEFAULT 'a_faire',
             recurrence TEXT DEFAULT 'aucune',
             cours_lie_id INTEGER DEFAULT NULL,
+            date_creation TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    """)
+
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS todo (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            texte TEXT NOT NULL,
+            terminee INTEGER DEFAULT 0,
             date_creation TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     """)

@@ -1,12 +1,23 @@
 # db/__init__.py - Package DB NOKIROVA 🌸
-# Ce fichier expose toutes les fonctions de database.py
-# pour que le reste du projet continue à fonctionner sans changement
+# Ce fichier expose toutes les fonctions pour que le reste du projet fonctionne
+
+# ═══════════════════════════════════════════
+# 📦 BASE
+# ═══════════════════════════════════════════
 
 from db.base import (
     DB_FILE,
     init_db,
-    get_connexion
+    get_connexion,
+    get_user,
+    set_user,
+    is_logged_in,
+    get_current_user_id
 )
+
+# ═══════════════════════════════════════════
+# 📚 COURS
+# ═══════════════════════════════════════════
 
 from db.cours import (
     sauvegarder_cours,
@@ -22,6 +33,10 @@ from db.cours import (
     extraire_contexte
 )
 
+# ═══════════════════════════════════════════
+# 📜 HISTORIQUE
+# ═══════════════════════════════════════════
+
 from db.historique import (
     sauvegarder_historique,
     lister_historique,
@@ -35,6 +50,10 @@ from db.historique import (
     compter_par_type
 )
 
+# ═══════════════════════════════════════════
+# ✍️ NOTES
+# ═══════════════════════════════════════════
+
 from db.notes import (
     creer_note,
     modifier_note,
@@ -45,6 +64,10 @@ from db.notes import (
     lister_matieres_notes,
     rechercher_notes
 )
+
+# ═══════════════════════════════════════════
+# 🃏 FLASHCARDS
+# ═══════════════════════════════════════════
 
 from db.flashcards import (
     creer_flashcard,
@@ -58,12 +81,20 @@ from db.flashcards import (
     get_flashcards_a_revoir
 )
 
+# ═══════════════════════════════════════════
+# ⏱️ POMODORO
+# ═══════════════════════════════════════════
+
 from db.pomodoro import (
     enregistrer_session_pomodoro,
     sauvegarder_session_pomodoro,
     get_stats_pomodoro,
     lister_sessions_pomodoro
 )
+
+# ═══════════════════════════════════════════
+# 🎮 STATS & BADGES
+# ═══════════════════════════════════════════
 
 from db.stats import (
     get_stats,
@@ -76,12 +107,20 @@ from db.stats import (
     BADGES_DISPONIBLES
 )
 
+# ═══════════════════════════════════════════
+# 📊 GRAPHIQUES
+# ═══════════════════════════════════════════
+
 from db.graphiques import (
     get_stats_graphiques,
     get_progression_resume,
     get_repartition_matieres_cours,
     get_activite_7_derniers_jours
 )
+
+# ═══════════════════════════════════════════
+# 🔒 PIN SÉCURITÉ
+# ═══════════════════════════════════════════
 
 from db.pin import (
     set_pin,
@@ -90,7 +129,10 @@ from db.pin import (
     supprimer_pin
 )
 
-# 🆕 PLANIFICATEUR (Phase 3.1)
+# ═══════════════════════════════════════════
+# 📅 PLANIFICATEUR
+# ═══════════════════════════════════════════
+
 from db.planificateur import (
     init_table_planificateur,
     ajouter_tache,
@@ -112,3 +154,45 @@ from db.planificateur import (
     PRIORITES,
     PALETTE_MATIERES
 )
+
+# ═══════════════════════════════════════════
+# ✅ TODO LIST (Phase G)
+# ═══════════════════════════════════════════
+
+try:
+    from db.todo import (
+        ajouter_tache_todo,
+        lister_taches_todo,
+        toggle_tache_todo,
+        supprimer_tache_todo,
+        compter_taches_todo
+    )
+except ImportError:
+    # Fallback si le fichier n'existe pas encore
+    def ajouter_tache_todo(texte): return None
+    def lister_taches_todo(): return []
+    def toggle_tache_todo(id_t): return None
+    def supprimer_tache_todo(id_t): return None
+    def compter_taches_todo(): return 0
+
+# ═══════════════════════════════════════════
+# 🧠 TUTEUR IA (Phase D4)
+# ═══════════════════════════════════════════
+
+try:
+    from db.tuteur_ia import (
+        get_tuteur_dashboard,
+        generer_conseil_motivant,
+        get_recommandations_jour,
+        get_points_faibles,
+        get_matiere_performance,
+        get_progression_semaine
+    )
+except ImportError:
+    # Fallback si le fichier n'existe pas encore
+    def get_tuteur_dashboard(): return {"stats": {}, "points_faibles": [], "recommandations": [], "conseil_perso": "Bienvenue sur NOKIROVA ! Importe ton premier cours."}
+    def generer_conseil_motivant(): return "🌟 Importe un cours pour commencer !"
+    def get_recommandations_jour(): return []
+    def get_points_faibles(): return []
+    def get_matiere_performance(): return {}
+    def get_progression_semaine(): return []

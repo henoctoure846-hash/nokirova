@@ -24,8 +24,7 @@
 
     {% block extra_css %}{% endblock %}
 </head>
-<!-- PWA Installation Script -->
-<script src="{{ url_for('static', filename='js/pwa-install.js') }}"></script>
+
 <body>
 
 <!-- SPLASH -->
@@ -97,9 +96,9 @@
         </div>
 
         <!-- BOUTON DÉCONNEXION -->
-<button onclick="changerUtilisateur()" style="display:block;width:calc(100% - 24px);margin:10px 12px;padding:10px;background:#FF5252;color:white;border:none;border-radius:50px;font-weight:700;cursor:pointer;font-size:12px;">
-    🔄 Changer d'utilisateur
-</button>
+        <button onclick="changerUtilisateur()" style="display:block;width:calc(100% - 24px);margin:10px 12px;padding:10px;background:#FF5252;color:white;border:none;border-radius:50px;font-weight:700;cursor:pointer;font-size:12px;">
+            🔄 Changer d'utilisateur
+        </button>
         <div class="signature">✨ Created by Hénoc 🌸 2026 ✨</div>
     </aside>
 
@@ -109,6 +108,7 @@
 </div>
 
 <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+<script src="{{ url_for('static', filename='js/pwa-install.js') }}"></script>
 
 <script>
 function toggleSidebar() {
@@ -148,7 +148,8 @@ window.addEventListener('load', ()=>{
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('/static/service-worker.js').catch(()=>{});
 }
-    function changerUtilisateur() {
+
+function changerUtilisateur() {
     if (confirm('🔄 Veux-tu vraiment changer d\'utilisateur ?\n\n(Tes données restent sauvegardées)')) {
         localStorage.removeItem('nokirova_user');
         sessionStorage.clear();
@@ -156,24 +157,26 @@ if ('serviceWorker' in navigator) {
     }
 }
 
-// Afficher le nom de l'user dans la sidebar
-const userData = JSON.parse(localStorage.getItem('nokirova_user') || 'null');
-if (userData) {
-    const statutNom = document.querySelector('.statut-nom');
-    if (statutNom && '{{ nom_cours }}' === 'Aucun cours chargé') {
-        // optionnel : tu peux personnaliser ici
+// ═══════════════════════════════════════════
+// 🔐 VÉRIFICATION CONNEXION - PHASE G
+// ═══════════════════════════════════════════
+const pagesPubliques = ['/bienvenue', '/login', '/register', '/landing'];
+const currentPath = window.location.pathname;
+
+if (!pagesPubliques.includes(currentPath)) {
+    const user = JSON.parse(localStorage.getItem('nokirova_user') || 'null');
+    if (!user || !user.user_id) {
+        window.location.href = '/bienvenue';
     }
 }
-    // ════════════════════════════════════
+
+// ═══════════════════════════════════════════
 // 👤 ENVOI USER_ID À CHAQUE REQUÊTE
-// ════════════════════════════════════
+// ═══════════════════════════════════════════
 (function() {
     const user = JSON.parse(localStorage.getItem('nokirova_user') || 'null');
     if (user && user.user_id) {
-        // Stocke aussi en cookie pour les requêtes HTML
         document.cookie = `nokirova_user_id=${user.user_id}; path=/; max-age=31536000`;
-
-        // Intercepte fetch pour ajouter le header
         const oldFetch = window.fetch;
         window.fetch = function(url, options = {}) {
             options.headers = options.headers || {};

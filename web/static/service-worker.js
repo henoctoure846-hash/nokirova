@@ -1,10 +1,13 @@
 // ═══════════════════════════════════════════
-// 🌸 NOKIROVA Service Worker - PHASE C
+// 🌸 NOKIROVA Service Worker - PHASE G CORRIGÉ
 // ═══════════════════════════════════════════
 
-const CACHE = 'nokirova-v2';
+const CACHE = 'nokirova-v3';
 const URLS = [
   '/',
+  '/login',
+  '/register',
+  '/landing',
   '/static/css/style.css',
   '/static/js/script.js',
   '/logo'
@@ -60,7 +63,6 @@ self.addEventListener('push', e => {
     badge: '/logo'
   };
 
-  // Si le serveur envoie des données
   if (e.data) {
     try {
       data = e.data.json();
@@ -95,14 +97,12 @@ self.addEventListener('notificationclick', e => {
   e.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true })
       .then(clientList => {
-        // Si l'app est déjà ouverte → focus
         for (let client of clientList) {
           if (client.url.includes(self.location.origin) && 'focus' in client) {
             client.navigate(url);
             return client.focus();
           }
         }
-        // Sinon → ouvrir l'app
         if (clients.openWindow) {
           return clients.openWindow(url);
         }
@@ -111,7 +111,7 @@ self.addEventListener('notificationclick', e => {
 });
 
 // ═══════════════════════════════════════════
-// ⏰ NOTIFICATIONS PROGRAMMÉES (Background Sync)
+// ⏰ NOTIFICATIONS PROGRAMMÉES
 // ═══════════════════════════════════════════
 
 self.addEventListener('sync', e => {

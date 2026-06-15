@@ -38,7 +38,7 @@
     </div>
   </div>
 
-  <!-- 🧠 TUTEUR IA PERSONNALISÉ - PHASE D4 -->
+  <!-- 🧠 TUTEUR IA PERSONNALISÉ - PHASE G CORRIGÉ -->
   <div class="card-tuteur">
     <div class="tuteur-header">
       <div class="tuteur-avatar">🧠</div>
@@ -353,75 +353,78 @@ html[data-mode="sombre"] .action-titre { color: #F1F5F9; }
 </style>
 
 <script>
-// Charger les données du tuteur IA
+// Charger les données du tuteur IA - VERSION CORRIGÉE PHASE G
 async function chargerTuteur() {
+    const conseilDiv = document.getElementById('tuteurConseil');
+    const pointsDiv = document.getElementById('pointsFaibles');
+    const recosDiv = document.getElementById('recommandations');
+
     try {
         const response = await fetch('/api/tuteur/dashboard');
         const data = await response.json();
 
         if (data.succes && data.data) {
-            afficherConseil(data.data.conseil_perso);
-            afficherPointsFaibles(data.data.points_faibles);
-            afficherRecommandations(data.data.recommandations);
+            // Afficher conseil
+            if (conseilDiv) {
+                conseilDiv.innerHTML = `<div class="conseil-text">💬 ${data.data.conseil_perso || 'Pose ta première question à ton tuteur !'}</div>`;
+            }
+
+            // Afficher points faibles
+            if (pointsDiv) {
+                const points = data.data.points_faibles;
+                if (!points || points.length === 0) {
+                    pointsDiv.innerHTML = '<div class="faible-item">🎉 Aucun point faible détecté ! Continue comme ça !</div>';
+                } else {
+                    let html = '<h4 style="margin:0 0 12px">📚 Matières à travailler</h4>';
+                    for (const p of points) {
+                        html += `
+                            <div class="faible-item">
+                                <div class="faible-matiere">
+                                    <span>${p.matiere || 'Général'}</span>
+                                    <span>${p.niveau || 'Débutant'}</span>
+                                </div>
+                                <div class="faible-barre">
+                                    <div class="faible-progress" style="width: ${p.score || 0}%"></div>
+                                </div>
+                                <div class="faible-conseil">💡 ${p.conseil || 'Continue à travailler cette matière'}</div>
+                            </div>
+                        `;
+                    }
+                    pointsDiv.innerHTML = html;
+                }
+            }
+
+            // Afficher recommandations
+            if (recosDiv) {
+                const recos = data.data.recommandations;
+                if (!recos || recos.length === 0) {
+                    recosDiv.innerHTML = '<div class="recommandation-item">✨ Importe ton premier cours pour commencer !</div>';
+                } else {
+                    let html = '<h4 style="margin:0 0 12px">🎯 Recommandations du jour</h4>';
+                    for (const r of recos) {
+                        html += `
+                            <div class="recommandation-item" onclick="if('${r.lien}') window.location.href='${r.lien}'">
+                                <div class="recommandation-titre">${r.titre || 'Conseil'}</div>
+                                <div class="recommandation-message">${r.message || ''}</div>
+                                ${r.action ? `<div style="margin-top:8px;font-size:12px;opacity:0.8">👉 ${r.action}</div>` : ''}
+                            </div>
+                        `;
+                    }
+                    recosDiv.innerHTML = html;
+                }
+            }
+        } else {
+            // Pas de données
+            if (conseilDiv) conseilDiv.innerHTML = '<div class="conseil-text">💬 Commence par importer un cours !</div>';
+            if (pointsDiv) pointsDiv.innerHTML = '<div class="faible-item">📚 Aucune donnée pour le moment. Importe un cours !</div>';
+            if (recosDiv) recosDiv.innerHTML = '<div class="recommandation-item">🎯 Importe ton premier cours pour commencer</div>';
         }
     } catch (err) {
         console.error('Erreur tuteur:', err);
-        document.getElementById('tuteurConseil').innerHTML = '<div>⚠️ Recharger la page pour le tuteur</div>';
+        if (conseilDiv) conseilDiv.innerHTML = '<div>⚠️ Connecte-toi pour voir ton tuteur personnalisé</div>';
+        if (pointsDiv) pointsDiv.innerHTML = '<div class="faible-item">📊 Connecte-toi pour voir tes statistiques</div>';
+        if (recosDiv) recosDiv.innerHTML = '<div class="recommandation-item">🎯 Connecte-toi pour voir tes recommandations</div>';
     }
-}
-
-function afficherConseil(conseil) {
-    const el = document.getElementById('tuteurConseil');
-    if (el) el.innerHTML = `<div class="conseil-text">💬 ${conseil}</div>`;
-}
-
-function afficherPointsFaibles(points) {
-    const el = document.getElementById('pointsFaibles');
-    if (!el) return;
-
-    if (!points || points.length === 0) {
-        el.innerHTML = '<div class="faible-item">🎉 Aucun point faible détecté ! Continue comme ça !</div>';
-        return;
-    }
-
-    let html = '<h4 style="margin:0 0 12px">📚 Matières à travailler</h4>';
-    for (const p of points) {
-        html += `
-            <div class="faible-item">
-                <div class="faible-matiere">
-                    <span>${p.matiere}</span>
-                    <span>${p.niveau}</span>
-                </div>
-                <div class="faible-barre">
-                    <div class="faible-progress" style="width: ${p.score}%"></div>
-                </div>
-                <div class="faible-conseil">💡 ${p.conseil}</div>
-            </div>
-        `;
-    }
-    el.innerHTML = html;
-}
-
-function afficherRecommandations(recos) {
-    const el = document.getElementById('recommandations');
-    if (!el) return;
-
-    if (!recos || recos.length === 0) {
-        el.innerHTML = '<div class="recommandation-item">✨ Pas de recommandation pour le moment</div>';
-        return;
-    }
-
-    let html = '<h4 style="margin:0 0 12px">🎯 Recommandations du jour</h4>';
-    for (const r of recos) {
-        html += `
-            <div class="recommandation-item" onclick="if('${r.lien}') window.location.href='${r.lien}'">
-                <div class="recommandation-titre">${r.titre}</div>
-                <div class="recommandation-message">${r.message}</div>
-                ${r.action ? `<div style="margin-top:8px;font-size:12px;opacity:0.8">👉 ${r.action}</div>` : ''}
-            </div>
-        `;
-    }
-    el.innerHTML = html;
 }
 
 // Charger au chargement

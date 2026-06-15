@@ -1,233 +1,274 @@
 {% extends "base.html" %}
-{% block title %}Vidéos Révision - NOKIROVA{% endblock %}
-{% block contenu %}
 
-<!-- TOAST -->
-<div id="toast" style="
-position:fixed; top:20px; right:20px; z-index:9999;
-background:#1A1D2E; color:white; padding:1rem 1.5rem;
-border-radius:16px; font-weight:600; font-size:0.95rem;
-box-shadow:0 8px 30px rgba(0,0,0,0.3);
-transform:translateX(120%); transition:0.4s;
-display:flex; align-items:center; gap:0.8rem; max-width:320px;">
-</div>
+{% block title %}🎬 Vidéos Révision - NOKIROVA{% endblock %}
+
+{% block contenu %}
 
 <div class="vid-container">
 
-  <!-- HEADER PREMIUM -->
+  <!-- HEADER -->
   <div class="vid-header">
     <div class="vid-header-bg">🎬</div>
     <div class="vid-header-icon">🎬</div>
     <div class="vid-header-text">
       <h1>Vidéos Révision</h1>
-      <p>Trouve les meilleures vidéos pour réviser 📺</p>
+      <p>Trouve et génère des vidéos éducatives pour réviser 📺</p>
     </div>
-    <div class="vid-badge">YouTube Focus</div>
   </div>
 
-  <!-- SEARCH -->
-  <div class="vid-search-card">
+  <!-- ALERTE AUCUN COURS -->
+  <div id="alerte-cours" class="vid-alerte" style="display:none;">
+    <span>⚠️</span>
+    <div>
+      <strong>Aucun cours chargé !</strong>
+      <p>Importe un cours pour générer une vidéo éducative personnalisée.</p>
+      <a href="/import" class="vid-btn-alerte">📥 Importer un cours</a>
+    </div>
+  </div>
+
+  <!-- STATUT COURS -->
+  <div id="statut-cours" class="vid-statut" style="display:none;">
+    <div class="vid-statut-icon">📚</div>
+    <div class="vid-statut-info">
+      <span class="vid-statut-label">Cours actif</span>
+      <span id="nom-cours" class="vid-statut-nom"></span>
+    </div>
+    <div class="vid-badge">✅ Prêt</div>
+  </div>
+
+  <!-- SECTION 1 : GÉNÉRATION VIDÉO ÉDUCATIVE -->
+  <div class="vid-card">
+    <div class="vid-card-header">
+      <div class="vid-card-icon" style="background:linear-gradient(135deg,#DC2626,#991B1B);">
+        🎬
+      </div>
+      <div>
+        <h3>Générer une vidéo éducative</h3>
+        <p>Transforme ton cours en vidéo animée</p>
+      </div>
+    </div>
+
+    <div class="vid-params">
+      <div class="vid-param">
+        <label>🎨 Style vidéo</label>
+        <select id="style-video" class="vid-select">
+          <option value="animation">✨ Animation 2D</option>
+          <option value="documentaire">📽️ Style documentaire</option>
+          <option value="tableau">✍️ Tableau noir interactif</option>
+          <option value="bande_dessinee">📚 Bande dessinée éducative</option>
+        </select>
+      </div>
+      <div class="vid-param">
+        <label>⚡ Vitesse</label>
+        <select id="vitesse" class="vid-select">
+          <option value="lent">🐢 Lente (pédagogique)</option>
+          <option value="normal" selected>⚡ Normale</option>
+          <option value="rapide">🚀 Rapide (révision)</option>
+        </select>
+      </div>
+    </div>
+
+    <button id="btn-generer-video" onclick="genererVideoEducative()" class="vid-btn-generer">
+      <span>🎬</span>
+      Générer la vidéo
+    </button>
+  </div>
+
+  <!-- SECTION 2 : RECHERCHE YOUTUBE -->
+  <div class="vid-card">
+    <div class="vid-card-header">
+      <div class="vid-card-icon" style="background:linear-gradient(135deg,#EF4444,#DC2626);">
+        📺
+      </div>
+      <div>
+        <h3>Rechercher sur YouTube</h3>
+        <p>Trouve les meilleures vidéos pour réviser</p>
+      </div>
+    </div>
+
     <div class="vid-search-input-wrap">
       <span>🔍</span>
       <input type="text" id="recherche"
         placeholder="Ex: microéconomie, dérivées, marketing..."
-        onkeypress="if(event.key==='Enter') chercher()">
+        onkeypress="if(event.key==='Enter') chercherYouTube()">
     </div>
 
-    <button onclick="chercher()" class="vid-btn-search">
-      <span class="vid-btn-circle">📺</span>
-      Chercher
-    </button>
-  </div>
-
-  <!-- SUGGESTIONS -->
-  <div class="vid-suggestions">
-    <h3>💡 Suggestions populaires</h3>
-
-    <div class="vid-tags">
+    <div class="vid-suggestions">
       <span onclick="rechercheRapide('microéconomie')">📊 Microéconomie</span>
       <span onclick="rechercheRapide('macroéconomie')">📈 Macroéconomie</span>
-      <span onclick="rechercheRapide('mathématiques licence')">➗ Maths Licence</span>
+      <span onclick="rechercheRapide('mathématiques')">➗ Mathématiques</span>
       <span onclick="rechercheRapide('statistiques')">📉 Statistiques</span>
       <span onclick="rechercheRapide('comptabilité')">📒 Comptabilité</span>
       <span onclick="rechercheRapide('marketing')">📣 Marketing</span>
-      <span onclick="rechercheRapide('gestion entreprise')">🏢 Gestion</span>
       <span onclick="rechercheRapide('droit')">⚖️ Droit</span>
+      <span onclick="rechercheRapide('économie générale')">🌍 Économie générale</span>
     </div>
+
+    <button onclick="chercherYouTube()" class="vid-btn-search">
+      <span class="vid-btn-circle">📺</span>
+      Chercher sur YouTube
+    </button>
   </div>
 
-  <!-- RESULT -->
+  <!-- ZONE RÉSULTAT YOUTUBE -->
   <div id="zone-iframe" class="vid-result" style="display:none;">
     <div class="vid-result-header">
-      <h3>📺 Résultats</h3>
-      <span>Astuce : clique sur une vidéo pour ouvrir YouTube</span>
+      <h3>📺 Résultats YouTube</h3>
+      <span>💡 Clique sur une vidéo pour l'ouvrir</span>
+      <button onclick="fermerResultat()" class="vid-btn-fermer">✕</button>
     </div>
     <iframe id="yt-iframe" allowfullscreen></iframe>
+  </div>
+
+  <!-- ZONE CHARGEMENT VIDÉO -->
+  <div id="loading-video" class="vid-loading" style="display:none;">
+    <div class="vid-spinner"></div>
+    <p>Génération de la vidéo en cours...</p>
+    <small>Cette opération peut prendre quelques minutes ⏳</small>
   </div>
 
 </div>
 
 <style>
+.vid-container { max-width: 1000px; margin: 0 auto; padding: 20px; animation: fadeInUp 0.5s ease; }
+@keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
-/* CONTAINER */
-.vid-container { padding:1.5rem; max-width:1000px; margin:0 auto; }
-
-/* HEADER */
 .vid-header {
-  position:relative; overflow:hidden;
-  background:linear-gradient(135deg,#DC2626,#991B1B,#EF4444);
-  border-radius:28px; padding:2rem;
-  display:flex; align-items:center; gap:1.2rem;
-  color:white; margin-bottom:1.5rem;
-  box-shadow:0 8px 32px rgba(220,38,38,0.35);
+  background: linear-gradient(135deg, #DC2626, #991B1B, #EF4444);
+  border-radius: 28px; padding: 30px; margin-bottom: 25px; color: white;
+  display: flex; align-items: center; gap: 1.2rem;
 }
-.vid-header-bg {
-  position:absolute; right:-10px; top:-20px;
-  font-size:8rem; opacity:0.1;
-}
-.vid-header-icon {
-  width:70px; height:70px;
-  background:rgba(255,255,255,0.2);
-  border-radius:18px;
-  display:flex; align-items:center; justify-content:center;
-  font-size:2rem;
-}
-.vid-header-text h1 { margin:0; font-size:1.8rem; font-weight:900; }
-.vid-header-text p { margin:0.3rem 0 0; opacity:0.85; }
-.vid-badge {
-  margin-left:auto;
-  background:rgba(255,255,255,0.2);
-  padding:0.5rem 1rem;
-  border-radius:50px;
-  font-weight:700;
-}
+.vid-header-icon { width: 70px; height: 70px; background: rgba(255,255,255,0.2); border-radius: 20px; display: flex; align-items: center; justify-content: center; font-size: 2rem; }
+.vid-header-text h1 { margin: 0; font-size: 1.8rem; }
+.vid-header-text p { margin: 0.3rem 0 0; opacity: 0.85; }
 
-/* SEARCH */
-.vid-search-card {
-  background:white;
-  border-radius:24px;
-  padding:1.5rem;
-  display:flex;
-  gap:1rem;
-  flex-wrap:wrap;
-  margin-bottom:1.5rem;
-  box-shadow:0 4px 24px rgba(220,38,38,0.15);
-}
-.vid-search-input-wrap {
-  flex:1;
-  display:flex;
-  align-items:center;
-  gap:0.6rem;
-  background:#FEE2E2;
-  border-radius:50px;
-  padding:0.8rem 1.2rem;
-}
-.vid-search-input-wrap input {
-  flex:1;
-  border:none;
-  background:transparent;
-  outline:none;
-  font-size:1rem;
-}
-.vid-btn-search {
-  display:flex;
-  align-items:center;
-  gap:0.6rem;
-  padding:0.8rem 1.5rem;
-  border:none;
-  border-radius:50px;
-  font-weight:800;
-  cursor:pointer;
-  background:linear-gradient(135deg,#DC2626,#991B1B);
-  color:white;
-  box-shadow:0 6px 20px rgba(220,38,38,0.4);
-  transition:0.3s;
-}
-.vid-btn-search:hover {
-  transform:translateY(-3px);
-}
-.vid-btn-circle {
-  background:rgba(255,255,255,0.25);
-  border-radius:50%;
-  width:30px; height:30px;
-  display:flex; align-items:center; justify-content:center;
-}
+.vid-alerte { display: flex; align-items: center; gap: 15px; background: #FFFBEB; border: 2px solid #FFD93D; border-radius: 20px; padding: 20px; margin-bottom: 20px; }
+.vid-alerte span { font-size: 32px; }
+.vid-btn-alerte { background: linear-gradient(135deg, #FFD93D, #F59E0B); color: #374151; padding: 8px 20px; border-radius: 30px; text-decoration: none; font-weight: 700; display: inline-block; }
 
-/* SUGGESTIONS */
-.vid-suggestions {
-  background:white;
-  border-radius:24px;
-  padding:1.5rem;
-  margin-bottom:1.5rem;
-  box-shadow:0 4px 20px rgba(0,0,0,0.05);
-}
-.vid-tags {
-  display:flex;
-  flex-wrap:wrap;
-  gap:0.6rem;
-}
-.vid-tags span {
-  background:#FEE2E2;
-  color:#991B1B;
-  padding:0.5rem 1rem;
-  border-radius:50px;
-  font-weight:700;
-  font-size:0.85rem;
-  cursor:pointer;
-  transition:0.2s;
-}
-.vid-tags span:hover {
-  background:#DC2626;
-  color:white;
-  transform:translateY(-2px);
-}
+.vid-statut { display: flex; align-items: center; gap: 15px; background: #EDE9FE; border: 2px solid #DDD6FE; border-radius: 20px; padding: 15px 20px; margin-bottom: 20px; }
+.vid-statut-icon { font-size: 28px; }
+.vid-statut-nom { font-weight: 800; color: #5B21B6; }
+.vid-badge { margin-left: auto; background: #00C853; color: white; padding: 5px 15px; border-radius: 30px; }
 
-/* RESULT */
-.vid-result {
-  background:white;
-  border-radius:24px;
-  padding:1.5rem;
-  box-shadow:0 4px 24px rgba(0,0,0,0.08);
-}
-.vid-result-header {
-  margin-bottom:1rem;
-}
-iframe {
-  width:100%;
-  height:550px;
-  border:none;
-  border-radius:18px;
-  box-shadow:0 8px 24px rgba(0,0,0,0.2);
-}
+.vid-card { background: white; border-radius: 24px; padding: 25px; margin-bottom: 25px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); border-top: 5px solid #DC2626; }
+.vid-card-header { display: flex; align-items: center; gap: 15px; margin-bottom: 20px; }
+.vid-card-icon { width: 50px; height: 50px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 24px; }
 
-/* RESPONSIVE */
-@media(max-width:640px){
-  iframe { height:400px; }
-}
+.vid-params { display: flex; gap: 30px; flex-wrap: wrap; margin-bottom: 25px; }
+.vid-param label { display: block; font-weight: 700; margin-bottom: 10px; color: #374151; }
+.vid-select { padding: 10px 15px; border: 2px solid #E5E7EB; border-radius: 12px; background: white; cursor: pointer; min-width: 180px; }
 
+.vid-btn-generer, .vid-btn-search { width: 100%; display: flex; align-items: center; justify-content: center; gap: 10px; padding: 14px; border: none; border-radius: 50px; font-weight: 800; font-size: 16px; cursor: pointer; transition: all 0.3s; }
+.vid-btn-generer { background: linear-gradient(135deg, #DC2626, #991B1B); color: white; }
+.vid-btn-generer:hover { transform: scale(1.02); }
+.vid-btn-search { background: linear-gradient(135deg, #EF4444, #DC2626); color: white; margin-top: 15px; }
+
+.vid-search-input-wrap { display: flex; align-items: center; gap: 10px; background: #FEE2E2; border-radius: 50px; padding: 12px 20px; margin-bottom: 15px; }
+.vid-search-input-wrap input { flex: 1; border: none; background: transparent; outline: none; font-size: 1rem; }
+
+.vid-suggestions { display: flex; flex-wrap: wrap; gap: 10px; margin: 15px 0; }
+.vid-suggestions span { background: #FEE2E2; color: #991B1B; padding: 8px 16px; border-radius: 50px; font-weight: 700; font-size: 0.85rem; cursor: pointer; transition: 0.2s; }
+.vid-suggestions span:hover { background: #DC2626; color: white; transform: translateY(-2px); }
+
+.vid-result { background: white; border-radius: 24px; padding: 20px; margin-top: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+.vid-result-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; }
+.vid-result-header h3 { margin: 0; }
+.vid-btn-fermer { background: #EF4444; color: white; border: none; width: 30px; height: 30px; border-radius: 50%; cursor: pointer; }
+iframe { width: 100%; height: 500px; border: none; border-radius: 18px; }
+
+.vid-loading { text-align: center; padding: 50px; background: white; border-radius: 24px; }
+.vid-spinner { width: 50px; height: 50px; border: 4px solid #F3F4F6; border-top-color: #DC2626; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 20px; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* MODE SOMBRE */
+html[data-mode="sombre"] .vid-card, html[data-mode="sombre"] .vid-result, html[data-mode="sombre"] .vid-loading { background: #2A2D3E; }
+html[data-mode="sombre"] .vid-param label { color: #F1F5F9; }
+html[data-mode="sombre"] .vid-select { background: #1A1D2E; border-color: #3A3D4E; color: #F1F5F9; }
+html[data-mode="sombre"] .vid-search-input-wrap { background: #1A1D2E; }
+html[data-mode="sombre"] .vid-search-input-wrap input { color: #F1F5F9; }
+
+@media (max-width: 640px) {
+  .vid-container { padding: 10px; }
+  .vid-header { padding: 20px; }
+  .vid-header h1 { font-size: 1.4rem; }
+  .vid-params { flex-direction: column; gap: 15px; }
+  iframe { height: 300px; }
+}
 </style>
 
 <script>
-function toast(msg){
-  const t=document.getElementById('toast');
-  t.innerHTML=msg;
-  t.style.transform='translateX(0)';
-  setTimeout(()=>{t.style.transform='translateX(120%)'},3000);
+document.addEventListener('DOMContentLoaded', () => {
+  fetch('/api/statut-cours')
+    .then(r => r.json())
+    .then(data => {
+      if (data.cours_charge) {
+        document.getElementById('nom-cours').textContent = data.nom_cours;
+        document.getElementById('statut-cours').style.display = 'flex';
+        document.getElementById('alerte-cours').style.display = 'none';
+        document.getElementById('btn-generer-video').disabled = false;
+      } else {
+        document.getElementById('alerte-cours').style.display = 'flex';
+        document.getElementById('statut-cours').style.display = 'none';
+        document.getElementById('btn-generer-video').disabled = true;
+      }
+    });
+});
+
+function rechercheRapide(q) {
+  document.getElementById('recherche').value = q;
+  chercherYouTube();
 }
 
-function chercher(){
-  const q=document.getElementById('recherche').value.trim();
-  if(!q){ toast('⚠️ Tape ce que tu veux chercher !'); return; }
-  const url='https://www.youtube.com/embed?listType=search&list='+encodeURIComponent(q+' cours révision');
-  document.getElementById('yt-iframe').src=url;
-  document.getElementById('zone-iframe').style.display='block';
-  document.getElementById('zone-iframe').scrollIntoView({behavior:'smooth'});
-  toast('📺 Résultats chargés !');
+function chercherYouTube() {
+  const q = document.getElementById('recherche').value.trim();
+  if (!q) {
+    alert('⚠️ Tape ce que tu veux chercher !');
+    return;
+  }
+  const url = 'https://www.youtube.com/embed?listType=search&list=' + encodeURIComponent(q + ' cours révision français');
+  document.getElementById('yt-iframe').src = url;
+  document.getElementById('zone-iframe').style.display = 'block';
+  document.getElementById('zone-iframe').scrollIntoView({ behavior: 'smooth' });
 }
 
-function rechercheRapide(q){
-  document.getElementById('recherche').value=q;
-  chercher();
+function fermerResultat() {
+  document.getElementById('zone-iframe').style.display = 'none';
+  document.getElementById('yt-iframe').src = '';
+}
+
+async function genererVideoEducative() {
+  const btn = document.getElementById('btn-generer-video');
+  const loading = document.getElementById('loading-video');
+  const style = document.getElementById('style-video').value;
+  const vitesse = document.getElementById('vitesse').value;
+
+  btn.disabled = true;
+  loading.style.display = 'block';
+
+  try {
+    const response = await fetch('/api/video/generer', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ style: style, vitesse: vitesse })
+    });
+
+    const data = await response.json();
+
+    if (data.succes) {
+      alert('✅ Vidéo générée avec succès !\n\n📥 Téléchargement en cours...');
+      if (data.url) {
+        window.open(data.url, '_blank');
+      }
+    } else {
+      alert('❌ ' + (data.erreur || 'Erreur lors de la génération de la vidéo'));
+    }
+  } catch (err) {
+    alert('❌ Erreur réseau : ' + err.message);
+  } finally {
+    btn.disabled = false;
+    loading.style.display = 'none';
+  }
 }
 </script>
 

@@ -1758,6 +1758,78 @@ def api_dashboard_stats():
                 except Exception as e:
                     return jsonify({"succes": False, "erreur": str(e)})
 
+
+# ═══════════════════════════════════════════
+# 🎬 GÉNÉRATION VIDÉO ÉDUCATIVE
+# ═══════════════════════════════════════════
+
+@app.route('/api/video/generer', methods=['POST'])
+def api_video_generer():
+    try:
+        data = request.get_json()
+        style = data.get('style', 'animation')
+        vitesse = data.get('vitesse', 'normal')
+
+        cours = session_data.get('cours_actuel', '')
+        if not cours:
+            return jsonify({"succes": False, "erreur": "Aucun cours chargé"})
+
+        # Générer un script vidéo à partir du cours
+        from ia_handler import demander_ia_brut
+
+        prompt_video = f"""Transforme ce cours en script vidéo éducatif.
+
+Style demandé : {style}
+Vitesse : {vitesse}
+
+📋 FORMAT OBLIGATOIRE :
+- Durée approximative : 3-5 minutes
+- Structure : Introduction → Développement → Conclusion
+- Inclure des indications visuelles [VISUEL: ...]
+- Inclure des indications audio [AUDIO: ...]
+
+📄 CONTENU DU COURS :
+{cours[:4000]}
+
+🎬 SCRIPT VIDÉO :"""
+
+        script = demander_ia_brut(prompt_video, temperature=0.7, rapide=False)
+
+        # Sauvegarder le script
+        import os
+        import json
+        from datetime import datetime
+
+        outputs_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'outputs')
+        os.makedirs(outputs_dir, exist_ok=True)
+
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        script_file = os.path.join(outputs_dir, f"video_script_{timestamp}.txt")
+
+        with open(script_file, 'w', encoding='utf-8') as f:
+            f.write(script)
+
+        return jsonify({
+            "succes": True,
+            "message": "Script vidéo généré",
+            "script": script,
+            "url": f"/download-script/{timestamp}"
+        })
+
+    except Exception as e:
+        return jsonify({"succes": False, "erreur": str(e)})
+
+
+@app.route('/download-script/<timestamp>')
+def download_script(timestamp):
+    import os
+    from flask import send_file
+    dossier = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'outputs')
+    chemin = os.path.join(dossier, f"video_script_{timestamp}.txt")
+    if os.path.exists(chemin):
+        return send_file(chemin, as_attachment=True, download_name=f"script_video_{timestamp}.txt")
+    return "Fichier non trouvé", 404
+
 # ═══════════════════════════════════════════
 # 🚀 LANCEMENT
 # ═══════════════════════════════════════════

@@ -1314,6 +1314,91 @@ def logo():
     dossier = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'frontend')
     return send_from_directory(dossier, 'icon-512.png')
 
+
+# ═══════════════════════════════════════════
+# 🔐 AUTHENTIFICATION - PHASE A
+# ═══════════════════════════════════════════
+
+@app.route('/login')
+def page_login():
+    return render_template('login.html', page_active='login')
+
+
+@app.route('/register')
+def page_register():
+    return render_template('register.html', page_active='register')
+
+
+@app.route('/api/login', methods=['POST'])
+def api_login():
+    try:
+        data = request.get_json()
+        email = data.get('email', '').strip()
+        password = data.get('password', '')
+
+        if not email or not password:
+            return jsonify({"succes": False, "erreur": "Email et mot de passe requis"})
+
+        from db.base import verifier_utilisateur
+        result = verifier_utilisateur(email, password)
+
+        if result["succes"]:
+            response = jsonify({
+                "succes": True,
+                "user_id": result["user_id"],
+                "email": result["email"],
+                "prenom": result.get("prenom", ""),
+                "nom": result.get("nom", "")
+            })
+            response.set_cookie('nokirova_user_id', str(result["user_id"]), max_age=31536000, path='/')
+            return response
+        else:
+            return jsonify({"succes": False, "erreur": result["erreur"]})
+    except Exception as e:
+        return jsonify({"succes": False, "erreur": str(e)})
+
+
+@app.route('/api/register', methods=['POST'])
+def api_register():
+    try:
+        data = request.get_json()
+        email = data.get('email', '').strip()
+        prenom = data.get('prenom', '').strip()
+        nom = data.get('nom', '').strip()
+        password = data.get('password', '')
+
+        if not email or not password:
+            return jsonify({"succes": False, "erreur": "Email et mot de passe requis"})
+
+        if len(password) < 6:
+            return jsonify({"succes": False, "erreur": "Mot de passe trop court (min 6 caractères)"})
+
+        from db.base import creer_utilisateur
+        result = creer_utilisateur(email, password, nom, prenom)
+
+        if result["succes"]:
+            return jsonify({"succes": True, "user_id": result["user_id"], "email": result["email"]})
+        else:
+            return jsonify({"succes": False, "erreur": result["erreur"]})
+    except Exception as e:
+        return jsonify({"succes": False, "erreur": str(e)})
+
+
+@app.route('/api/logout', methods=['POST'])
+def api_logout():
+    response = jsonify({"succes": True})
+    response.set_cookie('nokirova_user_id', '', expires=0, path='/')
+    return response
+
+
+@app.route('/api/check-auth')
+def api_check_auth():
+    from db.base import is_logged_in, get_current_user_id, get_user_info
+    if is_logged_in():
+        user_info = get_user_info(get_current_user_id())
+        return jsonify({"succes": True, "logged_in": True, "user": user_info})
+    return jsonify({"succes": True, "logged_in": False})
+
 # ═══════════════════════════════════════════
 # 🚀 LANCEMENT
 # ═══════════════════════════════════════════

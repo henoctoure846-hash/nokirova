@@ -157,34 +157,8 @@ function changerUtilisateur() {
     }
 }
 
-// ═══════════════════════════════════════════
-// 🔐 VÉRIFICATION CONNEXION - PHASE G
-// ═══════════════════════════════════════════
-const pagesPubliques = ['/bienvenue', '/login', '/register', '/landing'];
-const currentPath = window.location.pathname;
-
-if (!pagesPubliques.includes(currentPath)) {
-    const user = JSON.parse(localStorage.getItem('nokirova_user') || 'null');
-    if (!user || !user.user_id) {
-        window.location.href = '/bienvenue';
-    }
-}
-
-// ═══════════════════════════════════════════
-// 👤 ENVOI USER_ID À CHAQUE REQUÊTE
-// ═══════════════════════════════════════════
-(function() {
-    const user = JSON.parse(localStorage.getItem('nokirova_user') || 'null');
-    if (user && user.user_id) {
-        document.cookie = `nokirova_user_id=${user.user_id}; path=/; max-age=31536000`;
-        const oldFetch = window.fetch;
-        window.fetch = function(url, options = {}) {
-            options.headers = options.headers || {};
-            options.headers['X-User-Id'] = user.user_id;
-            return oldFetch(url, options);
-        };
-    }
-})();
+// La protection de connexion est désormais gérée UNIQUEMENT par le middleware Flask.
+// Aucune redirection automatique côté client n'est faite ici.
 </script>
 
 </body>

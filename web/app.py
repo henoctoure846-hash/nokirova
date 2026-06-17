@@ -1,4 +1,4 @@
-# web/app.py - NOKIROVA WEB 🌸 VERSION CORRIGÉE (SESSION PERSISTANTE + PROFIL + AUTH + AUDIO/VIDEO)
+# web/app.py - NOKIROVA WEB 🌸 VERSION CORRIGÉE (MIDDLEWARE PUBLIC + AUTH)
 from flask import Flask, render_template, request, jsonify, send_from_directory, url_for
 import sys
 import os
@@ -36,8 +36,14 @@ def detecter_utilisateur():
         user_id = request.cookies.get('nokirova_user_id')
     set_user(user_id)
 
-    # 🔐 Blocage si non connecté et pas une page publique
+    # 🔐 Routes publiques (pages + API d'authentification)
     pages_publiques = ['login', 'register', 'bienvenue', 'landing', 'test']
+    routes_api_publiques = ['/api/login', '/api/register', '/api/logout', '/api/check-auth']
+
+    # Ne pas bloquer les routes API publiques
+    if request.path in routes_api_publiques:
+        return
+
     if request.endpoint and request.endpoint not in pages_publiques:
         if not db.is_logged_in():
             # ✅ Pour les APIs, renvoyer une erreur JSON (ne pas renvoyer du HTML)
@@ -1330,15 +1336,7 @@ def api_register():
         from db.base import creer_utilisateur
         result = creer_utilisateur(email, password, nom, prenom)
         if result["succes"]:
-            response = jsonify({
-                "succes": True,
-                "user_id": result["user_id"],
-                "email": result["email"],
-                "prenom": prenom,
-                "nom": nom
-            })
-            response.set_cookie('nokirova_user_id', str(result["user_id"]), max_age=31536000, path='/')
-            return response
+            return jsonify({"succes": True, "user_id": result["user_id"], "email": result["email"]})
         else:
             return jsonify({"succes": False, "erreur": result["erreur"]})
     except Exception as e:

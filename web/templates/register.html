@@ -122,91 +122,223 @@
   margin-top: 10px;
 }
 .btn-register:hover {
-  transform: scale(1.02);
-  box-shadow: 0 8px 20px rgba(0,200,83,0.4);
+  transform-register:hover {
+  transform: scale(1.02: scale(1.02);
+  box-shadow: );
+  box-shadow: 0 8px 20px rgba(0,200,83,0.40 8px 20px rgba(0,200,83,0.4);
+}
+.register-footer {
+ );
 }
 .register-footer {
   text-align: center;
-  margin-top: 25px;
+  text-align: center;
+  margin-top: 25px margin-top: 25px;
+  padding-top: ;
   padding-top: 20px;
-  border-top: 1px solid #F3F4F6;
+  border-top: 1px solid20px;
+  border-top: 1px solid #F3F4F6 #F3F4F6;
+}
+.register-footer a;
 }
 .register-footer a {
+  color: #00 {
   color: #00C853;
+  text-decorationC853;
   text-decoration: none;
   font-weight: 600;
 }
+.register: none;
+  font-weight: 600;
+}
 .register-footer a:hover {
+ -footer a:hover {
   text-decoration: underline;
 }
-html[data-mode="sombre"] .register-card {
-  background: #2A2D3E;
+html text-decoration: underline;
 }
-html[data-mode="sombre"] .register-header h1 {
+html[data-mode[data-mode="sombre"]="sombre"] .register-card {
+  background: # .register-card {
+  background: #2A2D32A2D3E;
+}
+htmlE;
+}
+html[data-mode="sombre[data-mode="sombre"] .register-header h1 {
+"] .register-header h1 {
+  color: #F1  color: #F1F5F9;
+}
+F5F9;
+}
+html[data-mode="somhtml[data-mode="sombre"] .input-group labelbre"] .input-group label {
+  color: #F1F5F9;
+ {
   color: #F1F5F9;
 }
-html[data-mode="sombre"] .input-group label {
-  color: #F1F5F9;
-}
-html[data-mode="sombre"] .input-group input {
-  background: #1A1D2E;
+html[data-mode="}
+html[data-mode="sombre"] .input-groupsombre"] .input-group input {
+  background: # input {
+  background: #1A1D21A1E;
+  border-color: #3A3D2E;
   border-color: #3A3D4E;
-  color: #F1F5F9;
+  colorD4E;
+  color: #F1F5: #F1F5F9;
+}
+</styleF9;
 }
 </style>
 
 <script>
-document.getElementById('registerForm').addEventListener('submit', async (e) => {
+document.getElementById('>
+
+<script>
+document.getElementById('registerForm').addEventListener('registerForm').addEventListener('submit', async (e) => {
   e.preventDefault();
 
-  const email = document.getElementById('email').value;
-  const prenom = document.getElementById('prenom').value;
+submit', async (e) => {
+  e.preventDefault();
+
+  const email = document.getElementById  const email = document.getElementById('email').value('email').value;
+ ;
+  const prenom = document.getElementById('prenom').value const prenom = document.getElementById;
+  const nom = document('prenom').value;
   const nom = document.getElementById('nom').value;
-  const password = document.getElementById('password').value;
+.getElementById('nom').value;
+  const password = document.getElementById  const password = document.getElementById('password').value;
+  const confirm = document.getElementById('('password').value;
   const confirm = document.getElementById('confirm').value;
 
-  if (password !== confirm) {
-    alert('❌ Les mots de passe ne correspondent pas');
+  ifconfirm').value;
+
+  if (password (password !== confirm) {
+ !== confirm) {
+    alert('❌ Les    alert('❌ Les mots de passe ne correspondent pas mots de passe ne correspondent pas');
     return;
   }
 
   if (password.length < 6) {
-    alert('❌ Le mot de passe doit faire au moins 6 caractères');
+    alert');
     return;
   }
 
-  const btn = document.querySelector('.btn-register');
+  if (password.length < 6) {
+    alert('❌ Le mot de('❌ Le mot de passe doit faire au moins  passe doit faire au moins 6 caractères');
+    return;
+  }
+
+  const btn6 caractères');
+    return;
+  }
+
+  const btn = document.querySelector('.btn-reg = document.querySelector('.btn-register');
+  btn.disister');
   btn.disabled = true;
-  btn.textContent = '⏳ Inscription...';
+  btnabled = true;
+  btn.textContent = '.textContent = '⏳ Inscription...';
 
   try {
-    const response = await fetch('/api/register', {
+    // Éta⏳ Inscription...';
+
+  try {
+    // Étape 1 : Créer le compte
+    constpe 1 : Créer le compte
+    const registerResponse = await fetch('/ registerResponse = await fetch('/api/register', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, prenom, nom, password })
+     api/register', {
+      method: 'POST',
+      headers: { 'Content-Type headers: { 'Content-Type': 'application/json' },
+': 'application/json' },
+      body: JSON.stringify({      body: JSON.stringify({ email, pre email, prenom, nom, password })
+nom, nom, password })
     });
 
-    const data = await response.json();
+    const registerData    });
 
-    if (data.succes) {
-      // Stocker les informations dans localStorage pour l'application
-      localStorage.setItem('nokirova_user', JSON.stringify({
-        user_id: data.user_id,
-        email: data.email,
-        prenom: data.prenom,
-        nom: data.nom
-      }));
-      // Rediriger directement vers l'accueil (le cookie est déjà défini par l'API)
-      window.location.href = '/';
-    } else {
-      alert('❌ ' + data.erreur);
+    const registerData = await registerResponse.json();
+
+ = await registerResponse.json();
+
+    if (!registerData.s    if (!registerData.succes) {
+      alertucces) {
+      alert('('❌ '❌ ' + registerData.erreur);
+      btn.disabled = false;
+      btn.textContent = '🎉 S\' + registerData.erreur);
       btn.disabled = false;
       btn.textContent = '🎉 S\'inscrire';
+      returninscrire';
+      return;
+    }
+
+    // É;
+    }
+
+    // Étape 2 : Connecttape 2 : Connecter automatiquement leer automatiquement le nouvel utilis nouvel utilisateur
+    const loginResponseateur
+    const loginResponse = await fetch('/api/login', {
+      method: ' = await fetch('/api/login', {
+      method: 'POST',
+POST',
+      headers      headers: { ': { 'Content-Type': 'applicationContent-Type': 'application/json' },
+      body:/json' },
+      body: JSON.stringify({ email, password JSON.stringify({ email, password })
+    });
+
+    const login })
+    });
+
+    const loginData = await loginResponse.jsonData = await loginResponse.json();
+
+    if (loginData();
+
+    if (loginData.succes) {
+     .succes) {
+      // Stock // Stocker leser les infos utilis infos utilisateur dans le localStorage
+     ateur dans le localStorage
+      localStorage.setItem('nokiro localStorage.setItem('nokirova_user', JSON.stringifyva_user', JSON.stringify({
+({
+        user_id: loginData        user_id: loginData.user_id,
+        email:.user_id,
+        email: loginData.email,
+        pre loginData.email,
+        prenom: loginData.prennom: loginData.prenom,
+        nom: loginom,
+        nom: loginData.nom
+Data.nom
+      }      }));
+
+      // Pos));
+
+      // Poser le cookie ner le cookie nokirova_user_id
+okirova_user_id
+      document.cookie =      document.cookie = `nokirova_user `nokirova_user_id=${_id=${loginData.userloginData.user_id}; path=/; max-age=31536000`;
+
+_id}; path=/; max-age=31536000`;
+
+      // Redir      // Rediriger vers l'acciger vers l'accueil
+      windowueil
+      window.location.href = '/';
+    } else {
+      //.location.href = '/';
+    } else {
+      // Si la Si la connexion éch connexion échoue (neoue (ne devrait pas arr devrait pas arriver), rediriver), rediriger vers la page de connexion
+iger vers la page      alert('✅ Com de connexion
+      alert('✅ Compte créé ! Connecte-toipte créé ! Connecte-toi maintenant.');
+      window.location.h maintenant.');
+      window.location.href = '/login';
     }
   } catch (err) {
-    alert('❌ Erreur d\'inscription');
+ref = '/login';
+    }
+  } catch (err    alert('❌ Erreur réseau) {
+    alert('❌ Erreur réseau : ' + : ' + err.message);
+    btn.dis err.message);
     btn.disabled = false;
-    btn.textContent = '🎉 S\'inscrire';
+    btnabled = false;
+    btn.textContent = '🎉.textContent = '🎉 S\'inscrire';
+  }
+});
+</script>
+
+ S\'inscrire';
   }
 });
 </script>

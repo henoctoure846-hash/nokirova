@@ -1,30 +1,28 @@
 // ═══════════════════════════════════════════
-// 🌸 NOKIROVA Service Worker - PHASE G CORRIGÉ
+// 🌸 NOKIROVA Service Worker – CORRIGÉ (cache pages désactivé)
 // ═══════════════════════════════════════════
 
-const CACHE = 'nokirova-v3';
-const URLS = [
-  '/',
-  '/login',
-  '/register',
-  '/landing',
+const CACHE = 'nokirova-v4';          // on change le nom pour forcer un cache propre
+const STATIC_ASSETS = [               // on ne met QUE les ressources statiques en cache
   '/static/css/style.css',
   '/static/js/script.js',
   '/logo'
 ];
 
 // ═══════════════════════════════════════════
-// 📦 INSTALLATION + CACHE
+// 📦 INSTALLATION – cache uniquement les statiques
 // ═══════════════════════════════════════════
-
 self.addEventListener('install', e => {
   console.log('🌸 NOKIROVA SW installé !');
   e.waitUntil(
-    caches.open(CACHE).then(c => c.addAll(URLS))
+    caches.open(CACHE).then(c => c.addAll(STATIC_ASSETS))
   );
   self.skipWaiting();
 });
 
+// ═══════════════════════════════════════════
+// 🧹 ACTIVATION – nettoyage des anciens caches
+// ═══════════════════════════════════════════
 self.addEventListener('activate', e => {
   console.log('✅ NOKIROVA SW activé !');
   e.waitUntil(
@@ -38,39 +36,36 @@ self.addEventListener('activate', e => {
 });
 
 // ═══════════════════════════════════════════
-// 🌐 FETCH (cache + réseau)
+// 🌐 FETCH – stratégie « réseau d’abord »
 // ═══════════════════════════════════════════
-
 self.addEventListener('fetch', e => {
-  e.respondWith(
-    fetch(e.request).catch(() =>
-      caches.match(e.request)
-    )
-  );
+  // Pour les fichiers statiques, essayer le cache puis le réseau
+  if (e.request.url.includes('/static/') || e.request.url.endsWith('/logo')) {
+    e.respondWith(
+      caches.match(e.request).then(cachedResponse =>
+        cachedResponse || fetch(e.request)
+      )
+    );
+  } else {
+    // Pour tout le reste (pages HTML, API…) → réseau uniquement
+    e.respondWith(fetch(e.request));
+  }
 });
 
 // ═══════════════════════════════════════════
-// 🔔 RECEVOIR UNE NOTIFICATION PUSH
+// 🔔 PUSH NOTIFICATIONS (inchangé)
 // ═══════════════════════════════════════════
-
 self.addEventListener('push', e => {
   console.log('📬 Notification reçue !', e);
-
   let data = {
     title: '🌸 NOKIROVA',
     body: 'Ton professeur IA t\'attend ! 💪',
     icon: '/logo',
     badge: '/logo'
   };
-
   if (e.data) {
-    try {
-      data = e.data.json();
-    } catch(err) {
-      data.body = e.data.text();
-    }
+    try { data = e.data.json(); } catch(err) { data.body = e.data.text(); }
   }
-
   e.waitUntil(
     self.registration.showNotification(data.title, {
       body: data.body,
@@ -84,16 +79,9 @@ self.addEventListener('push', e => {
   );
 });
 
-// ═══════════════════════════════════════════
-// 👆 CLIC SUR UNE NOTIFICATION
-// ═══════════════════════════════════════════
-
 self.addEventListener('notificationclick', e => {
-  console.log('👆 Notification cliquée !');
   e.notification.close();
-
   const url = e.notification.data?.url || '/';
-
   e.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true })
       .then(clientList => {
@@ -103,21 +91,13 @@ self.addEventListener('notificationclick', e => {
             return client.focus();
           }
         }
-        if (clients.openWindow) {
-          return clients.openWindow(url);
-        }
+        if (clients.openWindow) return clients.openWindow(url);
       })
   );
 });
 
-// ═══════════════════════════════════════════
-// ⏰ NOTIFICATIONS PROGRAMMÉES
-// ═══════════════════════════════════════════
-
 self.addEventListener('sync', e => {
-  if (e.tag === 'rappel-etude') {
-    e.waitUntil(envoyerRappel());
-  }
+  if (e.tag === 'rappel-etude') e.waitUntil(envoyerRappel());
 });
 
 async function envoyerRappel() {
@@ -128,9 +108,7 @@ async function envoyerRappel() {
     { title: '⏱️ Pomodoro time !', body: '25 minutes de focus = 1 succès de plus ! 💎' },
     { title: '📝 Résumé rapide ?', body: 'Fais résumer ton cours par l\'IA ! ✨' }
   ];
-
   const msg = messages[Math.floor(Math.random() * messages.length)];
-
   return self.registration.showNotification(msg.title, {
     body: msg.body,
     icon: '/logo',

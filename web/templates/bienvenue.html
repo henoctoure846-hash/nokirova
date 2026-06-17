@@ -114,7 +114,7 @@
         }
         .password-wrapper input {
             flex: 1;
-            padding-right: 50px; /* espace pour le bouton œil */
+            padding-right: 50px;
         }
         .toggle-password {
             position: absolute;
@@ -234,7 +234,8 @@ function enregistrerUtilisateur(e) {
                         date_creation: new Date().toISOString()
                     }));
                     document.cookie = `nokirova_user_id=${loginData.user_id}; path=/; max-age=31536000`;
-                    window.location.href = '/';
+                    // Utilisation de replace() pour éviter les boucles
+                    window.location.replace('/');
                 } else {
                     alert('✅ Compte créé ! Connecte-toi maintenant.');
                     window.location.href = '/login';
@@ -252,7 +253,7 @@ function enregistrerUtilisateur(e) {
 
 // Si déjà connecté → rediriger
 if (localStorage.getItem('nokirova_user')) {
-    window.location.href = '/';
+    window.location.replace('/');
 }
 </script>
 

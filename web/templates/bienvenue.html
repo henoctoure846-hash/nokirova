@@ -106,6 +106,30 @@
         .login-link a:hover {
             text-decoration: underline;
         }
+        /* Bouton de visibilité du mot de passe */
+        .password-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+        .password-wrapper input {
+            flex: 1;
+            padding-right: 50px; /* espace pour le bouton œil */
+        }
+        .toggle-password {
+            position: absolute;
+            right: 12px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.2rem;
+            color: #9CA3AF;
+            padding: 0;
+            line-height: 1;
+        }
+        .toggle-password:hover {
+            color: #1A1D2E;
+        }
     </style>
 </head>
 <body>
@@ -126,7 +150,10 @@
         <input type="email" id="email" required placeholder="exemple@email.com">
 
         <label for="password">🔒 Mot de passe</label>
-        <input type="password" id="password" required placeholder="Au moins 6 caractères" minlength="6">
+        <div class="password-wrapper">
+            <input type="password" id="password" required placeholder="Au moins 6 caractères" minlength="6">
+            <button type="button" class="toggle-password" onclick="togglePasswordVisibility('password', this)">👁️</button>
+        </div>
 
         <label for="universite">🎓 Ton université (optionnel)</label>
         <input type="text" id="universite" placeholder="Ex: Université Internationale ICK de Bouaké">
@@ -156,6 +183,17 @@
 </div>
 
 <script>
+function togglePasswordVisibility(inputId, btn) {
+    const input = document.getElementById(inputId);
+    if (input.type === 'password') {
+        input.type = 'text';
+        btn.textContent = '🙈';
+    } else {
+        input.type = 'password';
+        btn.textContent = '👁️';
+    }
+}
+
 function enregistrerUtilisateur(e) {
     e.preventDefault();
     const prenom = document.getElementById('prenom').value.trim();
@@ -168,25 +206,43 @@ function enregistrerUtilisateur(e) {
     if (!email) return alert('⚠️ Ton email est obligatoire !');
     if (!password || password.length < 6) return alert('⚠️ Mot de passe (min 6 caractères)');
 
+    // Étape 1 : Créer le compte
     fetch('/api/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password, prenom, nom: '' })
     })
     .then(r => r.json())
-    .then(data => {
+    .then(async data => {
         if (data.succes) {
-            const user = {
-                id: data.user_id,
-                prenom: prenom,
-                email: email,
-                universite: universite || 'Non précisé',
-                niveau: niveau,
-                date_creation: new Date().toISOString(),
-                user_id: data.user_id
-            };
-            localStorage.setItem('nokirova_user', JSON.stringify(user));
-            window.location.href = '/';
+            // Étape 2 : Connecter automatiquement pour poser le cookie
+            try {
+                const loginResponse = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+                const loginData = await loginResponse.json();
+                if (loginData.succes) {
+                    localStorage.setItem('nokirova_user', JSON.stringify({
+                        user_id: loginData.user_id,
+                        email: loginData.email,
+                        prenom: loginData.prenom,
+                        nom: loginData.nom,
+                        universite: universite || 'Non précisé',
+                        niveau: niveau,
+                        date_creation: new Date().toISOString()
+                    }));
+                    document.cookie = `nokirova_user_id=${loginData.user_id}; path=/; max-age=31536000`;
+                    window.location.href = '/';
+                } else {
+                    alert('✅ Compte créé ! Connecte-toi maintenant.');
+                    window.location.href = '/login';
+                }
+            } catch (err) {
+                alert('✅ Compte créé ! Une erreur est survenue lors de la connexion automatique.\n\nTu peux te connecter manuellement.');
+                window.location.href = '/login';
+            }
         } else {
             alert('❌ ' + (data.erreur || 'Erreur création compte'));
         }

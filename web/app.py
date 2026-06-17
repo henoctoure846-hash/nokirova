@@ -26,7 +26,7 @@ app = Flask(__name__, template_folder='templates', static_folder='static')
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
 
 # ═══════════════════════════════════════════
-# 👤 MIDDLEWARE MULTI-UTILISATEURS
+# 👤 MIDDLEWARE MULTI-UTILISATEURS (CORRIGÉ)
 # ═══════════════════════════════════════════
 @app.before_request
 def detecter_utilisateur():
@@ -40,7 +40,10 @@ def detecter_utilisateur():
     pages_publiques = ['login', 'register', 'bienvenue', 'landing', 'test']
     if request.endpoint and request.endpoint not in pages_publiques:
         if not db.is_logged_in():
-            # Rediriger vers la page de connexion
+            # ✅ Pour les APIs, renvoyer une erreur JSON (ne pas renvoyer du HTML)
+            if request.path.startswith('/api/'):
+                return jsonify({"succes": False, "erreur": "Non authentifié. Connecte-toi d'abord."}), 401
+            # Pour les pages normales, rediriger vers la page de connexion
             return render_template('login.html', page_active='login')
 
 # ═══════════════════════════════════════════

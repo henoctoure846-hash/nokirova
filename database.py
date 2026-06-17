@@ -1,8 +1,10 @@
-# database.py - NOKIROVA 🌸 VERSION MODULAIRE
+# database.py - NOKIROVA 🌸 VERSION MODULAIRE (CORRIGÉE)
 # Ce fichier redirige tout vers le package db/
 # Pour compatibilité avec tout le projet
 
 from db.base import DB_FILE, init_db, get_connexion
+from db.base import is_logged_in, get_current_user_id, get_user_info
+from db.base import charger_session, sauvegarder_session
 
 from db.cours import (
     sauvegarder_cours,

@@ -1,10 +1,11 @@
 # video_generator.py - Création de vidéos éducatives 🎬🌸
+# Compatible moviepy >= 2.0
 import os
 import re
 import uuid
 import requests
 from PIL import Image, ImageDraw, ImageFont
-from moviepy.editor import ImageClip, AudioFileClip, concatenate_videoclips
+from moviepy import AudioFileClip, concatenate_videoclips, ImageSequenceClip
 import edge_tts
 import asyncio
 
@@ -179,9 +180,12 @@ def generer_video(cours, style="documentaire", vitesse="normal", voix="jeune_fem
             _generer_audio_segment(seg, voix, audio_file)
             audio_files.append(audio_file)
 
-            # Clip audio + image
+            # Clip audio
             audio_clip = AudioFileClip(audio_file)
-            image_clip = ImageClip(img_file).set_duration(audio_clip.duration * facteur).set_audio(audio_clip)
+
+            # Clip image compatible moviepy 2.x
+            image_clip = ImageSequenceClip([img_file], durations=[audio_clip.duration * facteur])
+            image_clip = image_clip.with_audio(audio_clip)
             scenes.append(image_clip)
 
         # Assemblage final

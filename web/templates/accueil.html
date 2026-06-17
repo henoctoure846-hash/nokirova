@@ -11,7 +11,7 @@
     <div class="hero-overlay"></div>
     <div class="hero-content-v2">
       <div class="hero-badge">🌟 NOKIROVA PREMIUM GRATUIT</div>
-      <h1>Bienvenue, <span id="prenomUser">{{ salutation }}</span> !</h1>
+      <h1><span id="prenomUser">{{ salutation }} {{ prenom }}</span> !</h1>
       <p class="hero-desc">Ton professeur IA intelligent pour réussir tes examens</p>
       <div class="hero-stats-v2">
         <div class="hero-stat">
@@ -585,11 +585,6 @@ async function chargerTuteur() {
 }
 
 document.addEventListener('DOMContentLoaded', chargerTuteur);
-
-const user = JSON.parse(localStorage.getItem('nokirova_user') || 'null');
-if (user && user.prenom) {
-    document.getElementById('prenomUser').textContent = user.prenom;
-}
 </script>
 
 {% endblock %}

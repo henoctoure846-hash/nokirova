@@ -124,13 +124,17 @@
         <button onclick="telecharger()" class="ex-btn-action ex-btn-download">
           <span>💾</span> Télécharger
         </button>
+        <button onclick="afficherCorrection()" class="ex-btn-action ex-btn-correction">
+          <span>✅</span> Corriger
+        </button>
         <button onclick="generer()" class="ex-btn-action ex-btn-regen">
           <span>🔄</span> Régénérer
         </button>
       </div>
     </div>
 
-    <div id="display"></div>
+    <div id="display" class="ex-display"></div>
+    <div id="correction" class="ex-correction" style="display:none;"></div>
     <textarea id="brut" style="display:none;"></textarea>
   </div>
 
@@ -433,13 +437,17 @@
   background:#DCFCE7; color:#00C853; border-color:#86EFAC;
 }
 .ex-btn-download:hover { background:#00C853; color:white; transform:translateY(-2px); }
+.ex-btn-correction {
+  background:#FFE5EF; color:#C2185B; border-color:#FFC9DE;
+}
+.ex-btn-correction:hover { background:#C2185B; color:white; transform:translateY(-2px); }
 .ex-btn-regen {
   background:#FFFBEB; color:#F59E0B; border-color:#FDE68A;
 }
 .ex-btn-regen:hover { background:#F59E0B; color:white; transform:translateY(-2px); }
 
-/* ── EXERCICE BLOC ── */
-.ex-bloc {
+/* ── AFFICHAGE ── */
+.ex-display, .ex-correction {
   background:white; border-radius:20px;
   padding:1.8rem; margin-bottom:1.2rem;
   box-shadow:0 4px 20px rgba(245,158,11,0.1);
@@ -449,9 +457,10 @@
   animation:slideInLeft 0.4s ease both;
   transition:all 0.3s;
 }
-.ex-bloc:hover {
-  transform:translateX(6px);
-  box-shadow:0 8px 28px rgba(245,158,11,0.2);
+.ex-correction {
+  border-left-color: #00C853;
+  background: #E8F5E9;
+  margin-top: 1rem;
 }
 
 /* ══════════════════════════════════ */
@@ -465,8 +474,11 @@
 [data-theme="dark"] .ex-btn-niveau {
   background:#252A40; border-color:#374151; color:#D1D5DB;
 }
-[data-theme="dark"] .ex-bloc {
+[data-theme="dark"] .ex-display, [data-theme="dark"] .ex-correction {
   background:#1E2235; color:#CBD5E1; border-left-color:#F59E0B;
+}
+[data-theme="dark"] .ex-correction {
+  border-left-color: #00C853;
 }
 [data-theme="dark"] .ex-loading {
   background:linear-gradient(135deg,#27200A,#1C1810);
@@ -501,6 +513,8 @@
 
 <script>
 let brut = '';
+let texteCorrection = '';
+let texteEnonce = '';
 let niveauActuel = 'moyen';
 
 document.addEventListener('DOMContentLoaded', verifierCours);
@@ -583,13 +597,18 @@ function generer() {
       brut = d.texte;
       document.getElementById('brut').value = brut;
 
-      const c = document.getElementById('display');
-      c.innerHTML = '';
-      const div = document.createElement('div');
-      div.className = 'ex-bloc';
-      div.textContent = d.texte;
-      c.appendChild(div);
+      const indexCorrection = brut.indexOf('🔒') !== -1 ? brut.indexOf('🔒') : brut.indexOf('CORRECTION');
+      if (indexCorrection !== -1) {
+        texteEnonce = brut.substring(0, indexCorrection).trim();
+        texteCorrection = brut.substring(indexCorrection).trim();
+      } else {
+        texteEnonce = brut;
+        texteCorrection = '';
+      }
 
+      document.getElementById('display').innerHTML = formaterMarkdown(texteEnonce);
+      document.getElementById('correction').innerHTML = formaterMarkdown(texteCorrection);
+      document.getElementById('correction').style.display = 'none';
       document.getElementById('zone-resultat').style.display = 'block';
       document.getElementById('zone-resultat')
         .scrollIntoView({ behavior: 'smooth' });
@@ -615,18 +634,16 @@ function copier() {
   }).catch(() => toast('❌ Erreur copie', 'erreur'));
 }
 
-/* ── TÉLÉCHARGER ── */
+/* ── TÉLÉCHARGER PDF ── */
 function telecharger() {
-  const blob = new Blob(
-    [document.getElementById('brut').value],
-    { type: 'text/plain;charset=utf-8' }
-  );
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = 'Examen_NOKIROVA_' +
-    new Date().toLocaleDateString('fr-FR').replace(/\//g, '-') + '.txt';
-  a.click();
-  toast('💾 Fichier téléchargé !', 'succes');
+  const contenu = document.getElementById('brut').value;
+  if (!contenu) { toast('⚠️ Génère d\'abord !', 'warning'); return; }
+  telechargerPDF('Exercices Examen', contenu);
+}
+
+/* ── AFFICHER CORRECTION ── */
+function afficherCorrection() {
+  document.getElementById('correction').style.display = 'block';
 }
 </script>
 

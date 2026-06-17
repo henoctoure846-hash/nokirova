@@ -1,4 +1,4 @@
-# db/base.py - Connexion DB MULTI-UTILISATEURS + AUTHENTIFICATION NOKIROVA 🌸
+# db/base.py - Connexion DB MULTI-UTILISATEURS + AUTHENTIFICATION + SESSION PERSISTANTE 🌸
 
 import sqlite3
 import os
@@ -303,6 +303,17 @@ def _init_db_file(db_file: str):
         )
     """)
 
+    # 🆕 TABLE POUR LA SESSION PERSISTANTE
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS user_session (
+            id INTEGER PRIMARY KEY CHECK (id = 1),
+            cours_actuel TEXT,
+            nom_cours TEXT,
+            matiere_detectee TEXT,
+            last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    """)
+
     cur.execute("SELECT id FROM utilisateur WHERE id = 1")
     if not cur.fetchone():
         cur.execute("INSERT INTO utilisateur (id) VALUES (1)")
@@ -310,6 +321,11 @@ def _init_db_file(db_file: str):
     cur.execute("SELECT id FROM securite WHERE id = 1")
     if not cur.fetchone():
         cur.execute("INSERT INTO securite (id, pin_actif) VALUES (1, 0)")
+
+    # Initialiser la session par défaut
+    cur.execute("SELECT id FROM user_session WHERE id = 1")
+    if not cur.fetchone():
+        cur.execute("INSERT INTO user_session (id, cours_actuel, nom_cours, matiere_detectee) VALUES (1, '', 'Aucun cours chargé', '')")
 
     conn.commit()
     conn.close()
@@ -328,6 +344,43 @@ def is_logged_in():
 
 def get_current_user_id():
     return get_user()
+
+
+# ═══════════════════════════════════════════
+# 🧠 SESSION PERSISTANTE
+# ═══════════════════════════════════════════
+
+def charger_session():
+    """Charge la session depuis la DB pour l'utilisateur courant"""
+    conn = get_connexion()
+    cur = conn.cursor()
+    cur.execute("SELECT cours_actuel, nom_cours, matiere_detectee FROM user_session WHERE id = 1")
+    row = cur.fetchone()
+    conn.close()
+    if row:
+        return {
+            'cours_actuel': row[0] or '',
+            'nom_cours': row[1] or 'Aucun cours chargé',
+            'matiere_detectee': row[2] or ''
+        }
+    return {
+        'cours_actuel': '',
+        'nom_cours': 'Aucun cours chargé',
+        'matiere_detectee': ''
+    }
+
+
+def sauvegarder_session(cours_actuel: str, nom_cours: str, matiere_detectee: str):
+    """Sauvegarde la session dans la DB"""
+    conn = get_connexion()
+    cur = conn.cursor()
+    cur.execute("""
+        UPDATE user_session
+        SET cours_actuel = ?, nom_cours = ?, matiere_detectee = ?, last_updated = CURRENT_TIMESTAMP
+        WHERE id = 1
+    """, (cours_actuel, nom_cours, matiere_detectee))
+    conn.commit()
+    conn.close()
 
 
 # Initialisation

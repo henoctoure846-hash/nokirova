@@ -433,7 +433,6 @@
   font-size: 16px;
   line-height: 1.9;
   color: #1A1D2E;
-  white-space: pre-wrap;
   min-height: 300px;
   max-height: 600px;
   overflow-y: auto;
@@ -520,7 +519,7 @@ async function genererExplication() {
 
     if (data.succes) {
       explicationGeneree = data.explication;
-      document.getElementById('contenuExplication').textContent = data.explication;
+      document.getElementById('contenuExplication').innerHTML = formaterMarkdown(data.explication);
       resultat.style.display = 'block';
       resultat.scrollIntoView({ behavior: 'smooth' });
     } else {
@@ -544,12 +543,7 @@ function copierExplication() {
 
 function telechargerExplicationPDF() {
   if (!explicationGeneree) return showToast('⚠️ Génère d\'abord !', '#F59E0B');
-  window.telechargerPDF('💡 Explication simplifiée', explicationGeneree, {
-    couleur: [245, 158, 11],
-    matiere: 'Explication',
-    emoji: '💡'
-  });
-  showToast('📄 PDF généré !', '#F59E0B');
+  telechargerPDF('💡 Explication simplifiée', explicationGeneree);
 }
 
 async function partagerExplication() {

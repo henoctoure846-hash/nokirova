@@ -90,8 +90,12 @@
     </div>
 
     <div id="contenu-qcm" class="qcm-contenu"></div>
+    <div id="correction-qcm" class="qcm-correction" style="display:none;"></div>
 
     <div class="qcm-footer-actions">
+      <button onclick="afficherCorrection()" class="qcm-btn-correction">
+        ✅ Corriger
+      </button>
       <button onclick="genererQCM()" class="qcm-btn-regen">
         🔄 Générer un nouveau QCM
       </button>
@@ -365,17 +369,21 @@
 .qcm-btn-pdf:hover, .qcm-btn-pdf-footer:hover {
   transform: scale(1.02);
 }
-.qcm-contenu {
+.qcm-contenu, .qcm-correction {
   max-height: 500px;
   overflow-y: auto;
   padding: 15px;
   background: #F9FAFB;
   border-radius: 16px;
   margin-bottom: 20px;
-  font-family: monospace;
-  white-space: pre-wrap;
+  font-family: 'Segoe UI', sans-serif;
   font-size: 14px;
   line-height: 1.6;
+}
+.qcm-correction {
+  background: #E8F5E9;
+  border-left: 5px solid #00C853;
+  margin-top: 15px;
 }
 .qcm-footer-actions {
   display: flex;
@@ -394,6 +402,16 @@
 }
 .qcm-btn-regen:hover {
   transform: scale(1.02);
+}
+.qcm-btn-correction {
+  background: linear-gradient(135deg, #00C853, #059669);
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 30px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s;
 }
 
 /* MODE SOMBRE */
@@ -414,7 +432,8 @@ html[data-mode="sombre"] .qcm-nb-btn {
   background: #1A1D2E;
   color: #F1F5F9;
 }
-html[data-mode="sombre"] .qcm-contenu {
+html[data-mode="sombre"] .qcm-contenu,
+html[data-mode="sombre"] .qcm-correction {
   background: #1A1D2E;
   color: #F1F5F9;
 }
@@ -430,6 +449,8 @@ html[data-mode="sombre"] .qcm-contenu {
 
 <script>
 let nbQuestions = 5;
+let texteCorrection = '';
+let texteEnonce = '';
 
 // Vérifier si cours chargé
 document.addEventListener('DOMContentLoaded', () => {
@@ -482,8 +503,19 @@ async function genererQCM() {
     const data = await response.json();
 
     if (data.succes) {
-      const contenuDiv = document.getElementById('contenu-qcm');
-      contenuDiv.innerHTML = data.qcm.replace(/\n/g, '<br>');
+      // Séparer énoncé et correction
+      const indexCorrection = data.qcm.indexOf('🔒') !== -1 ? data.qcm.indexOf('🔒') : data.qcm.indexOf('Bonnes réponses');
+      if (indexCorrection !== -1) {
+        texteEnonce = data.qcm.substring(0, indexCorrection).trim();
+        texteCorrection = data.qcm.substring(indexCorrection).trim();
+      } else {
+        texteEnonce = data.qcm;
+        texteCorrection = '';
+      }
+
+      document.getElementById('contenu-qcm').innerHTML = formaterMarkdown(texteEnonce);
+      document.getElementById('correction-qcm').innerHTML = formaterMarkdown(texteCorrection);
+      document.getElementById('correction-qcm').style.display = 'none';
       zoneQCM.style.display = 'block';
       zoneQCM.scrollIntoView({ behavior: 'smooth' });
     } else {
@@ -498,46 +530,17 @@ async function genererQCM() {
   }
 }
 
+function afficherCorrection() {
+  document.getElementById('correction-qcm').style.display = 'block';
+}
+
 async function exporterQCM() {
-  const qcmText = document.getElementById('contenu-qcm').innerHTML.replace(/<br>/g, '\n');
-  if (!qcmText || qcmText === 'Aucun QCM généré') {
+  const contenu = document.getElementById('contenu-qcm').textContent + '\n\n' + document.getElementById('correction-qcm').textContent;
+  if (!contenu.trim()) {
     alert('⚠️ Aucun QCM à exporter. Génère d\'abord un QCM !');
     return;
   }
-
-  const btn = document.querySelector('.qcm-btn-pdf');
-  const originalText = btn?.innerHTML;
-  if (btn) {
-    btn.disabled = true;
-    btn.innerHTML = '⏳ Export...';
-  }
-
-  try {
-    const response = await fetch('/api/export-pdf-qcm', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        qcm_texte: qcmText,
-        titre: 'QCM - ' + new Date().toLocaleDateString()
-      })
-    });
-
-    const data = await response.json();
-
-    if (data.succes) {
-      window.open(data.url, '_blank');
-      alert('✅ PDF généré avec succès !');
-    } else {
-      alert('❌ ' + (data.erreur || 'Erreur lors de l\'export'));
-    }
-  } catch (err) {
-    alert('❌ Erreur réseau : ' + err.message);
-  } finally {
-    if (btn) {
-      btn.disabled = false;
-      btn.innerHTML = originalText || '📄 Exporter PDF';
-    }
-  }
+  telechargerPDF('QCM - ' + new Date().toLocaleDateString(), contenu);
 }
 </script>
 

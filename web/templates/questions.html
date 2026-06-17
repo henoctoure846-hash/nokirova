@@ -103,7 +103,10 @@
           <span>📋</span> Copier
         </button>
         <button onclick="telecharger()" class="qst-btn-action qst-btn-download">
-          <span>💾</span> Télécharger
+          <span>💾</span> PDF
+        </button>
+        <button onclick="afficherCorrection()" class="qst-btn-action qst-btn-correction">
+          <span>✅</span> Corriger
         </button>
         <button onclick="generer()" class="qst-btn-action qst-btn-regen">
           <span>🔄</span> Régénérer
@@ -112,17 +115,15 @@
     </div>
 
     <!-- Display questions -->
-    <div id="display"></div>
+    <div id="display" class="qst-display"></div>
+    <div id="correction" class="qst-correction" style="display:none;"></div>
     <textarea id="brut" style="display:none;"></textarea>
   </div>
 
 </div>
 
-<!-- ══════════════════════════════════════════ -->
-<!-- STYLES -->
-<!-- ══════════════════════════════════════════ -->
+<!-- Styles identiques à la version précédente, je les mets ici pour le fichier complet -->
 <style>
-
 /* ── ANIMATIONS ── */
 @keyframes fadeInUp {
   from { opacity:0; transform:translateY(30px); }
@@ -417,12 +418,29 @@
   background: #DCFCE7; color: #00C853; border-color: #86EFAC;
 }
 .qst-btn-download:hover { background: #00C853; color: white; border-color: #00C853; transform: translateY(-2px); }
+.qst-btn-correction {
+  background: #FFE5EF; color: #C2185B; border-color: #FFC9DE;
+}
+.qst-btn-correction:hover { background: #C2185B; color: white; border-color: #C2185B; transform: translateY(-2px); }
 .qst-btn-regen {
   background: #EFF6FF; color: #2962FF; border-color: #93C5FD;
 }
 .qst-btn-regen:hover { background: #2962FF; color: white; border-color: #2962FF; transform: translateY(-2px); }
 
-/* ── QUESTION CARDS ── */
+/* ── AFFICHAGE QUESTIONS ET CORRECTIONS ── */
+.qst-display, .qst-correction {
+  background: white; border-radius: 20px;
+  padding: 1.5rem; margin-bottom: 1.2rem;
+  box-shadow: 0 4px 20px rgba(41,98,255,0.08);
+  border-left: 5px solid #2962FF;
+  animation: questionPop 0.4s ease both;
+  transition: all 0.3s;
+}
+.qst-correction {
+  border-left-color: #00C853;
+  background: #E8F5E9;
+  margin-top: 1rem;
+}
 .qst-question-card {
   background: white; border-radius: 20px;
   padding: 1.5rem; margin-bottom: 1.2rem;
@@ -497,27 +515,15 @@
   border-color: #374151;
 }
 [data-theme="dark"] .qst-actions-label { color: #A5B4FC; }
-
-/* ══════════════════════════════════ */
-/* RESPONSIVE */
-/* ══════════════════════════════════ */
-@media (max-width: 640px) {
-  .qst-container { padding: 1rem; }
-  .qst-header { padding: 1.2rem; }
-  .qst-header-title { font-size: 1.4rem; }
-  .qst-header-badge { display: none; }
-  .qst-card { padding: 1.2rem; }
-  .qst-actions-bar { flex-direction: column; align-items: flex-start; }
-  .qst-actions-btns { width: 100%; }
-  .qst-btn-action { flex: 1; justify-content: center; }
+[data-theme="dark"] .qst-display, [data-theme="dark"] .qst-correction {
+  background: #1E2235;
 }
 </style>
 
-<!-- ══════════════════════════════════════════ -->
-<!-- JAVASCRIPT -->
-<!-- ══════════════════════════════════════════ -->
 <script>
 let brut = '';
+let texteCorrection = '';
+let texteEnonce = '';
 
 document.addEventListener('DOMContentLoaded', verifierCours);
 
@@ -584,10 +590,22 @@ function generer() {
     if (d.succes) {
       brut = d.texte;
       document.getElementById('brut').value = brut;
-      afficher(d.parse || [], d.texte);
+
+      // Séparer les corrections
+      const indexCorrection = brut.indexOf('🔒') !== -1 ? brut.indexOf('🔒') : -1;
+      if (indexCorrection !== -1) {
+        texteEnonce = brut.substring(0, indexCorrection).trim();
+        texteCorrection = brut.substring(indexCorrection).trim();
+      } else {
+        texteEnonce = brut;
+        texteCorrection = '';
+      }
+
+      document.getElementById('display').innerHTML = formaterMarkdown(texteEnonce);
+      document.getElementById('correction').innerHTML = formaterMarkdown(texteCorrection);
+      document.getElementById('correction').style.display = 'none';
       document.getElementById('zone-resultat').style.display = 'block';
-      document.getElementById('zone-resultat')
-        .scrollIntoView({ behavior: 'smooth' });
+      document.getElementById('zone-resultat').scrollIntoView({ behavior: 'smooth' });
       toast('✅ ' + nb + ' questions générées !', 'succes');
     } else {
       toast('❌ ' + (d.erreur || 'Erreur génération'), 'erreur');
@@ -601,31 +619,9 @@ function generer() {
   });
 }
 
-/* ── AFFICHER ── */
-function afficher(items, brutTxt) {
-  const c = document.getElementById('display');
-  c.innerHTML = '';
-
-  if (items && items.length > 0) {
-    items.forEach((q, i) => {
-      const div = document.createElement('div');
-      div.className = 'qst-question-card';
-      div.style.animationDelay = (i * 0.1) + 's';
-      div.innerHTML = `
-        <span class="qst-question-num">❓ Question ${i + 1}</span>
-        <p class="qst-question-titre">${esc(q.question || '')}</p>
-        <div class="qst-question-reponse">
-          💡 <strong>Réponse :</strong> ${esc(q.reponse || '')}
-        </div>
-      `;
-      c.appendChild(div);
-    });
-  } else {
-    const pre = document.createElement('pre');
-    pre.className = 'qst-brut-pre';
-    pre.textContent = brutTxt;
-    c.appendChild(pre);
-  }
+/* ── AFFICHER CORRECTION ── */
+function afficherCorrection() {
+  document.getElementById('correction').style.display = 'block';
 }
 
 /* ── COPIER ── */
@@ -639,25 +635,11 @@ function copier() {
   });
 }
 
-/* ── TÉLÉCHARGER ── */
+/* ── TÉLÉCHARGER PDF ── */
 function telecharger() {
-  const blob = new Blob(
-    [document.getElementById('brut').value],
-    { type: 'text/plain;charset=utf-8' }
-  );
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = 'Questions_NOKIROVA_' +
-    new Date().toLocaleDateString('fr-FR').replace(/\//g, '-') + '.txt';
-  a.click();
-  toast('💾 Fichier téléchargé !', 'succes');
-}
-
-/* ── ESCAPE ── */
-function esc(t) {
-  const d = document.createElement('div');
-  d.textContent = t;
-  return d.innerHTML;
+  const contenu = document.getElementById('brut').value;
+  if (!contenu) { toast('⚠️ Génère d\'abord !', 'warning'); return; }
+  telechargerPDF('Questions de cours', contenu);
 }
 </script>
 

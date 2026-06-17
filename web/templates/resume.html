@@ -392,7 +392,6 @@
   font-size: 15px;
   line-height: 1.85;
   color: #1A1D2E;
-  white-space: pre-wrap;
   min-height: 300px;
   max-height: 600px;
   overflow-y: auto;
@@ -482,7 +481,7 @@ async function genererResume() {
 
     if (data.succes) {
       resumeGenere = data.resume;
-      document.getElementById('contenuResume').textContent = data.resume;
+      document.getElementById('contenuResume').innerHTML = formaterMarkdown(data.resume);
       resultat.style.display = 'block';
       resultat.scrollIntoView({ behavior: 'smooth' });
     } else {
@@ -506,12 +505,7 @@ function copierResume() {
 
 function telechargerResumePDF() {
   if (!resumeGenere) return showToast('⚠️ Génère d\'abord !', '#F59E0B');
-  window.telechargerPDF('📝 Résumé de cours', resumeGenere, {
-    couleur: [41, 98, 255],
-    matiere: '{{ matiere or "Cours" }}',
-    emoji: '📝'
-  });
-  showToast('📄 PDF généré !', '#2962FF');
+  telechargerPDF('📝 Résumé de cours', resumeGenere);
 }
 
 async function partagerResume() {

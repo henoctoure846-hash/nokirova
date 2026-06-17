@@ -118,18 +118,35 @@ function afficherToast(message, type = 'info') {
 }
 
 // ═══════════════════════════════════════════
-// 📄 FONCTIONS PDF (globales)
+// 📄 FONCTIONS PDF (vrai PDF)
 // ═══════════════════════════════════════════
 
-window.telechargerPDF = function(titre, contenu, options = {}) {
-  const blob = new Blob([`${titre}\n\n${contenu}\n\n---\n📅 Généré par NOKIROVA`], { type: 'text/plain;charset=utf-8' });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = `NOKIROVA_${titre.replace(/[^a-z0-9]/gi, '_')}.txt`;
-  a.click();
-  URL.revokeObjectURL(a.href);
-  afficherToast('📄 Document généré !', 'success');
-};
+async function telechargerPDF(titre, contenu, options = {}) {
+  // Appel à l'API PDF
+  try {
+    const response = await fetch('/api/export-pdf-qcm', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        qcm_texte: contenu,
+        titre: titre
+      })
+    });
+    const data = await response.json();
+    if (data.succes) {
+      // Télécharger le fichier PDF
+      const a = document.createElement('a');
+      a.href = data.url;
+      a.download = data.url.split('/').pop();
+      a.click();
+      afficherToast('📄 PDF généré avec succès !', 'success');
+    } else {
+      throw new Error(data.erreur || 'Erreur inconnue');
+    }
+  } catch (err) {
+    afficherToast('⚠️ Erreur PDF : ' + err.message, 'error');
+  }
+}
 
 // ═══════════════════════════════════════════
 // 🌙 MODE JOUR/NUIT
@@ -159,6 +176,21 @@ function changerUtilisateur() {
     sessionStorage.clear();
     window.location.href = '/bienvenue';
   }
+}
+
+// ═══════════════════════════════════════════
+// ✨ FORMATAGE MARKDOWN (pour rendu propre)
+// ═══════════════════════════════════════════
+
+function formaterMarkdown(texte) {
+  if (!texte) return '';
+  // Utilisation simple : convertir les sauts de ligne en <br>
+  let html = texte.replace(/\n/g, '<br>');
+  // Convertir **gras** en <strong>
+  html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+  // Convertir les listes simples
+  html = html.replace(/^[•\-]\s/gm, '&nbsp;&nbsp;● ');
+  return html;
 }
 
 // ═══════════════════════════════════════════

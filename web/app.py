@@ -1,4 +1,4 @@
-# web/app.py - NOKIROVA WEB 🌸 VERSION CORRIGÉE (MIDDLEWARE PUBLIC + AUTH)
+# web/app.py - NOKIROVA WEB 🌸 VERSION CORRIGÉE (CHEMINS PUBLICS PAR URL)
 from flask import Flask, render_template, request, jsonify, send_from_directory, url_for
 import sys
 import os
@@ -36,21 +36,26 @@ def detecter_utilisateur():
         user_id = request.cookies.get('nokirova_user_id')
     set_user(user_id)
 
-    # 🔐 Routes publiques (pages + API d'authentification)
-    pages_publiques = ['login', 'register', 'bienvenue', 'landing', 'test']
-    routes_api_publiques = ['/api/login', '/api/register', '/api/logout', '/api/check-auth']
+    # 🔐 Chemins publics (pages, statiques, assets, API d'authentification)
+    chemins_publics = [
+        '/static/', '/logo', '/manifest.json', '/sw.js',
+        '/pwa-install.js', '/favicon.ico', '/icon-512.png',
+        '/api/login', '/api/register', '/api/logout', '/api/check-auth',
+        '/login', '/register', '/bienvenue', '/landing', '/test'
+    ]
 
-    # Ne pas bloquer les routes API publiques
-    if request.path in routes_api_publiques:
-        return
+    # Si le chemin commence par un préfixe public → on laisse passer
+    for public in chemins_publics:
+        if request.path.startswith(public):
+            return
 
-    if request.endpoint and request.endpoint not in pages_publiques:
-        if not db.is_logged_in():
-            # ✅ Pour les APIs, renvoyer une erreur JSON (ne pas renvoyer du HTML)
-            if request.path.startswith('/api/'):
-                return jsonify({"succes": False, "erreur": "Non authentifié. Connecte-toi d'abord."}), 401
-            # Pour les pages normales, rediriger vers la page de connexion
-            return render_template('login.html', page_active='login')
+    # Pour toutes les autres routes, vérifier si l'utilisateur est connecté
+    if not db.is_logged_in():
+        # Pour les APIs, renvoyer une erreur JSON
+        if request.path.startswith('/api/'):
+            return jsonify({"succes": False, "erreur": "Non authentifié. Connecte-toi d'abord."}), 401
+        # Pour les pages normales, rediriger vers la page de connexion
+        return render_template('login.html', page_active='login')
 
 # ═══════════════════════════════════════════
 # 🧠 SESSION PERSISTANTE

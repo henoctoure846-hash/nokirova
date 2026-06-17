@@ -141,37 +141,37 @@ window.addEventListener('load', function() {
   const splash = document.getElementById('splash-screen');
   if (!splash) return;
 
-  // Si le splash a déjà été vu dans cette session, on le cache immédiatement
   if (sessionStorage.getItem('splash-vu') === '1') {
     splash.style.display = 'none';
     return;
   }
 
-  // Sinon, on l'affiche, puis on le fait disparaître après 2 secondes
   setTimeout(() => {
     splash.classList.add('fade-out');
     setTimeout(() => {
       splash.style.display = 'none';
-      // Marquer comme vu pour ne plus le réafficher
       sessionStorage.setItem('splash-vu', '1');
-    }, 600);  // durée de l'animation CSS
-  }, 1800);  // temps d'affichage du splash
+    }, 600);
+  }, 1800);
 });
 
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('/static/service-worker.js').catch(()=>{});
 }
 
+// ═══════════════════════════════════════════
+// 🔄 CHANGER D'UTILISATEUR (CORRIGÉ – ne vide plus sessionStorage)
+// ═══════════════════════════════════════════
 function changerUtilisateur() {
     if (confirm('🔄 Veux-tu vraiment changer d\'utilisateur ?\n\n(Tes données restent sauvegardées)')) {
+        // Ne supprimer QUE les données d'authentification, pas sessionStorage
         localStorage.removeItem('nokirova_user');
-        sessionStorage.clear();
+        localStorage.removeItem('nokirova_user_id');
+        // Effacer le cookie
+        document.cookie = 'nokirova_user_id=; path=/; max-age=0';
         window.location.href = '/bienvenue';
     }
 }
-
-// La protection de connexion est désormais gérée UNIQUEMENT par le middleware Flask.
-// Aucune redirection automatique côté client n'est faite ici.
 </script>
 
 </body>

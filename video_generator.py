@@ -1,5 +1,5 @@
 # video_generator.py - Création de vidéos éducatives 🎬🌸
-# Compatible moviepy >= 2.0
+# Compatible moviepy >= 2.0, avec gestion d'erreurs améliorée
 import os
 import re
 import uuid
@@ -8,6 +8,7 @@ from PIL import Image, ImageDraw, ImageFont
 from moviepy import AudioFileClip, concatenate_videoclips, ImageSequenceClip
 import edge_tts
 import asyncio
+import traceback
 
 # Dossiers
 OUTPUT_DIR = "outputs"
@@ -57,7 +58,6 @@ VOIX = {
 
 
 def _decouper_script(texte):
-    """Découpe le texte en segments exploitables"""
     phrases = re.split(r'(?<=[.!?])\s+', texte)
     segments = []
     current = ""
@@ -74,7 +74,6 @@ def _decouper_script(texte):
 
 
 def _generer_audio_segment(texte, voix, nom_fichier):
-    """Génère un fichier audio pour un segment"""
     voix_code = VOIX.get(voix, VOIX["jeune_femme"])
 
     async def tache():
@@ -86,7 +85,6 @@ def _generer_audio_segment(texte, voix, nom_fichier):
 
 
 def _generer_image_pollinations(prompt, style_prompt, nom_fichier):
-    """Génère une image via Pollinations.ai"""
     try:
         full_prompt = f"{prompt}, {style_prompt}"
         encoded = requests.utils.quote(full_prompt)
@@ -102,7 +100,6 @@ def _generer_image_pollinations(prompt, style_prompt, nom_fichier):
 
 
 def _generer_image_unsplash(query, nom_fichier):
-    """Utilise Unsplash pour une image libre de droits"""
     try:
         url = f"https://source.unsplash.com/1280x720/?{query}"
         response = requests.get(url, timeout=10)
@@ -116,7 +113,6 @@ def _generer_image_unsplash(query, nom_fichier):
 
 
 def _generer_fond_ardoise(texte, police_nom, nom_fichier):
-    """Crée une image style ardoise avec texte"""
     img = Image.open("assets/ardoise.png") if os.path.exists("assets/ardoise.png") else Image.new('RGB', (1280, 720),
                                                                                                   (34, 139, 34))
     d = ImageDraw.Draw(img)
@@ -137,30 +133,42 @@ def _generer_fond_ardoise(texte, police_nom, nom_fichier):
 def generer_video(cours, style="documentaire", vitesse="normal", voix="jeune_femme"):
     """
     Génère une vidéo éducative complète.
-    Retourne le chemin du fichier .mp4 ou None en cas d'erreur.
+    Retourne le chemin du fichier .mp4 ou une chaîne d'erreur explicite.
     """
     try:
-        # Découpage
+        print("🎬 Début de la génération vidéo...")
         segments = _decouper_script(cours)
         if not segments:
-            return None
+            return "❌ Le cours ne contient aucun texte exploitable."
 
-        # Paramètres de vitesse
+        print(f"📝 {len(segments)} segments à traiter.")
+
         vitesse_map = {"lent": 1.4, "normal": 1.0, "rapide": 0.7}
         facteur = vitesse_map.get(vitesse, 1.0)
 
-        # Préparer les scènes
         scenes = []
         audio_files = []
         for i, seg in enumerate(segments):
+            print(f"  🎞️ Traitement du segment {i+1}/{len(segments)}...")
             img_file = os.path.join(TEMP_DIR, f"scene_{i}.png")
             audio_file = os.path.join(TEMP_DIR, f"audio_{i}.mp3")
 
-            # Générer image selon style
+            # Génération image
             if STYLES[style]["source_image"] == "pollinations":
-                _generer_image_pollinations(seg, STYLES[style]["style_prompt"], img_file)
+                res = _generer_image_pollinations(seg, STYLES[style]["style_prompt"], img_file)
+                if not res:
+                    # Fallback : image blanche avec texte
+                    img = Image.new('RGB', (1280, 720), (255, 255, 255))
+                    d = ImageDraw.Draw(img)
+                    d.text((50, 300), seg, fill=(0, 0, 0))
+                    img.save(img_file)
             elif STYLES[style]["source_image"] == "unsplash":
-                _generer_image_unsplash(seg, img_file)
+                res = _generer_image_unsplash(seg, img_file)
+                if not res:
+                    img = Image.new('RGB', (1280, 720), (255, 255, 255))
+                    d = ImageDraw.Draw(img)
+                    d.text((50, 300), seg, fill=(0, 0, 0))
+                    img.save(img_file)
             else:
                 fond = STYLES[style]["fond"]
                 if fond == "ardoise":
@@ -176,19 +184,29 @@ def generer_video(cours, style="documentaire", vitesse="normal", voix="jeune_fem
                     d.text((50, 300), seg, fill=(0, 0, 0), font=font)
                     img.save(img_file)
 
-            # Générer audio
-            _generer_audio_segment(seg, voix, audio_file)
-            audio_files.append(audio_file)
+            # Génération audio
+            try:
+                _generer_audio_segment(seg, voix, audio_file)
+                audio_files.append(audio_file)
+            except Exception as e:
+                print(f"  ⚠️ Erreur audio segment {i}: {e}")
+                # On continue sans audio pour ce segment ? Mieux vaut retourner l'erreur
+                return f"❌ Erreur lors de la génération audio du segment {i+1} : {e}"
 
-            # Clip audio
-            audio_clip = AudioFileClip(audio_file)
+            # Clip
+            try:
+                audio_clip = AudioFileClip(audio_file)
+                image_clip = ImageSequenceClip([img_file], durations=[audio_clip.duration * facteur])
+                image_clip = image_clip.with_audio(audio_clip)
+                scenes.append(image_clip)
+            except Exception as e:
+                print(f"  ⚠️ Erreur création clip : {e}")
+                return f"❌ Erreur lors de la création du clip {i+1} : {e}"
 
-            # Clip image compatible moviepy 2.x
-            image_clip = ImageSequenceClip([img_file], durations=[audio_clip.duration * facteur])
-            image_clip = image_clip.with_audio(audio_clip)
-            scenes.append(image_clip)
+        if not scenes:
+            return "❌ Aucune scène n'a pu être générée."
 
-        # Assemblage final
+        print("🎥 Assemblage final...")
         video_final = os.path.join(OUTPUT_DIR, f"video_{uuid.uuid4().hex[:8]}.mp4")
         video = concatenate_videoclips(scenes, method="compose")
         video.write_videofile(video_final, fps=24)
@@ -197,8 +215,9 @@ def generer_video(cours, style="documentaire", vitesse="normal", voix="jeune_fem
         for f in os.listdir(TEMP_DIR):
             os.remove(os.path.join(TEMP_DIR, f))
 
+        print(f"✅ Vidéo créée : {video_final}")
         return video_final
 
     except Exception as e:
-        print(f"❌ Erreur génération vidéo : {e}")
-        return None
+        traceback.print_exc()
+        return f"❌ Erreur génération vidéo : {e}"

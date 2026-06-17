@@ -1330,7 +1330,15 @@ def api_register():
         from db.base import creer_utilisateur
         result = creer_utilisateur(email, password, nom, prenom)
         if result["succes"]:
-            return jsonify({"succes": True, "user_id": result["user_id"], "email": result["email"]})
+            response = jsonify({
+                "succes": True,
+                "user_id": result["user_id"],
+                "email": result["email"],
+                "prenom": prenom,
+                "nom": nom
+            })
+            response.set_cookie('nokirova_user_id', str(result["user_id"]), max_age=31536000, path='/')
+            return response
         else:
             return jsonify({"succes": False, "erreur": result["erreur"]})
     except Exception as e:

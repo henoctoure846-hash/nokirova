@@ -189,10 +189,15 @@ document.getElementById('registerForm').addEventListener('submit', async (e) => 
     const data = await response.json();
 
     if (data.succes) {
-      alert('✅ Compte créé ! Connecte-toi');
-      setTimeout(() => {
-        window.location.href = '/login';
-      }, 1000);
+      // Stocker les informations dans localStorage pour l'application
+      localStorage.setItem('nokirova_user', JSON.stringify({
+        user_id: data.user_id,
+        email: data.email,
+        prenom: data.prenom,
+        nom: data.nom
+      }));
+      // Rediriger directement vers l'accueil (le cookie est déjà défini par l'API)
+      window.location.href = '/';
     } else {
       alert('❌ ' + data.erreur);
       btn.disabled = false;

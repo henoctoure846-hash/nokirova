@@ -220,16 +220,22 @@ function verifierCours() {
 }
 
 function previewVoix(voix) {
-  const textes = {
-    femme: "Bonjour, je suis Denise, votre professeure virtuelle.",
-    homme: "Bonjour, je suis Henri, votre professeur virtuel.",
-    jeune_femme: "Salut, je suis Vivienne, votre tutrice.",
-    jeune_homme: "Salut, je suis Rémy, votre tuteur."
-  };
-  const utterance = new SpeechSynthesisUtterance(textes[voix]);
-  utterance.lang = 'fr-FR';
-  utterance.rate = 0.9;
-  speechSynthesis.speak(utterance);
+  // Utilise le nouvel endpoint de pré‑écoute
+  fetch('/api/audio/preview', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ voix: voix, type_contenu: typeActuel })
+  })
+  .then(r => r.json())
+  .then(d => {
+    if (d.succes) {
+      const audio = new Audio(d.url + '?t=' + Date.now());
+      audio.play();
+    } else {
+      alert('❌ ' + (d.erreur || 'Erreur preview'));
+    }
+  })
+  .catch(e => alert('❌ Erreur réseau'));
 }
 
 function choisirVoix(btn, voix) {

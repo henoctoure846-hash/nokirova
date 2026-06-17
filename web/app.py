@@ -1,4 +1,4 @@
-# web/app.py - NOKIROVA WEB 🌸 VERSION CORRIGÉE (SESSION PERSISTANTE + PROFIL + AUTH)
+# web/app.py - NOKIROVA WEB 🌸 VERSION CORRIGÉE (SESSION PERSISTANTE + PROFIL + AUTH + AUDIO/VIDEO)
 from flask import Flask, render_template, request, jsonify, send_from_directory, url_for
 import sys
 import os
@@ -906,6 +906,35 @@ def audio_file(nom):
     return send_from_directory(dossier, nom)
 
 # ═══════════════════════════════════════════
+# 🎧 AUDIO PREVIEW (NOUVEAU)
+# ═══════════════════════════════════════════
+@app.route('/api/audio/preview', methods=['POST'])
+def api_audio_preview():
+    try:
+        data = request.get_json()
+        voix = data.get('voix', 'femme')
+        type_c = data.get('type_contenu', 'cours')
+        cours = get_session_data().get('cours_actuel', '')
+        if not cours:
+            return jsonify({"succes": False, "erreur": "Aucun cours chargé"})
+        if type_c == 'resume':
+            from ia_handler import creer_resume
+            texte = creer_resume(cours[:4000])
+        elif type_c == 'explication':
+            from ia_handler import expliquer_simplement
+            texte = expliquer_simplement(cours[:4000])
+        else:
+            texte = cours[:4000]
+        from audio_generator import generer_audio_preview
+        chemin = generer_audio_preview(texte, voix)
+        if not chemin:
+            return jsonify({"succes": False, "erreur": "Erreur preview"})
+        nom = os.path.basename(chemin)
+        return jsonify({"succes": True, "url": f"/audio_file/{nom}"})
+    except Exception as e:
+        return jsonify({"succes": False, "erreur": str(e)})
+
+# ═══════════════════════════════════════════
 # 📅 PLANIFICATEUR
 # ═══════════════════════════════════════════
 
@@ -1369,43 +1398,32 @@ def download_pdf(nom_fichier):
     return "Fichier non trouvé", 404
 
 # ═══════════════════════════════════════════
-# 🎬 VIDÉO API
+# 🎬 VIDÉO API (NOUVELLE VERSION)
 # ═══════════════════════════════════════════
 
 @app.route('/api/video/generer', methods=['POST'])
 def api_video_generer():
     try:
         data = request.get_json()
-        style = data.get('style', 'animation')
+        style = data.get('style', 'documentaire')
         vitesse = data.get('vitesse', 'normal')
+        voix = data.get('voix', 'jeune_femme')
         cours = get_session_data().get('cours_actuel', '')
         if not cours:
             return jsonify({"succes": False, "erreur": "Aucun cours chargé"})
-        from ia_handler import demander_ia_brut
-        prompt_video = f"""Transforme ce cours en script vidéo éducatif.
-Style: {style}, Vitesse: {vitesse}
-Cours: {cours[:4000]}
-Génère un script structuré pour une vidéo éducative de 3-5 minutes."""
-        script = demander_ia_brut(prompt_video, temperature=0.7, rapide=False)
-        outputs_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'outputs')
-        os.makedirs(outputs_dir, exist_ok=True)
-        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-        script_file = os.path.join(outputs_dir, f"video_script_{timestamp}.txt")
-        with open(script_file, 'w', encoding='utf-8') as f:
-            f.write(script)
-        return jsonify({"succes": True, "message": "Script vidéo généré", "url": f"/download-script/{timestamp}"})
+        from video_generator import generer_video
+        chemin = generer_video(cours, style, vitesse, voix)
+        if not chemin:
+            return jsonify({"succes": False, "erreur": "Erreur génération vidéo"})
+        nom = os.path.basename(chemin)
+        return jsonify({"succes": True, "url": f"/download-video/{nom}"})
     except Exception as e:
         return jsonify({"succes": False, "erreur": str(e)})
 
-@app.route('/download-script/<timestamp>')
-def download_script(timestamp):
-    import os
-    from flask import send_file
+@app.route('/download-video/<nom>')
+def download_video(nom):
     dossier = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'outputs')
-    chemin = os.path.join(dossier, f"video_script_{timestamp}.txt")
-    if os.path.exists(chemin):
-        return send_file(chemin, as_attachment=True, download_name=f"script_video_{timestamp}.txt")
-    return "Fichier non trouvé", 404
+    return send_from_directory(dossier, nom)
 
 # ═══════════════════════════════════════════
 # 🧠 TUTEUR IA

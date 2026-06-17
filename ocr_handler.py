@@ -1,10 +1,9 @@
-# ocr_handler.py - OCR avec Gemini Vision (cloud) + fallback Tesseract
+# ocr_handler.py - OCR avec Gemini Vision (cloud) + fallback Tesseract + EasyOCR
 # VERSION CORRIGÉE - Récupère la clé API depuis config ou os.getenv
 
 import os
 import base64
-from PIL import Image
-
+from PIL import Image, ImageEnhance
 
 # ═══════════════════════════════════════════
 # 🔑 CHARGEMENT DE LA CLÉ GEMINI
@@ -40,6 +39,15 @@ if os.path.exists(r'C:\Program Files\Tesseract-OCR\tesseract.exe'):
     except ImportError:
         pass
 
+# ═══════════════════════════════════════════
+# 🆕 EASYOCR (fallback supplémentaire gratuit)
+# ═══════════════════════════════════════════
+EASYOCR_DISPONIBLE = False
+try:
+    import easyocr
+    EASYOCR_DISPONIBLE = True
+except ImportError:
+    pass
 
 # ═══════════════════════════════════════════
 # 🧠 GEMINI VISION
@@ -78,7 +86,7 @@ def lire_image_avec_gemini(image_bytes, prompt="Transcris ce texte manuscrit en 
 # ═══════════════════════════════════════════
 
 def lire_image(chemin_image: str, langue: str = "fra") -> str:
-    """OCR : Gemini d'abord, fallback Tesseract local"""
+    """OCR : Gemini d'abord, fallback Tesseract, puis EasyOCR"""
 
     if not os.path.exists(chemin_image):
         return f"❌ Image introuvable : {chemin_image}"
@@ -97,19 +105,34 @@ def lire_image(chemin_image: str, langue: str = "fra") -> str:
     # 2️⃣ FALLBACK TESSERACT
     if TESSERACT_DISPONIBLE:
         try:
-            image = Image.open(chemin_image)
+            image = Image.open(chemin_image).convert('L')  # niveaux de gris
+            enhancer = ImageEnhance.Contrast(image)
+            image = enhancer.enhance(2)  # améliorer le contraste
             texte = pytesseract.image_to_string(image, lang=langue)
             if texte.strip() and len(texte.strip()) > 10:
                 return texte.strip()
         except Exception as e:
             print(f"⚠️ Tesseract échoué : {e}")
 
-    # 3️⃣ TOUT A ÉCHOUÉ
+    # 3️⃣ FALLBACK EASYOCR
+    if EASYOCR_DISPONIBLE:
+        try:
+            reader = easyocr.Reader(['fr', 'en'])  # français + anglais
+            result = reader.readtext(chemin_image, detail=0)
+            texte = ' '.join(result)
+            if texte.strip():
+                return texte.strip()
+        except Exception as e:
+            print(f"⚠️ EasyOCR échoué : {e}")
+
+    # 4️⃣ TOUT A ÉCHOUÉ
     return ("❌ Impossible de lire l'image.\n\n"
             "💡 Solutions :\n"
             "• Vérifie que ta clé GEMINI_API_KEY est configurée sur Render\n"
+            "• Installe Tesseract sur ton PC (https://github.com/UB-Mannheim/tesseract/wiki)\n"
+            "• Installe EasyOCR : pip install easyocr\n"
             "• Vérifie ta connexion internet\n"
-            "• Ou tape ta question directement dans le chat")
+            "• Tape ta question directement dans le chat")
 
 
 def lire_image_et_expliquer(chemin_image: str) -> str:

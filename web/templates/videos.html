@@ -12,7 +12,7 @@
     <div class="vid-header-icon">🎬</div>
     <div class="vid-header-text">
       <h1>Vidéos Révision</h1>
-      <p>Génère des vidéos éducatives à partir de tes cours 📺✨</p>
+      <p>Transforme ton cours en vidéo éducative personnalisée 📺✨</p>
     </div>
   </div>
 
@@ -21,7 +21,7 @@
     <span>⚠️</span>
     <div>
       <strong>Aucun cours chargé !</strong>
-      <p>Importe un cours pour générer une vidéo éducative personnalisée.</p>
+      <p>Importe un cours ou choisis-en un dans la bibliothèque.</p>
       <a href="/import" class="vid-btn-alerte">📥 Importer un cours</a>
     </div>
   </div>
@@ -44,7 +44,7 @@
       </div>
       <div>
         <h3>🎥 Générer une vidéo éducative</h3>
-        <p>Transforme ton cours en vidéo animée personnalisée</p>
+        <p>Choisis ton style, ta vitesse, et crée une vidéo complète</p>
       </div>
     </div>
 
@@ -52,25 +52,34 @@
       <div class="vid-param">
         <label>🎨 Style vidéo</label>
         <select id="style-video" class="vid-select">
-          <option value="animation">✨ Animation 2D</option>
-          <option value="documentaire">📽️ Style documentaire</option>
-          <option value="tableau">✍️ Tableau noir interactif</option>
-          <option value="bande_dessinee">📚 Bande dessinée éducative</option>
+          <option value="bande_dessinee">📚 Bande dessinée</option>
+          <option value="documentaire">📽️ Documentaire</option>
+          <option value="tableau">✍️ Tableau noir</option>
+          <option value="ardoise">🖤 Ardoise</option>
+          <option value="ecritures_animees">✨ Écritures animées</option>
         </select>
       </div>
       <div class="vid-param">
-        <label>⚡ Vitesse d'explication</label>
+        <label>⚡ Vitesse</label>
         <select id="vitesse" class="vid-select">
-          <option value="lent">🐢 Lente (pédagogique)</option>
+          <option value="lent">🐢 Lente</option>
           <option value="normal" selected>⚡ Normale</option>
-          <option value="rapide">🚀 Rapide (révision)</option>
+          <option value="rapide">🚀 Rapide</option>
+        </select>
+      </div>
+      <div class="vid-param">
+        <label>🎙️ Voix</label>
+        <select id="voix" class="vid-select">
+          <option value="femme">👩 Femme</option>
+          <option value="homme">👨 Homme</option>
+          <option value="jeune_femme">👧 Jeune femme</option>
+          <option value="jeune_homme">👦 Jeune homme</option>
         </select>
       </div>
     </div>
 
     <button id="btn-generer-video" onclick="genererVideoEducative()" class="vid-btn-generer">
-      <span>🎬</span>
-      Générer le script vidéo
+      <span>🎬</span> Générer la vidéo
     </button>
   </div>
 
@@ -123,23 +132,20 @@
   <!-- ZONE CHARGEMENT VIDÉO -->
   <div id="loading-video" class="vid-loading" style="display:none;">
     <div class="vid-spinner"></div>
-    <p>✨ Génération du script vidéo en cours...</p>
-    <small>L'IA analyse ton cours et prépare un scénario pédagogique ⏳</small>
+    <p>✨ Génération de la vidéo en cours...</p>
+    <small>L'IA construit ton film éducatif (cela peut prendre 1 à 3 minutes) ⏳</small>
   </div>
 
-  <!-- ZONE RÉSULTAT SCRIPT -->
-  <div id="zone-script" class="vid-script" style="display:none;">
-    <div class="vid-script-header">
-      <h3>🎬 Script vidéo généré</h3>
+  <!-- ZONE RÉSULTAT VIDÉO -->
+  <div id="zone-video" class="vid-result" style="display:none;">
+    <div class="vid-result-header">
+      <h3>🎬 Ta vidéo est prête !</h3>
       <div class="vid-script-actions">
-        <button onclick="copierScript()" class="vid-btn-copy">📋 Copier</button>
-        <button onclick="telechargerScript()" class="vid-btn-download-script">💾 Télécharger</button>
+        <a id="download-video" class="vid-btn-download" download>💾 Télécharger</a>
+        <button onclick="document.getElementById('zone-video').style.display='none'" class="vid-btn-fermer">✕</button>
       </div>
     </div>
-    <div id="script-contenu" class="vid-script-content"></div>
-    <div class="vid-script-footer">
-      <p>💡 Astuce : Utilise ce script avec un générateur vidéo IA comme <strong>RunwayML</strong> ou <strong>Pika Labs</strong> pour créer ta vidéo !</p>
-    </div>
+    <video id="video-player" controls style="width:100%; border-radius:12px;"></video>
   </div>
 
 </div>
@@ -189,6 +195,7 @@
 .vid-result { background: white; border-radius: 24px; padding: 20px; margin-top: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
 .vid-result-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; }
 .vid-result-header h3 { margin: 0; }
+.vid-btn-download { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; background: #00C853; color: white; border-radius: 30px; font-weight: 700; text-decoration: none; cursor: pointer; }
 .vid-btn-fermer { background: #EF4444; color: white; border: none; width: 30px; height: 30px; border-radius: 50%; cursor: pointer; }
 iframe { width: 100%; height: 500px; border: none; border-radius: 18px; }
 
@@ -196,28 +203,14 @@ iframe { width: 100%; height: 500px; border: none; border-radius: 18px; }
 .vid-spinner { width: 50px; height: 50px; border: 4px solid #F3F4F6; border-top-color: #DC2626; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 20px; }
 @keyframes spin { to { transform: rotate(360deg); } }
 
-.vid-script { background: white; border-radius: 24px; padding: 25px; margin-top: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); border-left: 5px solid #DC2626; }
-.vid-script-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; }
-.vid-script-actions { display: flex; gap: 10px; }
-.vid-btn-copy, .vid-btn-download-script { display: flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: 30px; font-weight: 700; cursor: pointer; border: none; transition: all 0.2s; }
-.vid-btn-copy { background: #EDE9FE; color: #7B61FF; }
-.vid-btn-copy:hover { background: #7B61FF; color: white; }
-.vid-btn-download-script { background: #DCFCE7; color: #00C853; }
-.vid-btn-download-script:hover { background: #00C853; color: white; }
-.vid-script-content { background: #F9FAFB; padding: 20px; border-radius: 16px; font-family: monospace; white-space: pre-wrap; font-size: 14px; line-height: 1.6; max-height: 500px; overflow-y: auto; }
-.vid-script-footer { margin-top: 15px; padding: 12px; background: #FFF7ED; border-radius: 12px; font-size: 13px; color: #92400E; }
-
 /* MODE SOMBRE */
 html[data-mode="sombre"] .vid-card,
 html[data-mode="sombre"] .vid-result,
-html[data-mode="sombre"] .vid-loading,
-html[data-mode="sombre"] .vid-script { background: #2A2D3E; }
+html[data-mode="sombre"] .vid-loading { background: #2A2D3E; }
 html[data-mode="sombre"] .vid-param label { color: #F1F5F9; }
 html[data-mode="sombre"] .vid-select { background: #1A1D2E; border-color: #3A3D4E; color: #F1F5F9; }
 html[data-mode="sombre"] .vid-search-input-wrap { background: #1A1D2E; }
 html[data-mode="sombre"] .vid-search-input-wrap input { color: #F1F5F9; }
-html[data-mode="sombre"] .vid-script-content { background: #1A1D2E; color: #F1F5F9; }
-html[data-mode="sombre"] .vid-script-footer { background: #27200A; color: #FDE68A; }
 
 @media (max-width: 640px) {
   .vid-container { padding: 10px; }
@@ -229,8 +222,6 @@ html[data-mode="sombre"] .vid-script-footer { background: #27200A; color: #FDE68
 </style>
 
 <script>
-let scriptGenere = '';
-
 document.addEventListener('DOMContentLoaded', () => {
   fetch('/api/statut-cours')
     .then(r => r.json())
@@ -273,30 +264,30 @@ function fermerResultat() {
 async function genererVideoEducative() {
   const btn = document.getElementById('btn-generer-video');
   const loading = document.getElementById('loading-video');
-  const style = document.getElementById('style-video').value;
-  const vitesse = document.getElementById('vitesse').value;
+  const zoneVideo = document.getElementById('zone-video');
 
   btn.disabled = true;
   loading.style.display = 'block';
-  document.getElementById('zone-script').style.display = 'none';
+  zoneVideo.style.display = 'none';
+
+  const style = document.getElementById('style-video').value;
+  const vitesse = document.getElementById('vitesse').value;
+  const voix = document.getElementById('voix').value;
 
   try {
     const response = await fetch('/api/video/generer', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ style: style, vitesse: vitesse })
+      body: JSON.stringify({ style, vitesse, voix })
     });
-
     const data = await response.json();
-
     if (data.succes) {
-      scriptGenere = data.script || '';
-      document.getElementById('script-contenu').innerHTML = scriptGenere.replace(/\n/g, '<br>');
-      document.getElementById('zone-script').style.display = 'block';
-      document.getElementById('zone-script').scrollIntoView({ behavior: 'smooth' });
-      alert('✅ Script vidéo généré avec succès !');
+      document.getElementById('video-player').src = data.url + '?t=' + Date.now();
+      document.getElementById('download-video').href = data.url;
+      document.getElementById('download-video').setAttribute('download', data.url.split('/').pop());
+      zoneVideo.style.display = 'block';
     } else {
-      alert('❌ ' + (data.erreur || 'Erreur lors de la génération du script'));
+      alert('❌ ' + (data.erreur || 'Erreur lors de la génération de la vidéo'));
     }
   } catch (err) {
     alert('❌ Erreur réseau : ' + err.message);
@@ -304,28 +295,6 @@ async function genererVideoEducative() {
     btn.disabled = false;
     loading.style.display = 'none';
   }
-}
-
-function copierScript() {
-  if (!scriptGenere) {
-    alert('⚠️ Aucun script à copier');
-    return;
-  }
-  navigator.clipboard.writeText(scriptGenere);
-  alert('✅ Script copié !');
-}
-
-function telechargerScript() {
-  if (!scriptGenere) {
-    alert('⚠️ Aucun script à télécharger');
-    return;
-  }
-  const blob = new Blob([scriptGenere], { type: 'text/plain;charset=utf-8' });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = 'script_video_NOKIROVA_' + new Date().toLocaleDateString('fr-FR').replace(/\//g, '-') + '.txt';
-  a.click();
-  alert('💾 Script téléchargé !');
 }
 </script>
 

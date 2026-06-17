@@ -48,7 +48,7 @@ JSON UNIQUEMENT :
             if reponse.startswith("json"):
                 reponse = reponse[4:]
         reponse = reponse.strip()
-        
+
         import json
         data = json.loads(reponse)
         return data
@@ -168,9 +168,9 @@ def construire_contexte(matiere_info: dict) -> str:
     niveau = matiere_info.get("niveau", "Licence")
     concepts = matiere_info.get("concepts_cles", [])
     emoji = matiere_info.get("emoji_matiere", "📚")
-    
+
     style = STYLES_PEDAGOGIQUES.get(domaine, STYLES_PEDAGOGIQUES["Autre"])
-    
+
     contexte = f"""
 🎓 CONTEXTE PÉDAGOGIQUE DÉTECTÉ :
 {emoji} Matière : {matiere}
@@ -199,7 +199,7 @@ def construire_contexte(matiere_info: dict) -> str:
 def repondre_intelligemment(question: str, contexte_cours: str = "", matiere_info: dict = None) -> str:
     """
     Répond intelligemment en adaptant le style à la matière.
-    
+
     Args:
         question: La question de l'utilisateur
         contexte_cours: Le contenu du cours (optionnel)
@@ -216,9 +216,9 @@ def repondre_intelligemment(question: str, contexte_cours: str = "", matiere_inf
             "concepts_cles": [],
             "emoji_matiere": "💡"
         }
-    
+
     contexte = construire_contexte(matiere_info)
-    
+
     prompt = f"""{contexte}
 
 📚 CONTENU DU COURS (si fourni) :
@@ -235,20 +235,20 @@ def repondre_intelligemment(question: str, contexte_cours: str = "", matiere_inf
 # TEST
 if __name__ == "__main__":
     print("🧠 Test de l'intelligence universelle...\n")
-    
+
     cours_test = """
     La microéconomie étudie le comportement des agents économiques individuels.
     La loi de l'offre et de la demande détermine le prix d'équilibre sur un marché.
     L'élasticité-prix mesure la sensibilité de la demande aux variations de prix.
     """
-    
+
     print("🔍 Détection de matière...")
     info = detecter_matiere(cours_test)
     print(f"✅ Matière détectée : {info['emoji_matiere']} {info['matiere']}")
     print(f"📊 Domaine : {info['domaine']}")
     print(f"🎯 Niveau : {info['niveau']}")
     print(f"🔑 Concepts : {info['concepts_cles']}\n")
-    
+
     print("💬 Réponse intelligente...")
     reponse = repondre_intelligemment(
         "Explique-moi simplement l'offre et la demande",

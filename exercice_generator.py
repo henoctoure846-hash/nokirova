@@ -1,4 +1,4 @@
-# exercice_generator.py - Génération RAPIDE d'exercices 🎯⚡
+# exercice_generator.py - Génération RAPIDE d'exercices 🎯⚡ (AMÉLIORÉ)
 
 from ia_handler import demander_ia_brut
 
@@ -24,7 +24,7 @@ D) ...
 ⚠️ Erreur courante : ...
 ═══════════════════════════════════════
 
-Répète pour chaque QCM. Réponds en français.
+Répète pour chaque QCM. Réponds en français. Sois très complet : chaque explication doit faire au moins 3 phrases.
 
 COURS :
 {cours}
@@ -54,7 +54,7 @@ FORMAT OBLIGATOIRE :
 ...
 ═══════════════════════════════════════
 
-Réponds en français.
+Réponds en français. Sois très complet : chaque réponse doit comporter au moins 4 phrases d'explication.
 
 COURS :
 {cours}
@@ -72,7 +72,7 @@ def generer_exercices_examen(cours: str, niveau: str = "intermediaire", nombre: 
         "ultra_difficile": "🔴 NIVEAU ULTRA DIFFICILE (avec pièges)"
     }
     niveau_desc = niveaux.get(niveau, niveaux["intermediaire"])
-    
+
     prompt = f"""Tu es NOKIROVA. Génère {nombre} exercices type examen.
 NIVEAU : {niveau_desc}
 
@@ -97,7 +97,7 @@ FORMAT OBLIGATOIRE pour chaque exercice :
 ⚠️ Erreurs à éviter : ...
 ═══════════════════════════════════════
 
-Réponds en français.
+Réponds en français. Sois très complet : chaque correction doit détailler au moins 5 étapes.
 
 COURS :
 {cours}

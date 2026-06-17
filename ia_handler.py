@@ -1,9 +1,10 @@
-# ia_handler.py - Cerveau IA Multi-Provider 🧠⚡
-# Rotation automatique sur 7 IA gratuites (MIS À JOUR Juin 2026)
+# ia_handler.py - Cerveau IA Multi-Provider 🧠⚡ (AMÉLIORÉ)
+# Rotation automatique sur 7 IA gratuites + NLLB-200 + Recherche Web
 
 import os
 import requests
 from groq import Groq
+from duckduckgo_search import DDGS  # Nouvelle importation pour la recherche web
 
 # ═══════════════════════════════════════════
 # 🔑 CHARGEMENT DES CLÉS
@@ -110,6 +111,7 @@ MODELE_CEREBRAS = "llama3.1-8b"
 MODELE_OPENROUTER = "meta-llama/llama-3.2-3b-instruct:free"
 MODELE_TOGETHER = "meta-llama/Llama-3.3-70B-Instruct-Turbo-Free"
 MODELE_HF = "mistralai/Mistral-7B-Instruct-v0.3"
+MODELE_NLLB = "facebook/nllb-200-distilled-600M"  # Traduction gratuite
 
 
 # ═══════════════════════════════════════════
@@ -125,7 +127,7 @@ def demander_ia_brut(prompt: str, temperature: float = 0.7, rapide: bool = False
                 model=MODELE_CEREBRAS,
                 messages=[{"role": "user", "content": prompt}],
                 temperature=temperature,
-                max_tokens=6000  # AUGMENTÉ
+                max_tokens=8000  # AUGMENTÉ
             )
             return response.choices[0].message.content
         except Exception as e:
@@ -140,7 +142,7 @@ def demander_ia_brut(prompt: str, temperature: float = 0.7, rapide: bool = False
                 model=modele,
                 messages=[{"role": "user", "content": prompt}],
                 temperature=temperature,
-                max_tokens=6000  # AUGMENTÉ
+                max_tokens=8000  # AUGMENTÉ
             )
             return response.choices[0].message.content
         except Exception as e:
@@ -163,7 +165,7 @@ def demander_ia_brut(prompt: str, temperature: float = 0.7, rapide: bool = False
                 model=MODELE_TOGETHER,
                 messages=[{"role": "user", "content": prompt}],
                 temperature=temperature,
-                max_tokens=6000  # AUGMENTÉ
+                max_tokens=8000  # AUGMENTÉ
             )
             return response.choices[0].message.content
         except Exception as e:
@@ -183,7 +185,7 @@ def demander_ia_brut(prompt: str, temperature: float = 0.7, rapide: bool = False
                 "model": MODELE_OPENROUTER,
                 "messages": [{"role": "user", "content": prompt}],
                 "temperature": temperature,
-                "max_tokens": 6000  # AUGMENTÉ
+                "max_tokens": 8000  # AUGMENTÉ
             }
             r = requests.post(
                 "https://openrouter.ai/api/v1/chat/completions",
@@ -204,14 +206,14 @@ def demander_ia_brut(prompt: str, temperature: float = 0.7, rapide: bool = False
                     model="mistral-large-latest",
                     messages=[ChatMessage(role="user", content=prompt)],
                     temperature=temperature,
-                    max_tokens=6000  # AUGMENTÉ
+                    max_tokens=8000  # AUGMENTÉ
                 )
             except ImportError:
                 response = mistral_client.chat.complete(
                     model="mistral-large-latest",
                     messages=[{"role": "user", "content": prompt}],
                     temperature=temperature,
-                    max_tokens=6000  # AUGMENTÉ
+                    max_tokens=8000  # AUGMENTÉ
                 )
             return response.choices[0].message.content
         except Exception as e:
@@ -225,7 +227,7 @@ def demander_ia_brut(prompt: str, temperature: float = 0.7, rapide: bool = False
             data = {
                 "inputs": prompt,
                 "parameters": {
-                    "max_new_tokens": 5000,  # AUGMENTÉ
+                    "max_new_tokens": 8000,  # AUGMENTÉ
                     "temperature": temperature,
                     "return_full_text": False
                 }
@@ -250,9 +252,30 @@ def demander_ia_brut(prompt: str, temperature: float = 0.7, rapide: bool = False
 
 
 # ═══════════════════════════════════════════
-# 💬 QUESTION LIBRE (PROMPT AMÉLIORÉ)
+# 💬 QUESTION LIBRE (PROMPT AMÉLIORÉ + RECHERCHE WEB)
 # ═══════════════════════════════════════════
 def demander_ia(prompt: str) -> str:
+    # Si la question semble factuelle, on enrichit avec une recherche web
+    if len(prompt.split()) > 3:
+        # Détection simple de question factuelle
+        factuelle = any(marqueur in prompt.lower() for marqueur in [
+            "quelle est la capitale", "date de naissance", "définition de",
+            "combien de", "qui a", "quel est le", "qu'est-ce que",
+            "explique-moi", "c'est quoi", "définition", "quels sont"
+        ])
+        if factuelle:
+            try:
+                from web_search import rechercher_web
+                resultats = rechercher_web(prompt)
+                if resultats:
+                    contexte_web = "\n\n".join([
+                        f"🌐 **{r['titre']}**\n{r['extrait']}\n🔗 {r['url']}"
+                        for r in resultats
+                    ])
+                    prompt = f"{prompt}\n\n📖 **Informations récentes trouvées sur le web :**\n{contexte_web}"
+            except Exception as e:
+                print(f"⚠️ Recherche web échouée : {e}")
+
     prompt_complet = f"""Tu es NOKIROVA, un professeur intelligent universel.
 
 📋 **RÈGLES STRICTES :**
@@ -263,11 +286,14 @@ def demander_ia(prompt: str) -> str:
 - Tu es ENCOURAGEANT et MOTIVANT
 - Tu STRUCTURES ta réponse avec des titres et des listes
 - Tu utilises des emojis pour rendre la lecture agréable
+- Tu donnes toujours des ASTUCES MNÉMOTECHNIQUES si possible
+- Tu inclus des PIÈGES À ÉVITER pour les examens
+- Sois le plus complet possible (vise au moins 5 paragraphes)
 
 📚 **LA QUESTION DE L'ÉTUDIANT :**
 {prompt}
 
-🎯 **TA RÉPONSE :**"""
+🎯 **TA RÉPONSE (structure, exemples, astuces, pièges) :**"""
     return demander_ia_brut(prompt_complet, rapide=False)
 
 
@@ -305,7 +331,7 @@ def expliquer_simplement(texte: str) -> str:
 **📄 CONTENU À EXPLIQUER :**
 {texte[:8000]}
 
-**🎓 RÉPONSE DÉTAILLÉE :**"""
+**🎓 RÉPONSE DÉTAILLÉE (vise 10-15 lignes minimum) :**"""
     return demander_ia_brut(prompt, rapide=False)
 
 
@@ -321,7 +347,7 @@ def creer_resume(texte: str) -> str:
 (1-2 phrases)
 
 ## **💡 LES 3-5 IDÉES PRINCIPALES**
-1. **Idée 1** : Explication claire
+1. **Idée 1** : Explication claire (2-3 phrases)
 2. **Idée 2** : Explication claire
 3. **Idée 3** : Explication claire
 
@@ -336,6 +362,9 @@ def creer_resume(texte: str) -> str:
 ## **🎓 POUR L'EXAMEN**
 (Conseils ciblés et incontournables)
 
+## **🌟 POUR ALLER PLUS LOIN**
+(Question ouverte pour réfléchir)
+
 ---
 
 **📄 CONTENU DU COURS :**
@@ -343,6 +372,70 @@ def creer_resume(texte: str) -> str:
 
 **📝 RÉSUMÉ COMPLET :**"""
     return demander_ia_brut(prompt, rapide=False)
+
+
+# ═══════════════════════════════════════════
+# 🌍 TRADUCTION SPÉCIALISÉE (NLLB-200)
+# ═══════════════════════════════════════════
+def traduire_rapide(texte: str, langue_cible: str = "anglais") -> str:
+    """Traduction rapide avec NLLB-200 via HuggingFace"""
+    if not huggingface_ready:
+        # Fallback vers la rotation générale
+        prompt = f"""Tu es un traducteur professionnel. Traduis ce texte vers le {langue_cible}.
+
+RÈGLES STRICTES :
+- Donne UNIQUEMENT la traduction
+- Pas d'explication, pas de commentaire
+- Préserve le sens, le ton et la mise en forme
+
+TEXTE À TRADUIRE :
+{texte[:5000]}
+
+TRADUCTION EN {langue_cible.upper()} :"""
+        return demander_ia_brut(prompt, temperature=0.3)
+
+    try:
+        # Mapping des langues vers les codes NLLB
+        langue_map = {
+            "français": "fra_Latn",
+            "anglais": "eng_Latn",
+            "espagnol": "spa_Latn",
+            "allemand": "deu_Latn",
+            "italien": "ita_Latn",
+            "portugais": "por_Latn",
+            "arabe": "arb_Arab",
+            "chinois": "zho_Hans",
+            "japonais": "jpn_Jpan",
+            "russe": "rus_Cyrl"
+        }
+        # Détection automatique de la langue source
+        source = "fra_Latn"  # Par défaut français
+        cible = langue_map.get(langue_cible, "eng_Latn")
+
+        headers = {"Authorization": f"Bearer {HUGGINGFACE_API_KEY}"}
+        payload = {
+            "inputs": texte,
+            "parameters": {
+                "src_lang": source,
+                "tgt_lang": cible,
+                "max_length": 4000
+            }
+        }
+        response = requests.post(
+            f"https://api-inference.huggingface.co/models/{MODELE_NLLB}",
+            headers=headers,
+            json=payload,
+            timeout=30
+        )
+        if response.status_code == 200:
+            result = response.json()
+            if isinstance(result, list) and len(result) > 0:
+                return result[0].get("translation_text", result[0].get("generated_text", ""))
+        # Fallback
+        return demander_ia_brut(f"Traduis en {langue_cible} : {texte}", temperature=0.3)
+    except Exception as e:
+        print(f"⚠️ NLLB échoué, fallback IA : {e}")
+        return demander_ia_brut(f"Traduis en {langue_cible} : {texte}", temperature=0.3)
 
 
 # ═══════════════════════════════════════════
